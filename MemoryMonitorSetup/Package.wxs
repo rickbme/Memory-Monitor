@@ -1,0 +1,36 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Memory Monitor" Manufacturer="YourCompany" Version="1.0.0.0" UpgradeCode="12345678-1234-1234-1234-123456789012" Compressed="yes">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Memory Monitor is already installed." />
+    <Media Id="1" Cabinet="media1.cab" />
+    <Feature Id="Main">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Package>
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Memory Monitor" />
+    </StandardDirectory>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="MemoryMonitorExe" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" />
+      </Component>
+      <Component Id="MemoryMonitorDll" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.dll" />
+      </Component>
+      <Component Id="MemoryMonitorDeps" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.deps.json" />
+      </Component>
+      <Component Id="MemoryMonitorRuntime" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.runtimeconfig.json" />
+      </Component>
+      <Component Id="SystemCodeDom" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.CodeDom.dll" />
+      </Component>
+      <Component Id="SystemManagement" Guid="*">
+        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.Management.dll" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
