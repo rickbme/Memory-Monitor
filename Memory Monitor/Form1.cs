@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Memory_Monitor
@@ -11,6 +12,30 @@ namespace Memory_Monitor
 
         private CPUMonitor? _cpuMonitor;
         private GPUMonitor? _gpuMonitor;
+
+        // Windows API for memory info
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private class MEMORYSTATUSEX
+        {
+            public uint dwLength;
+            public uint dwMemoryLoad;
+            public ulong ullTotalPhys;
+            public ulong ullAvailPhys;
+            public ulong ullTotalPageFile;
+            public ulong ullAvailPageFile;
+            public ulong ullTotalVirtual;
+            public ulong ullAvailVirtual;
+            public ulong ullAvailExtendedVirtual;
+
+            public MEMORYSTATUSEX()
+            {
+                this.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+            }
+        }
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
 
         public Form1()
         {
@@ -280,10 +305,15 @@ namespace Memory_Monitor
         {
             try
             {
-                // Get total physical memory
-                var computerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
-                ulong totalMemory = computerInfo.TotalPhysicalMemory;
-                ulong availableMemory = computerInfo.AvailablePhysicalMemory;
+                // Get memory status using Windows API
+                MEMORYSTATUSEX memStatus = new MEMORYSTATUSEX();
+                if (!GlobalMemoryStatusEx(memStatus))
+                {
+                    throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                }
+
+                ulong totalMemory = memStatus.ullTotalPhys;
+                ulong availableMemory = memStatus.ullAvailPhys;
                 ulong usedMemory = totalMemory - availableMemory;
 
                 // Convert to GB
@@ -535,7 +565,7 @@ namespace Memory_Monitor
             }
 
             // Highlight selected item
-            if (e.Item.Selected)
+            if (e.Item?.Selected == true)
             {
                 backColor = ThemeManager.IsDarkMode() 
                     ? Color.FromArgb(60, 60, 60) 
@@ -547,6 +577,9 @@ namespace Memory_Monitor
             {
                 e.Graphics.FillRectangle(backBrush, e.Bounds);
             }
+
+            // Get text to display (with null safety)
+            string text = e.SubItem?.Text ?? string.Empty;
 
             // Draw marker for first column (process name)
             if (e.ColumnIndex == 0)
@@ -573,7 +606,7 @@ namespace Memory_Monitor
                     e.Bounds.Width - 20, 
                     e.Bounds.Height);
 
-                TextRenderer.DrawText(e.Graphics, e.SubItem?.Text ?? "", 
+                TextRenderer.DrawText(e.Graphics, text, 
                     listViewProcesses.Font, textBounds, colors.ListViewText,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             }
@@ -584,7 +617,7 @@ namespace Memory_Monitor
                     ? TextFormatFlags.Right | TextFormatFlags.VerticalCenter 
                     : TextFormatFlags.Left | TextFormatFlags.VerticalCenter;
 
-                TextRenderer.DrawText(e.Graphics, e.SubItem?.Text ?? "", 
+                TextRenderer.DrawText(e.Graphics, text, 
                     listViewProcesses.Font, e.Bounds, colors.ListViewText,
                     flags | TextFormatFlags.EndEllipsis);
             }
