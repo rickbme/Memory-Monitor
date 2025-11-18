@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  
+  <Package Name="System Monitor"
+           Manufacturer="DFS - Dad's Fixit Shop"
+           Version="1.0.0.0"
+           UpgradeCode="A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D"
+           Language="1033"
+           Codepage="1252">
+    
+    <SummaryInformation Description="System Monitor - Real-time hardware monitoring for Windows"
+                        Manufacturer="DFS - Dad's Fixit Shop"
+                        Keywords="Monitor,System,CPU,GPU,Memory" />
+
+    <!-- Embed cab file in MSI -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Ensure .NET 8 Desktop Runtime is installed -->
+    <Dependency ProviderKey="Microsoft.NetCore.DesktopRuntime.8.0.x64">
+      <Requires Id="Microsoft.NetCore.DesktopRuntime.8.0.x64"
+                Version="8.0.0"
+                DisplayName=".NET 8.0 Desktop Runtime (x64)" />
+    </Dependency>
+
+    <!-- Upgrade logic -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of System Monitor is already installed."
+                  Schedule="afterInstallInitialize" />
+
+    <!-- Icon for Add/Remove Programs -->
+    <Icon Id="AppIcon.ico" SourceFile="..\Memory Monitor\icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/rickbme/Memory-Monitor" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/rickbme/Memory-Monitor" />
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+
+    <!-- UI -->
+    <ui:WixUI Id="WixUI_InstallDir" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <!-- License -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- Main Feature -->
+    <Feature Id="ProductFeature" Title="System Monitor" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="Shortcuts" />
+    </Feature>
+
+    <!-- Installation Directory -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="CompanyFolder" Name="DFS">
+        <Directory Id="INSTALLFOLDER" Name="System Monitor" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Start Menu -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="System Monitor" />
+    </StandardDirectory>
+
+    <!-- Desktop -->
+    <StandardDirectory Id="DesktopFolder" />
+
+  </Package>
+
+  <!-- Application Components -->
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      
+      <!-- Main Executable -->
+      <Component Id="MainExecutable" Guid="11111111-2222-3333-4444-555555555555">
+        <File Id="MemoryMonitorExe" 
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" 
+              KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut"
+                    Name="System Monitor"
+                    Description="Monitor CPU, GPU, and Memory usage"
+                    Directory="ApplicationProgramsFolder"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon.ico"
+                    IconIndex="0"
+                    Advertise="yes" />
+          <Shortcut Id="DesktopShortcut"
+                    Name="System Monitor"
+                    Description="Monitor CPU, GPU, and Memory usage"
+                    Directory="DesktopFolder"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon.ico"
+                    IconIndex="0"
+                    Advertise="yes" />
+        </File>
+      </Component>
+
+      <!-- Configuration File -->
+      <Component Id="ConfigFile" Guid="22222222-3333-4444-5555-666666666666">
+        <File Id="MemoryMonitorDll.config"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.dll.config"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- DLL Files -->
+      <Component Id="MemoryMonitorDll" Guid="33333333-4444-5555-6666-777777777777">
+        <File Id="MemoryMonitorDll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="MemoryMonitorDeps" Guid="44444444-5555-6666-7777-888888888888">
+        <File Id="MemoryMonitorDepsjson"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.deps.json"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="MemoryMonitorRuntime" Guid="55555555-6666-7777-8888-999999999999">
+        <File Id="MemoryMonitorRuntimejson"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.runtimeconfig.json"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Dependencies -->
+      <Component Id="MicrosoftVisualBasic" Guid="66666666-7777-8888-9999-AAAAAAAAAAAA">
+        <File Id="MicrosoftVisualBasicDll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Microsoft.VisualBasic.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SystemManagement" Guid="77777777-8888-9999-AAAA-BBBBBBBBBBBB">
+        <File Id="SystemManagementDll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\System.Management.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SystemCodeDom" Guid="88888888-9999-AAAA-BBBB-CCCCCCCCCCCC">
+        <File Id="SystemCodeDomDll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\System.CodeDom.dll"
+              KeyPath="yes" />
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Shortcuts Component Group -->
+  <Fragment>
+    <ComponentGroup Id="Shortcuts">
+      
+      <!-- Start Menu Folder -->
+      <Component Id="ApplicationShortcutFolder" 
+                 Directory="ApplicationProgramsFolder" 
+                 Guid="99999999-AAAA-BBBB-CCCC-DDDDDDDDDDDD">
+        <RemoveFolder Id="CleanUpShortCut" On="uninstall" />
+        <RegistryValue Root="HKCU" 
+                      Key="Software\DFS\SystemMonitor" 
+                      Name="installed" 
+                      Type="integer" 
+                      Value="1" 
+                      KeyPath="yes" />
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>

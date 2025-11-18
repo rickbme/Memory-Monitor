@@ -48,7 +48,7 @@ namespace Memory_Monitor
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // Draw background
-            using (SolidBrush bgBrush = new SolidBrush(_backgroundColor))
+            using (SolidBrush bgBrush = new SolidBrush(this.BackColor))
             {
                 g.FillRectangle(bgBrush, this.ClientRectangle);
             }
@@ -148,6 +148,16 @@ namespace Memory_Monitor
             set
             {
                 _lineColor = value;
+                this.Invalidate();
+            }
+        }
+
+        public Color GridColor
+        {
+            get => _gridColor;
+            set
+            {
+                _gridColor = value;
                 this.Invalidate();
             }
         }

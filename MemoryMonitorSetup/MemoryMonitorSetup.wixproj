@@ -1,0 +1,15 @@
+<Project Sdk="WixToolset.Sdk/5.0.0">
+  <PropertyGroup>
+    <OutputName>MemoryMonitorSetup</OutputName>
+    <OutputType>Package</OutputType>
+    <WixVersion>5.0.0</WixVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+</Project>

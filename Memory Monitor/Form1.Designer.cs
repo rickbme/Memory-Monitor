@@ -51,13 +51,61 @@
             this.lblGPUUsageTitle = new System.Windows.Forms.Label();
             this.lblGPUUsageValue = new System.Windows.Forms.Label();
             this.gpuUsageGraph = new Memory_Monitor.MemoryGraphControl();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.darkModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // menuStrip
+            // 
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewToolStripMenuItem,
+            this.helpToolStripMenuItem});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(660, 24);
+            this.menuStrip.TabIndex = 18;
+            this.menuStrip.Text = "menuStrip1";
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.darkModeToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
+            // darkModeToolStripMenuItem
+            // 
+            this.darkModeToolStripMenuItem.CheckOnClick = true;
+            this.darkModeToolStripMenuItem.Name = "darkModeToolStripMenuItem";
+            this.darkModeToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.darkModeToolStripMenuItem.Text = "Dark Mode";
+            this.darkModeToolStripMenuItem.Click += new System.EventHandler(this.DarkModeToolStripMenuItem_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
             // lblCPUUsageTitle
             // 
             this.lblCPUUsageTitle.AutoSize = true;
             this.lblCPUUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblCPUUsageTitle.Location = new System.Drawing.Point(20, 20);
+            this.lblCPUUsageTitle.Location = new System.Drawing.Point(20, 35);
             this.lblCPUUsageTitle.Name = "lblCPUUsageTitle";
             this.lblCPUUsageTitle.Size = new System.Drawing.Size(95, 21);
             this.lblCPUUsageTitle.TabIndex = 0;
@@ -68,7 +116,7 @@
             this.lblCPUUsageValue.AutoSize = true;
             this.lblCPUUsageValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
             this.lblCPUUsageValue.ForeColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.lblCPUUsageValue.Location = new System.Drawing.Point(20, 45);
+            this.lblCPUUsageValue.Location = new System.Drawing.Point(20, 60);
             this.lblCPUUsageValue.Name = "lblCPUUsageValue";
             this.lblCPUUsageValue.Size = new System.Drawing.Size(52, 32);
             this.lblCPUUsageValue.TabIndex = 1;
@@ -78,7 +126,7 @@
             // 
             this.cpuUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.cpuUsageGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.cpuUsageGraph.Location = new System.Drawing.Point(20, 85);
+            this.cpuUsageGraph.Location = new System.Drawing.Point(20, 100);
             this.cpuUsageGraph.MaxDataPoints = 60;
             this.cpuUsageGraph.Name = "cpuUsageGraph";
             this.cpuUsageGraph.Size = new System.Drawing.Size(300, 60);
@@ -88,7 +136,7 @@
             // 
             this.lblGPUUsageTitle.AutoSize = true;
             this.lblGPUUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUUsageTitle.Location = new System.Drawing.Point(340, 20);
+            this.lblGPUUsageTitle.Location = new System.Drawing.Point(340, 35);
             this.lblGPUUsageTitle.Name = "lblGPUUsageTitle";
             this.lblGPUUsageTitle.Size = new System.Drawing.Size(95, 21);
             this.lblGPUUsageTitle.TabIndex = 3;
@@ -99,7 +147,7 @@
             this.lblGPUUsageValue.AutoSize = true;
             this.lblGPUUsageValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
             this.lblGPUUsageValue.ForeColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.lblGPUUsageValue.Location = new System.Drawing.Point(340, 45);
+            this.lblGPUUsageValue.Location = new System.Drawing.Point(340, 60);
             this.lblGPUUsageValue.Name = "lblGPUUsageValue";
             this.lblGPUUsageValue.Size = new System.Drawing.Size(52, 32);
             this.lblGPUUsageValue.TabIndex = 4;
@@ -109,7 +157,7 @@
             // 
             this.gpuUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.gpuUsageGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuUsageGraph.Location = new System.Drawing.Point(340, 85);
+            this.gpuUsageGraph.Location = new System.Drawing.Point(340, 100);
             this.gpuUsageGraph.MaxDataPoints = 60;
             this.gpuUsageGraph.Name = "gpuUsageGraph";
             this.gpuUsageGraph.Size = new System.Drawing.Size(300, 60);
@@ -119,7 +167,7 @@
             // 
             this.lblSystemMemoryTitle.AutoSize = true;
             this.lblSystemMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 165);
+            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 180);
             this.lblSystemMemoryTitle.Name = "lblSystemMemoryTitle";
             this.lblSystemMemoryTitle.Size = new System.Drawing.Size(130, 21);
             this.lblSystemMemoryTitle.TabIndex = 6;
@@ -129,7 +177,7 @@
             // 
             this.lblSystemMemoryValue.AutoSize = true;
             this.lblSystemMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 190);
+            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 205);
             this.lblSystemMemoryValue.Name = "lblSystemMemoryValue";
             this.lblSystemMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblSystemMemoryValue.TabIndex = 7;
@@ -137,7 +185,7 @@
             // 
             // progressBarSystemMemory
             // 
-            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 210);
+            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 225);
             this.progressBarSystemMemory.Name = "progressBarSystemMemory";
             this.progressBarSystemMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarSystemMemory.TabIndex = 8;
@@ -146,7 +194,7 @@
             // 
             this.lblSystemMemoryPercent.AutoSize = true;
             this.lblSystemMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 212);
+            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 227);
             this.lblSystemMemoryPercent.Name = "lblSystemMemoryPercent";
             this.lblSystemMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblSystemMemoryPercent.TabIndex = 9;
@@ -156,7 +204,7 @@
             // 
             this.systemMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.systemMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 235);
+            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 250);
             this.systemMemoryGraph.MaxDataPoints = 60;
             this.systemMemoryGraph.Name = "systemMemoryGraph";
             this.systemMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -166,7 +214,7 @@
             // 
             this.lblGPUMemoryTitle.AutoSize = true;
             this.lblGPUMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 165);
+            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 180);
             this.lblGPUMemoryTitle.Name = "lblGPUMemoryTitle";
             this.lblGPUMemoryTitle.Size = new System.Drawing.Size(112, 21);
             this.lblGPUMemoryTitle.TabIndex = 11;
@@ -176,7 +224,7 @@
             // 
             this.lblGPUMemoryValue.AutoSize = true;
             this.lblGPUMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 190);
+            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 205);
             this.lblGPUMemoryValue.Name = "lblGPUMemoryValue";
             this.lblGPUMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblGPUMemoryValue.TabIndex = 12;
@@ -184,7 +232,7 @@
             // 
             // progressBarGPUMemory
             // 
-            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 210);
+            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 225);
             this.progressBarGPUMemory.Name = "progressBarGPUMemory";
             this.progressBarGPUMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarGPUMemory.TabIndex = 13;
@@ -193,7 +241,7 @@
             // 
             this.lblGPUMemoryPercent.AutoSize = true;
             this.lblGPUMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 212);
+            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 227);
             this.lblGPUMemoryPercent.Name = "lblGPUMemoryPercent";
             this.lblGPUMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblGPUMemoryPercent.TabIndex = 14;
@@ -203,7 +251,7 @@
             // 
             this.gpuMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.gpuMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 235);
+            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 250);
             this.gpuMemoryGraph.MaxDataPoints = 60;
             this.gpuMemoryGraph.Name = "gpuMemoryGraph";
             this.gpuMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -218,7 +266,7 @@
             // 
             this.lblProcessesTitle.AutoSize = true;
             this.lblProcessesTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 315);
+            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 330);
             this.lblProcessesTitle.Name = "lblProcessesTitle";
             this.lblProcessesTitle.Size = new System.Drawing.Size(234, 21);
             this.lblProcessesTitle.TabIndex = 16;
@@ -231,13 +279,16 @@
             this.columnMemoryUsage,
             this.columnMemoryMB});
             this.listViewProcesses.FullRowSelect = true;
-            this.listViewProcesses.GridLines = true;
-            this.listViewProcesses.Location = new System.Drawing.Point(20, 345);
+            this.listViewProcesses.Location = new System.Drawing.Point(20, 360);
             this.listViewProcesses.Name = "listViewProcesses";
-            this.listViewProcesses.Size = new System.Drawing.Size(620, 265);
+            this.listViewProcesses.OwnerDraw = true;
+            this.listViewProcesses.Size = new System.Drawing.Size(620, 250);
             this.listViewProcesses.TabIndex = 17;
             this.listViewProcesses.UseCompatibleStateImageBehavior = false;
             this.listViewProcesses.View = System.Windows.Forms.View.Details;
+            this.listViewProcesses.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.ListView_DrawColumnHeader);
+            this.listViewProcesses.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.ListView_DrawItem);
+            this.listViewProcesses.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.ListView_DrawSubItem);
             // 
             // columnProcessName
             // 
@@ -278,11 +329,17 @@
             this.Controls.Add(this.cpuUsageGraph);
             this.Controls.Add(this.lblCPUUsageValue);
             this.Controls.Add(this.lblCPUUsageTitle);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            this.Controls.Add(this.menuStrip);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.MainMenuStrip = this.menuStrip;
+            this.MaximizeBox = true;
+            this.MinimumSize = new System.Drawing.Size(680, 650);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "System Monitor";
+            this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
@@ -311,5 +368,10 @@
         private System.Windows.Forms.Label lblGPUUsageTitle;
         private System.Windows.Forms.Label lblGPUUsageValue;
         private MemoryGraphControl gpuUsageGraph;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem darkModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
