@@ -1,35 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="Memory Monitor" Manufacturer="YourCompany" Version="1.0.0.0" UpgradeCode="12345678-1234-1234-1234-123456789012" Compressed="yes">
+  <Package Name="Memory Monitor" 
+           Manufacturer="Memory Monitor" 
+           Version="1.0.0.0" 
+           UpgradeCode="A8B9C7D6-E5F4-4321-9876-FEDCBA098765" 
+           Compressed="yes"
+           InstallerVersion="500">
+    
     <MajorUpgrade DowngradeErrorMessage="A newer version of Memory Monitor is already installed." />
-    <Media Id="1" Cabinet="media1.cab" />
-    <Feature Id="Main">
+    
+    <MediaTemplate EmbedCab="yes" />
+    
+    <Feature Id="Main" Title="Memory Monitor" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="StartMenuShortcuts" />
     </Feature>
+    
+    <!-- Add/Remove Programs Icon -->
+    <Icon Id="AppIcon.exe" SourceFile="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/rickbme/Memory-Monitor" />
+    <Property Id="ARPNOREPAIR" Value="yes" />
+    <Property Id="ARPNOMODIFY" Value="yes" />
   </Package>
+  
   <Fragment>
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="Memory Monitor" />
     </StandardDirectory>
+    
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Memory Monitor" />
+    </StandardDirectory>
   </Fragment>
+  
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="MemoryMonitorExe" Guid="*">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" />
+      <!-- Main executable -->
+      <Component Id="MainExecutable" Guid="12345678-ABCD-4321-ABCD-123456789ABC">
+        <File Id="MemoryMonitorExe" 
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" 
+              KeyPath="yes" />
       </Component>
-      <Component Id="MemoryMonitorDll" Guid="*">
+      
+      <!-- Application DLL -->
+      <Component Id="MemoryMonitorDll" Guid="23456789-BCDE-4321-BCDE-23456789ABCD">
         <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.dll" />
       </Component>
-      <Component Id="MemoryMonitorDeps" Guid="*">
+      
+      <!-- Configuration files -->
+      <Component Id="MemoryMonitorDeps" Guid="34567890-CDEF-4321-CDEF-34567890ABCD">
         <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.deps.json" />
       </Component>
-      <Component Id="MemoryMonitorRuntime" Guid="*">
+      
+      <Component Id="MemoryMonitorRuntime" Guid="45678901-DEF0-4321-DEF0-45678901ABCD">
         <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.runtimeconfig.json" />
       </Component>
-      <Component Id="SystemCodeDom" Guid="*">
+      
+      <!-- System dependencies -->
+      <Component Id="SystemCodeDom" Guid="56789012-EF01-4321-EF01-56789012ABCD">
         <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.CodeDom.dll" />
       </Component>
-      <Component Id="SystemManagement" Guid="*">
+      
+      <Component Id="SystemManagement" Guid="67890123-F012-4321-F012-67890123ABCD">
         <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.Management.dll" />
+      </Component>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="StartMenuShortcuts" Directory="ApplicationProgramsFolder">
+      <Component Id="StartMenuShortcut" Guid="78901234-0123-4321-0123-78901234ABCD">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Memory Monitor"
+                  Description="System Resource Monitor"
+                  Target="[INSTALLFOLDER]Memory Monitor.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.exe" />
+        <RemoveFolder Id="CleanUpStartMenu" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" 
+                       Key="Software\MemoryMonitor" 
+                       Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
