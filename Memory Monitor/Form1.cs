@@ -9,9 +9,16 @@ namespace Memory_Monitor
         private const long BYTES_TO_MB = 1024 * 1024;
         private const long BYTES_TO_GB = 1024 * 1024 * 1024;
         private const int MIN_MEMORY_MB = 400;
+        private const float MAX_DISK_SPEED_MBPS = 500f; // Max MB/s for disk graph scaling
+        private const float MAX_NETWORK_SPEED_MBPS = 125f; // Max MB/s for network graph scaling (1 Gbps)
 
         private CPUMonitor? _cpuMonitor;
         private GPUMonitor? _gpuMonitor;
+        private DiskMonitor? _diskMonitor;
+        private NetworkMonitor? _networkMonitor;
+
+        private bool _showDiskMonitor = false;
+        private bool _showNetworkMonitor = false;
 
         // Windows API for memory info
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -40,13 +47,13 @@ namespace Memory_Monitor
         public Form1()
         {
             InitializeComponent();
-            LoadThemePreference();
+            LoadSettings();
             InitializeMonitors();
             InitializeUI();
             ApplyTheme(); // Apply saved or default theme
         }
 
-        private void LoadThemePreference()
+        private void LoadSettings()
         {
             try
             {
@@ -54,25 +61,37 @@ namespace Memory_Monitor
                 bool darkMode = Properties.Settings.Default.DarkMode;
                 ThemeManager.SetTheme(darkMode ? ThemeManager.Theme.Dark : ThemeManager.Theme.Light);
                 darkModeToolStripMenuItem.Checked = darkMode;
+
+                // Load monitor visibility preferences
+                _showDiskMonitor = Properties.Settings.Default.ShowDiskMonitor;
+                _showNetworkMonitor = Properties.Settings.Default.ShowNetworkMonitor;
+                showDiskMonitorToolStripMenuItem.Checked = _showDiskMonitor;
+                showNetworkMonitorToolStripMenuItem.Checked = _showNetworkMonitor;
             }
             catch
             {
-                // Use default light theme if settings can't be loaded
+                // Use defaults if settings can't be loaded
                 ThemeManager.SetTheme(ThemeManager.Theme.Light);
                 darkModeToolStripMenuItem.Checked = false;
+                _showDiskMonitor = false;
+                _showNetworkMonitor = false;
+                showDiskMonitorToolStripMenuItem.Checked = false;
+                showNetworkMonitorToolStripMenuItem.Checked = false;
             }
         }
 
-        private void SaveThemePreference()
+        private void SaveSettings()
         {
             try
             {
                 Properties.Settings.Default.DarkMode = ThemeManager.IsDarkMode();
+                Properties.Settings.Default.ShowDiskMonitor = _showDiskMonitor;
+                Properties.Settings.Default.ShowNetworkMonitor = _showNetworkMonitor;
                 Properties.Settings.Default.Save();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to save theme preference: {ex.Message}");
+                Debug.WriteLine($"Failed to save settings: {ex.Message}");
             }
         }
 
@@ -83,6 +102,12 @@ namespace Memory_Monitor
 
             // Initialize GPU monitor
             _gpuMonitor = new GPUMonitor();
+
+            // Initialize Disk monitor
+            _diskMonitor = new DiskMonitor();
+
+            // Initialize Network monitor
+            _networkMonitor = new NetworkMonitor();
         }
 
         private void InitializeUI()
@@ -124,11 +149,36 @@ namespace Memory_Monitor
             progressBarGPUMemory.Value = 0;
             progressBarGPUMemory.Maximum = 100;
 
+            // Set initial values for Disk
+            lblDiskUsageValue.Text = _diskMonitor?.IsAvailable == true ? "0 MB/s" : "N/A";
+
+            // Set initial values for Network
+            lblNetworkUsageValue.Text = _networkMonitor?.IsAvailable == true ? "0 MB/s" : "N/A";
+
+            // Apply visibility settings
+            UpdateMonitorVisibility();
+
             // Start the update timer
             updateTimer.Start();
 
             // Do an initial update
             UpdateAllMetrics();
+        }
+
+        private void UpdateMonitorVisibility()
+        {
+            // Show/hide disk monitor controls
+            lblDiskUsageTitle.Visible = _showDiskMonitor;
+            lblDiskUsageValue.Visible = _showDiskMonitor;
+            diskUsageGraph.Visible = _showDiskMonitor;
+
+            // Show/hide network monitor controls
+            lblNetworkUsageTitle.Visible = _showNetworkMonitor;
+            lblNetworkUsageValue.Visible = _showNetworkMonitor;
+            networkUsageGraph.Visible = _showNetworkMonitor;
+
+            // Trigger resize to recalculate layout
+            Form1_Resize(this, EventArgs.Empty);
         }
 
         private void DarkModeToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -140,10 +190,24 @@ namespace Memory_Monitor
             darkModeToolStripMenuItem.Checked = ThemeManager.IsDarkMode();
             
             // Save preference
-            SaveThemePreference();
+            SaveSettings();
             
             // Apply the new theme
             ApplyTheme();
+        }
+
+        private void ShowDiskMonitorToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            _showDiskMonitor = showDiskMonitorToolStripMenuItem.Checked;
+            SaveSettings();
+            UpdateMonitorVisibility();
+        }
+
+        private void ShowNetworkMonitorToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            _showNetworkMonitor = showNetworkMonitorToolStripMenuItem.Checked;
+            SaveSettings();
+            UpdateMonitorVisibility();
         }
 
         private void AboutToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -179,6 +243,7 @@ namespace Memory_Monitor
 
         private void ApplyLabelColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
             Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
+            Color DiskColor, Color NetworkColor,
             Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
             Color MenuText) colors)
         {
@@ -187,11 +252,15 @@ namespace Memory_Monitor
             lblGPUUsageTitle.ForeColor = colors.TextPrimary;
             lblSystemMemoryTitle.ForeColor = colors.TextPrimary;
             lblGPUMemoryTitle.ForeColor = colors.TextPrimary;
+            lblDiskUsageTitle.ForeColor = colors.TextPrimary;
+            lblNetworkUsageTitle.ForeColor = colors.TextPrimary;
             lblProcessesTitle.ForeColor = colors.TextPrimary;
 
-            // Value labels (keep CPU/GPU colors)
+            // Value labels (keep CPU/GPU/Disk/Network colors)
             lblCPUUsageValue.ForeColor = colors.CPUColor;
             lblGPUUsageValue.ForeColor = colors.GPUColor;
+            lblDiskUsageValue.ForeColor = colors.DiskColor;
+            lblNetworkUsageValue.ForeColor = colors.NetworkColor;
 
             // Secondary labels
             lblSystemMemoryValue.ForeColor = colors.TextSecondary;
@@ -202,6 +271,7 @@ namespace Memory_Monitor
 
         private void ApplyGraphColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
             Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
+            Color DiskColor, Color NetworkColor,
             Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
             Color MenuText) colors)
         {
@@ -221,15 +291,26 @@ namespace Memory_Monitor
             gpuMemoryGraph.BackColor = colors.GraphBackground;
             gpuMemoryGraph.LineColor = colors.GPUColor;
 
+            // Disk graph
+            diskUsageGraph.BackColor = colors.GraphBackground;
+            diskUsageGraph.LineColor = colors.DiskColor;
+
+            // Network graph
+            networkUsageGraph.BackColor = colors.GraphBackground;
+            networkUsageGraph.LineColor = colors.NetworkColor;
+
             // Force graphs to redraw
             cpuUsageGraph.Invalidate();
             gpuUsageGraph.Invalidate();
             systemMemoryGraph.Invalidate();
             gpuMemoryGraph.Invalidate();
+            diskUsageGraph.Invalidate();
+            networkUsageGraph.Invalidate();
         }
 
         private void ApplyListViewColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
             Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
+            Color DiskColor, Color NetworkColor,
             Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
             Color MenuText) colors)
         {
@@ -248,6 +329,13 @@ namespace Memory_Monitor
             UpdateCPUUsage();
             UpdateGPUUsage();
             UpdateGPUMemory();
+            
+            if (_showDiskMonitor)
+                UpdateDiskUsage();
+            
+            if (_showNetworkMonitor)
+                UpdateNetworkUsage();
+            
             UpdateProcessList();
         }
 
@@ -298,6 +386,62 @@ namespace Memory_Monitor
             {
                 lblGPUUsageValue.Text = "Error";
                 Debug.WriteLine($"Error in UpdateGPUUsage: {ex.Message}");
+            }
+        }
+
+        private void UpdateDiskUsage()
+        {
+            try
+            {
+                if (_diskMonitor != null && _diskMonitor.IsAvailable)
+                {
+                    var (readMBps, writeMBps, totalMBps) = _diskMonitor.Update();
+
+                    // Display total throughput
+                    lblDiskUsageValue.Text = $"{totalMBps:F1} MB/s (R: {readMBps:F1} | W: {writeMBps:F1})";
+                    
+                    // Scale for graph (0-100 based on MAX_DISK_SPEED_MBPS)
+                    float scaledValue = (totalMBps / MAX_DISK_SPEED_MBPS) * 100f;
+                    diskUsageGraph.AddDataPoint(Math.Min(scaledValue, 100f));
+                }
+                else
+                {
+                    lblDiskUsageValue.Text = "N/A";
+                    diskUsageGraph.AddDataPoint(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblDiskUsageValue.Text = "Error";
+                Debug.WriteLine($"Error in UpdateDiskUsage: {ex.Message}");
+            }
+        }
+
+        private void UpdateNetworkUsage()
+        {
+            try
+            {
+                if (_networkMonitor != null && _networkMonitor.IsAvailable)
+                {
+                    var (uploadMBps, downloadMBps, totalMBps) = _networkMonitor.Update();
+
+                    // Display total throughput
+                    lblNetworkUsageValue.Text = $"{totalMBps:F1} MB/s (? {uploadMBps:F1} | ? {downloadMBps:F1})";
+                    
+                    // Scale for graph (0-100 based on MAX_NETWORK_SPEED_MBPS)
+                    float scaledValue = (totalMBps / MAX_NETWORK_SPEED_MBPS) * 100f;
+                    networkUsageGraph.AddDataPoint(Math.Min(scaledValue, 100f));
+                }
+                else
+                {
+                    lblNetworkUsageValue.Text = "N/A";
+                    networkUsageGraph.AddDataPoint(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                lblNetworkUsageValue.Text = "Error";
+                Debug.WriteLine($"Error in UpdateNetworkUsage: {ex.Message}");
             }
         }
 
@@ -430,6 +574,8 @@ namespace Memory_Monitor
             // Dispose monitors
             _cpuMonitor?.Dispose();
             _gpuMonitor?.Dispose();
+            _diskMonitor?.Dispose();
+            _networkMonitor?.Dispose();
 
             base.OnFormClosing(e);
         }
@@ -453,48 +599,74 @@ namespace Memory_Monitor
                 int columnWidth = (formWidth - (3 * margin)) / 2;
                 int rightColumnX = margin + columnWidth + spacing;
 
+                int currentY = menuHeight + margin;
+
                 // Top section - CPU and GPU Usage (first row)
-                int topY = menuHeight + margin;
                 int usageHeight = 160; // Title + Value + Graph
 
                 // CPU Usage (left)
-                lblCPUUsageTitle.Location = new Point(margin, topY);
-                lblCPUUsageValue.Location = new Point(margin, topY + 25);
-                cpuUsageGraph.Location = new Point(margin, topY + 65);
+                lblCPUUsageTitle.Location = new Point(margin, currentY);
+                lblCPUUsageValue.Location = new Point(margin, currentY + 25);
+                cpuUsageGraph.Location = new Point(margin, currentY + 65);
                 cpuUsageGraph.Size = new Size(columnWidth, 60);
 
                 // GPU Usage (right)
-                lblGPUUsageTitle.Location = new Point(rightColumnX, topY);
-                lblGPUUsageValue.Location = new Point(rightColumnX, topY + 25);
-                gpuUsageGraph.Location = new Point(rightColumnX, topY + 65);
+                lblGPUUsageTitle.Location = new Point(rightColumnX, currentY);
+                lblGPUUsageValue.Location = new Point(rightColumnX, currentY + 25);
+                gpuUsageGraph.Location = new Point(rightColumnX, currentY + 65);
                 gpuUsageGraph.Size = new Size(columnWidth, 60);
 
-                // Memory section (second row)
-                int memoryY = topY + usageHeight;
+                currentY += usageHeight;
+
+                // Disk/Network section (conditional second row)
+                if (_showDiskMonitor || _showNetworkMonitor)
+                {
+                    if (_showDiskMonitor)
+                    {
+                        lblDiskUsageTitle.Location = new Point(margin, currentY);
+                        lblDiskUsageValue.Location = new Point(margin, currentY + 25);
+                        diskUsageGraph.Location = new Point(margin, currentY + 65);
+                        diskUsageGraph.Size = new Size(columnWidth, 60);
+                    }
+
+                    if (_showNetworkMonitor)
+                    {
+                        lblNetworkUsageTitle.Location = new Point(rightColumnX, currentY);
+                        lblNetworkUsageValue.Location = new Point(rightColumnX, currentY + 25);
+                        networkUsageGraph.Location = new Point(rightColumnX, currentY + 65);
+                        networkUsageGraph.Size = new Size(columnWidth, 60);
+                    }
+
+                    currentY += usageHeight;
+                }
+
+                // Memory section
+                int memoryHeight = 150;
 
                 // System Memory (left)
-                lblSystemMemoryTitle.Location = new Point(margin, memoryY);
-                lblSystemMemoryValue.Location = new Point(margin, memoryY + 25);
-                progressBarSystemMemory.Location = new Point(margin, memoryY + 45);
+                lblSystemMemoryTitle.Location = new Point(margin, currentY);
+                lblSystemMemoryValue.Location = new Point(margin, currentY + 25);
+                progressBarSystemMemory.Location = new Point(margin, currentY + 45);
                 progressBarSystemMemory.Size = new Size(columnWidth - 60, 20);
-                lblSystemMemoryPercent.Location = new Point(margin + columnWidth - 50, memoryY + 47);
-                systemMemoryGraph.Location = new Point(margin, memoryY + 70);
+                lblSystemMemoryPercent.Location = new Point(margin + columnWidth - 50, currentY + 47);
+                systemMemoryGraph.Location = new Point(margin, currentY + 70);
                 systemMemoryGraph.Size = new Size(columnWidth, 60);
 
                 // GPU Memory (right)
-                lblGPUMemoryTitle.Location = new Point(rightColumnX, memoryY);
-                lblGPUMemoryValue.Location = new Point(rightColumnX, memoryY + 25);
-                progressBarGPUMemory.Location = new Point(rightColumnX, memoryY + 45);
+                lblGPUMemoryTitle.Location = new Point(rightColumnX, currentY);
+                lblGPUMemoryValue.Location = new Point(rightColumnX, currentY + 25);
+                progressBarGPUMemory.Location = new Point(rightColumnX, currentY + 45);
                 progressBarGPUMemory.Size = new Size(columnWidth - 60, 20);
-                lblGPUMemoryPercent.Location = new Point(rightColumnX + columnWidth - 50, memoryY + 47);
-                gpuMemoryGraph.Location = new Point(rightColumnX, memoryY + 70);
+                lblGPUMemoryPercent.Location = new Point(rightColumnX + columnWidth - 50, currentY + 47);
+                gpuMemoryGraph.Location = new Point(rightColumnX, currentY + 70);
                 gpuMemoryGraph.Size = new Size(columnWidth, 60);
 
+                currentY += memoryHeight;
+
                 // Process list (bottom section)
-                int processY = memoryY + 150;
-                lblProcessesTitle.Location = new Point(margin, processY);
+                lblProcessesTitle.Location = new Point(margin, currentY);
                 
-                int listViewY = processY + 30;
+                int listViewY = currentY + 30;
                 int listViewHeight = formHeight - listViewY - margin;
                 listViewProcesses.Location = new Point(margin, listViewY);
                 listViewProcesses.Size = new Size(formWidth - (2 * margin), Math.Max(100, listViewHeight));

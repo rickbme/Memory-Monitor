@@ -54,8 +54,17 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.darkModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.showDiskMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showNetworkMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblDiskUsageTitle = new System.Windows.Forms.Label();
+            this.lblDiskUsageValue = new System.Windows.Forms.Label();
+            this.diskUsageGraph = new Memory_Monitor.MemoryGraphControl();
+            this.lblNetworkUsageTitle = new System.Windows.Forms.Label();
+            this.lblNetworkUsageValue = new System.Windows.Forms.Label();
+            this.networkUsageGraph = new Memory_Monitor.MemoryGraphControl();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,7 +82,10 @@
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.darkModeToolStripMenuItem});
+            this.darkModeToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.showDiskMonitorToolStripMenuItem,
+            this.showNetworkMonitorToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
@@ -82,9 +94,30 @@
             // 
             this.darkModeToolStripMenuItem.CheckOnClick = true;
             this.darkModeToolStripMenuItem.Name = "darkModeToolStripMenuItem";
-            this.darkModeToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.darkModeToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.darkModeToolStripMenuItem.Text = "Dark Mode";
             this.darkModeToolStripMenuItem.Click += new System.EventHandler(this.DarkModeToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(197, 6);
+            // 
+            // showDiskMonitorToolStripMenuItem
+            // 
+            this.showDiskMonitorToolStripMenuItem.CheckOnClick = true;
+            this.showDiskMonitorToolStripMenuItem.Name = "showDiskMonitorToolStripMenuItem";
+            this.showDiskMonitorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.showDiskMonitorToolStripMenuItem.Text = "Show Disk Monitor";
+            this.showDiskMonitorToolStripMenuItem.Click += new System.EventHandler(this.ShowDiskMonitorToolStripMenuItem_Click);
+            // 
+            // showNetworkMonitorToolStripMenuItem
+            // 
+            this.showNetworkMonitorToolStripMenuItem.CheckOnClick = true;
+            this.showNetworkMonitorToolStripMenuItem.Name = "showNetworkMonitorToolStripMenuItem";
+            this.showNetworkMonitorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.showNetworkMonitorToolStripMenuItem.Text = "Show Network Monitor";
+            this.showNetworkMonitorToolStripMenuItem.Click += new System.EventHandler(this.ShowNetworkMonitorToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -163,11 +196,79 @@
             this.gpuUsageGraph.Size = new System.Drawing.Size(300, 60);
             this.gpuUsageGraph.TabIndex = 5;
             // 
+            // lblDiskUsageTitle
+            // 
+            this.lblDiskUsageTitle.AutoSize = true;
+            this.lblDiskUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblDiskUsageTitle.Location = new System.Drawing.Point(20, 180);
+            this.lblDiskUsageTitle.Name = "lblDiskUsageTitle";
+            this.lblDiskUsageTitle.Size = new System.Drawing.Size(120, 21);
+            this.lblDiskUsageTitle.TabIndex = 24;
+            this.lblDiskUsageTitle.Text = "Disk Throughput";
+            this.lblDiskUsageTitle.Visible = false;
+            // 
+            // lblDiskUsageValue
+            // 
+            this.lblDiskUsageValue.AutoSize = true;
+            this.lblDiskUsageValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblDiskUsageValue.ForeColor = System.Drawing.Color.FromArgb(255, 140, 0);
+            this.lblDiskUsageValue.Location = new System.Drawing.Point(20, 205);
+            this.lblDiskUsageValue.Name = "lblDiskUsageValue";
+            this.lblDiskUsageValue.Size = new System.Drawing.Size(95, 25);
+            this.lblDiskUsageValue.TabIndex = 25;
+            this.lblDiskUsageValue.Text = "0 MB/s";
+            this.lblDiskUsageValue.Visible = false;
+            // 
+            // diskUsageGraph
+            // 
+            this.diskUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
+            this.diskUsageGraph.LineColor = System.Drawing.Color.FromArgb(255, 140, 0);
+            this.diskUsageGraph.Location = new System.Drawing.Point(20, 235);
+            this.diskUsageGraph.MaxDataPoints = 60;
+            this.diskUsageGraph.Name = "diskUsageGraph";
+            this.diskUsageGraph.Size = new System.Drawing.Size(300, 60);
+            this.diskUsageGraph.TabIndex = 26;
+            this.diskUsageGraph.Visible = false;
+            // 
+            // lblNetworkUsageTitle
+            // 
+            this.lblNetworkUsageTitle.AutoSize = true;
+            this.lblNetworkUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblNetworkUsageTitle.Location = new System.Drawing.Point(340, 180);
+            this.lblNetworkUsageTitle.Name = "lblNetworkUsageTitle";
+            this.lblNetworkUsageTitle.Size = new System.Drawing.Size(121, 21);
+            this.lblNetworkUsageTitle.TabIndex = 27;
+            this.lblNetworkUsageTitle.Text = "Network Speed";
+            this.lblNetworkUsageTitle.Visible = false;
+            // 
+            // lblNetworkUsageValue
+            // 
+            this.lblNetworkUsageValue.AutoSize = true;
+            this.lblNetworkUsageValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblNetworkUsageValue.ForeColor = System.Drawing.Color.FromArgb(138, 43, 226);
+            this.lblNetworkUsageValue.Location = new System.Drawing.Point(340, 205);
+            this.lblNetworkUsageValue.Name = "lblNetworkUsageValue";
+            this.lblNetworkUsageValue.Size = new System.Drawing.Size(95, 25);
+            this.lblNetworkUsageValue.TabIndex = 28;
+            this.lblNetworkUsageValue.Text = "0 MB/s";
+            this.lblNetworkUsageValue.Visible = false;
+            // 
+            // networkUsageGraph
+            // 
+            this.networkUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
+            this.networkUsageGraph.LineColor = System.Drawing.Color.FromArgb(138, 43, 226);
+            this.networkUsageGraph.Location = new System.Drawing.Point(340, 235);
+            this.networkUsageGraph.MaxDataPoints = 60;
+            this.networkUsageGraph.Name = "networkUsageGraph";
+            this.networkUsageGraph.Size = new System.Drawing.Size(300, 60);
+            this.networkUsageGraph.TabIndex = 29;
+            this.networkUsageGraph.Visible = false;
+            // 
             // lblSystemMemoryTitle
             // 
             this.lblSystemMemoryTitle.AutoSize = true;
             this.lblSystemMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 180);
+            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 315);
             this.lblSystemMemoryTitle.Name = "lblSystemMemoryTitle";
             this.lblSystemMemoryTitle.Size = new System.Drawing.Size(130, 21);
             this.lblSystemMemoryTitle.TabIndex = 6;
@@ -177,7 +278,7 @@
             // 
             this.lblSystemMemoryValue.AutoSize = true;
             this.lblSystemMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 205);
+            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 340);
             this.lblSystemMemoryValue.Name = "lblSystemMemoryValue";
             this.lblSystemMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblSystemMemoryValue.TabIndex = 7;
@@ -185,7 +286,7 @@
             // 
             // progressBarSystemMemory
             // 
-            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 225);
+            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 360);
             this.progressBarSystemMemory.Name = "progressBarSystemMemory";
             this.progressBarSystemMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarSystemMemory.TabIndex = 8;
@@ -194,7 +295,7 @@
             // 
             this.lblSystemMemoryPercent.AutoSize = true;
             this.lblSystemMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 227);
+            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 362);
             this.lblSystemMemoryPercent.Name = "lblSystemMemoryPercent";
             this.lblSystemMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblSystemMemoryPercent.TabIndex = 9;
@@ -204,7 +305,7 @@
             // 
             this.systemMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.systemMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 250);
+            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 385);
             this.systemMemoryGraph.MaxDataPoints = 60;
             this.systemMemoryGraph.Name = "systemMemoryGraph";
             this.systemMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -214,7 +315,7 @@
             // 
             this.lblGPUMemoryTitle.AutoSize = true;
             this.lblGPUMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 180);
+            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 315);
             this.lblGPUMemoryTitle.Name = "lblGPUMemoryTitle";
             this.lblGPUMemoryTitle.Size = new System.Drawing.Size(112, 21);
             this.lblGPUMemoryTitle.TabIndex = 11;
@@ -224,7 +325,7 @@
             // 
             this.lblGPUMemoryValue.AutoSize = true;
             this.lblGPUMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 205);
+            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 340);
             this.lblGPUMemoryValue.Name = "lblGPUMemoryValue";
             this.lblGPUMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblGPUMemoryValue.TabIndex = 12;
@@ -232,7 +333,7 @@
             // 
             // progressBarGPUMemory
             // 
-            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 225);
+            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 360);
             this.progressBarGPUMemory.Name = "progressBarGPUMemory";
             this.progressBarGPUMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarGPUMemory.TabIndex = 13;
@@ -241,7 +342,7 @@
             // 
             this.lblGPUMemoryPercent.AutoSize = true;
             this.lblGPUMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 227);
+            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 362);
             this.lblGPUMemoryPercent.Name = "lblGPUMemoryPercent";
             this.lblGPUMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblGPUMemoryPercent.TabIndex = 14;
@@ -251,7 +352,7 @@
             // 
             this.gpuMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.gpuMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 250);
+            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 385);
             this.gpuMemoryGraph.MaxDataPoints = 60;
             this.gpuMemoryGraph.Name = "gpuMemoryGraph";
             this.gpuMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -266,7 +367,7 @@
             // 
             this.lblProcessesTitle.AutoSize = true;
             this.lblProcessesTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 330);
+            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 465);
             this.lblProcessesTitle.Name = "lblProcessesTitle";
             this.lblProcessesTitle.Size = new System.Drawing.Size(234, 21);
             this.lblProcessesTitle.TabIndex = 16;
@@ -279,7 +380,7 @@
             this.columnMemoryUsage,
             this.columnMemoryMB});
             this.listViewProcesses.FullRowSelect = true;
-            this.listViewProcesses.Location = new System.Drawing.Point(20, 360);
+            this.listViewProcesses.Location = new System.Drawing.Point(20, 495);
             this.listViewProcesses.Name = "listViewProcesses";
             this.listViewProcesses.OwnerDraw = true;
             this.listViewProcesses.Size = new System.Drawing.Size(620, 250);
@@ -310,7 +411,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(660, 630);
+            this.ClientSize = new System.Drawing.Size(660, 765);
+            this.Controls.Add(this.networkUsageGraph);
+            this.Controls.Add(this.lblNetworkUsageValue);
+            this.Controls.Add(this.lblNetworkUsageTitle);
+            this.Controls.Add(this.diskUsageGraph);
+            this.Controls.Add(this.lblDiskUsageValue);
+            this.Controls.Add(this.lblDiskUsageTitle);
             this.Controls.Add(this.listViewProcesses);
             this.Controls.Add(this.lblProcessesTitle);
             this.Controls.Add(this.gpuMemoryGraph);
@@ -373,5 +480,14 @@
         private System.Windows.Forms.ToolStripMenuItem darkModeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem showDiskMonitorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showNetworkMonitorToolStripMenuItem;
+        private System.Windows.Forms.Label lblDiskUsageTitle;
+        private System.Windows.Forms.Label lblDiskUsageValue;
+        private MemoryGraphControl diskUsageGraph;
+        private System.Windows.Forms.Label lblNetworkUsageTitle;
+        private System.Windows.Forms.Label lblNetworkUsageValue;
+        private MemoryGraphControl networkUsageGraph;
     }
 }

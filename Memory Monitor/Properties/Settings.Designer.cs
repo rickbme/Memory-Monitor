@@ -34,5 +34,29 @@ namespace Memory_Monitor.Properties {
                 this["DarkMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowDiskMonitor {
+            get {
+                return ((bool)(this["ShowDiskMonitor"]));
+            }
+            set {
+                this["ShowDiskMonitor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowNetworkMonitor {
+            get {
+                return ((bool)(this["ShowNetworkMonitor"]));
+            }
+            set {
+                this["ShowNetworkMonitor"] = value;
+            }
+        }
     }
 }
