@@ -61,10 +61,10 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblDiskUsageTitle = new System.Windows.Forms.Label();
             this.lblDiskUsageValue = new System.Windows.Forms.Label();
-            this.diskUsageGraph = new Memory_Monitor.MemoryGraphControl();
+            this.diskUsageGauge = new Memory_Monitor.CircularGaugeControl();
             this.lblNetworkUsageTitle = new System.Windows.Forms.Label();
             this.lblNetworkUsageValue = new System.Windows.Forms.Label();
-            this.networkUsageGraph = new Memory_Monitor.MemoryGraphControl();
+            this.networkUsageGauge = new Memory_Monitor.CircularGaugeControl();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -75,7 +75,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(660, 24);
+            this.menuStrip.Size = new System.Drawing.Size(760, 24);
             this.menuStrip.TabIndex = 18;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -199,76 +199,82 @@
             // lblDiskUsageTitle
             // 
             this.lblDiskUsageTitle.AutoSize = true;
-            this.lblDiskUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblDiskUsageTitle.Location = new System.Drawing.Point(20, 180);
+            this.lblDiskUsageTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.lblDiskUsageTitle.Location = new System.Drawing.Point(680, 35);
             this.lblDiskUsageTitle.Name = "lblDiskUsageTitle";
-            this.lblDiskUsageTitle.Size = new System.Drawing.Size(120, 21);
+            this.lblDiskUsageTitle.Size = new System.Drawing.Size(40, 20);
             this.lblDiskUsageTitle.TabIndex = 24;
-            this.lblDiskUsageTitle.Text = "Disk Throughput";
+            this.lblDiskUsageTitle.Text = "Disk";
             this.lblDiskUsageTitle.Visible = false;
             // 
             // lblDiskUsageValue
             // 
             this.lblDiskUsageValue.AutoSize = true;
-            this.lblDiskUsageValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblDiskUsageValue.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.lblDiskUsageValue.ForeColor = System.Drawing.Color.FromArgb(255, 140, 0);
-            this.lblDiskUsageValue.Location = new System.Drawing.Point(20, 205);
+            this.lblDiskUsageValue.Location = new System.Drawing.Point(680, 58);
             this.lblDiskUsageValue.Name = "lblDiskUsageValue";
-            this.lblDiskUsageValue.Size = new System.Drawing.Size(95, 25);
+            this.lblDiskUsageValue.MaximumSize = new System.Drawing.Size(130, 0);
+            this.lblDiskUsageValue.Size = new System.Drawing.Size(58, 13);
             this.lblDiskUsageValue.TabIndex = 25;
             this.lblDiskUsageValue.Text = "0 MB/s";
             this.lblDiskUsageValue.Visible = false;
             // 
-            // diskUsageGraph
+            // diskUsageGauge
             // 
-            this.diskUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.diskUsageGraph.LineColor = System.Drawing.Color.FromArgb(255, 140, 0);
-            this.diskUsageGraph.Location = new System.Drawing.Point(20, 235);
-            this.diskUsageGraph.MaxDataPoints = 60;
-            this.diskUsageGraph.Name = "diskUsageGraph";
-            this.diskUsageGraph.Size = new System.Drawing.Size(300, 60);
-            this.diskUsageGraph.TabIndex = 26;
-            this.diskUsageGraph.Visible = false;
+            this.diskUsageGauge.BackColor = System.Drawing.Color.Transparent;
+            this.diskUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(20, 20, 20);
+            this.diskUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(255, 140, 0);
+            this.diskUsageGauge.Location = new System.Drawing.Point(660, 80);
+            this.diskUsageGauge.MaxValue = 500F;
+            this.diskUsageGauge.MinimumSize = new System.Drawing.Size(120, 120);
+            this.diskUsageGauge.Name = "diskUsageGauge";
+            this.diskUsageGauge.NeedleColor = System.Drawing.Color.FromArgb(255, 140, 0);
+            this.diskUsageGauge.Size = new System.Drawing.Size(150, 150);
+            this.diskUsageGauge.TabIndex = 26;
+            this.diskUsageGauge.Visible = false;
             // 
             // lblNetworkUsageTitle
             // 
             this.lblNetworkUsageTitle.AutoSize = true;
-            this.lblNetworkUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblNetworkUsageTitle.Location = new System.Drawing.Point(340, 180);
+            this.lblNetworkUsageTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.lblNetworkUsageTitle.Location = new System.Drawing.Point(680, 245);
             this.lblNetworkUsageTitle.Name = "lblNetworkUsageTitle";
-            this.lblNetworkUsageTitle.Size = new System.Drawing.Size(121, 21);
+            this.lblNetworkUsageTitle.Size = new System.Drawing.Size(70, 20);
             this.lblNetworkUsageTitle.TabIndex = 27;
-            this.lblNetworkUsageTitle.Text = "Network Speed";
+            this.lblNetworkUsageTitle.Text = "Network";
             this.lblNetworkUsageTitle.Visible = false;
             // 
             // lblNetworkUsageValue
             // 
             this.lblNetworkUsageValue.AutoSize = true;
-            this.lblNetworkUsageValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblNetworkUsageValue.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.lblNetworkUsageValue.ForeColor = System.Drawing.Color.FromArgb(138, 43, 226);
-            this.lblNetworkUsageValue.Location = new System.Drawing.Point(340, 205);
+            this.lblNetworkUsageValue.Location = new System.Drawing.Point(680, 268);
             this.lblNetworkUsageValue.Name = "lblNetworkUsageValue";
-            this.lblNetworkUsageValue.Size = new System.Drawing.Size(95, 25);
+            this.lblNetworkUsageValue.MaximumSize = new System.Drawing.Size(130, 0);
+            this.lblNetworkUsageValue.Size = new System.Drawing.Size(58, 13);
             this.lblNetworkUsageValue.TabIndex = 28;
             this.lblNetworkUsageValue.Text = "0 MB/s";
             this.lblNetworkUsageValue.Visible = false;
             // 
-            // networkUsageGraph
+            // networkUsageGauge
             // 
-            this.networkUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.networkUsageGraph.LineColor = System.Drawing.Color.FromArgb(138, 43, 226);
-            this.networkUsageGraph.Location = new System.Drawing.Point(340, 235);
-            this.networkUsageGraph.MaxDataPoints = 60;
-            this.networkUsageGraph.Name = "networkUsageGraph";
-            this.networkUsageGraph.Size = new System.Drawing.Size(300, 60);
-            this.networkUsageGraph.TabIndex = 29;
-            this.networkUsageGraph.Visible = false;
+            this.networkUsageGauge.BackColor = System.Drawing.Color.Transparent;
+            this.networkUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(20, 20, 20);
+            this.networkUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(138, 43, 226);
+            this.networkUsageGauge.Location = new System.Drawing.Point(660, 290);
+            this.networkUsageGauge.MinimumSize = new System.Drawing.Size(120, 120);
+            this.networkUsageGauge.Name = "networkUsageGauge";
+            this.networkUsageGauge.Size = new System.Drawing.Size(150, 150);
+            this.networkUsageGauge.TabIndex = 29;
+            this.networkUsageGauge.Visible = false;
             // 
             // lblSystemMemoryTitle
             // 
             this.lblSystemMemoryTitle.AutoSize = true;
             this.lblSystemMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 315);
+            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 180);
             this.lblSystemMemoryTitle.Name = "lblSystemMemoryTitle";
             this.lblSystemMemoryTitle.Size = new System.Drawing.Size(130, 21);
             this.lblSystemMemoryTitle.TabIndex = 6;
@@ -278,7 +284,7 @@
             // 
             this.lblSystemMemoryValue.AutoSize = true;
             this.lblSystemMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 340);
+            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 205);
             this.lblSystemMemoryValue.Name = "lblSystemMemoryValue";
             this.lblSystemMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblSystemMemoryValue.TabIndex = 7;
@@ -286,7 +292,7 @@
             // 
             // progressBarSystemMemory
             // 
-            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 360);
+            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 225);
             this.progressBarSystemMemory.Name = "progressBarSystemMemory";
             this.progressBarSystemMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarSystemMemory.TabIndex = 8;
@@ -295,7 +301,7 @@
             // 
             this.lblSystemMemoryPercent.AutoSize = true;
             this.lblSystemMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 362);
+            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 227);
             this.lblSystemMemoryPercent.Name = "lblSystemMemoryPercent";
             this.lblSystemMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblSystemMemoryPercent.TabIndex = 9;
@@ -305,7 +311,7 @@
             // 
             this.systemMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.systemMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 385);
+            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 250);
             this.systemMemoryGraph.MaxDataPoints = 60;
             this.systemMemoryGraph.Name = "systemMemoryGraph";
             this.systemMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -315,7 +321,7 @@
             // 
             this.lblGPUMemoryTitle.AutoSize = true;
             this.lblGPUMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 315);
+            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 180);
             this.lblGPUMemoryTitle.Name = "lblGPUMemoryTitle";
             this.lblGPUMemoryTitle.Size = new System.Drawing.Size(112, 21);
             this.lblGPUMemoryTitle.TabIndex = 11;
@@ -325,7 +331,7 @@
             // 
             this.lblGPUMemoryValue.AutoSize = true;
             this.lblGPUMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 340);
+            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 205);
             this.lblGPUMemoryValue.Name = "lblGPUMemoryValue";
             this.lblGPUMemoryValue.Size = new System.Drawing.Size(106, 15);
             this.lblGPUMemoryValue.TabIndex = 12;
@@ -333,7 +339,7 @@
             // 
             // progressBarGPUMemory
             // 
-            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 360);
+            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 225);
             this.progressBarGPUMemory.Name = "progressBarGPUMemory";
             this.progressBarGPUMemory.Size = new System.Drawing.Size(240, 20);
             this.progressBarGPUMemory.TabIndex = 13;
@@ -342,7 +348,7 @@
             // 
             this.lblGPUMemoryPercent.AutoSize = true;
             this.lblGPUMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 362);
+            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 227);
             this.lblGPUMemoryPercent.Name = "lblGPUMemoryPercent";
             this.lblGPUMemoryPercent.Size = new System.Drawing.Size(26, 15);
             this.lblGPUMemoryPercent.TabIndex = 14;
@@ -352,7 +358,7 @@
             // 
             this.gpuMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
             this.gpuMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 385);
+            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 250);
             this.gpuMemoryGraph.MaxDataPoints = 60;
             this.gpuMemoryGraph.Name = "gpuMemoryGraph";
             this.gpuMemoryGraph.Size = new System.Drawing.Size(300, 60);
@@ -367,7 +373,7 @@
             // 
             this.lblProcessesTitle.AutoSize = true;
             this.lblProcessesTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 465);
+            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 330);
             this.lblProcessesTitle.Name = "lblProcessesTitle";
             this.lblProcessesTitle.Size = new System.Drawing.Size(234, 21);
             this.lblProcessesTitle.TabIndex = 16;
@@ -380,7 +386,7 @@
             this.columnMemoryUsage,
             this.columnMemoryMB});
             this.listViewProcesses.FullRowSelect = true;
-            this.listViewProcesses.Location = new System.Drawing.Point(20, 495);
+            this.listViewProcesses.Location = new System.Drawing.Point(20, 360);
             this.listViewProcesses.Name = "listViewProcesses";
             this.listViewProcesses.OwnerDraw = true;
             this.listViewProcesses.Size = new System.Drawing.Size(620, 250);
@@ -411,11 +417,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(660, 765);
-            this.Controls.Add(this.networkUsageGraph);
+            this.ClientSize = new System.Drawing.Size(840, 630);
+            this.Controls.Add(this.networkUsageGauge);
             this.Controls.Add(this.lblNetworkUsageValue);
             this.Controls.Add(this.lblNetworkUsageTitle);
-            this.Controls.Add(this.diskUsageGraph);
+            this.Controls.Add(this.diskUsageGauge);
             this.Controls.Add(this.lblDiskUsageValue);
             this.Controls.Add(this.lblDiskUsageTitle);
             this.Controls.Add(this.listViewProcesses);
@@ -440,7 +446,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = true;
-            this.MinimumSize = new System.Drawing.Size(680, 650);
+            this.MinimumSize = new System.Drawing.Size(520, 700);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "System Monitor";
@@ -485,9 +491,9 @@
         private System.Windows.Forms.ToolStripMenuItem showNetworkMonitorToolStripMenuItem;
         private System.Windows.Forms.Label lblDiskUsageTitle;
         private System.Windows.Forms.Label lblDiskUsageValue;
-        private MemoryGraphControl diskUsageGraph;
+        private CircularGaugeControl diskUsageGauge;
         private System.Windows.Forms.Label lblNetworkUsageTitle;
         private System.Windows.Forms.Label lblNetworkUsageValue;
-        private MemoryGraphControl networkUsageGraph;
+        private CircularGaugeControl networkUsageGauge;
     }
 }
