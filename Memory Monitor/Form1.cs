@@ -187,9 +187,10 @@ namespace Memory_Monitor
             float targetValue = Math.Max(currentValue, peakValue);
             
             // Find the smallest scale that can accommodate the value with some headroom
+            // Scale up when value exceeds 95% of current scale
             foreach (float scale in SCALE_OPTIONS)
             {
-                if (targetValue <= scale * 0.8f) // Use 80% of scale as threshold
+                if (targetValue <= scale * 0.95f) // Use 95% of scale as threshold
                 {
                     return scale;
                 }
