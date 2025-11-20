@@ -25,6 +25,10 @@ namespace Memory_Monitor
         private float _diskPeakMbps = 0;
         private float _networkPeakMbps = 0;
 
+        // Track CPU and GPU values for tray icon
+        private int _lastCpuUsage = 0;
+        private int _lastGpuUsage = 0;
+
         // Windows API for memory info
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private class MEMORYSTATUSEX
@@ -55,7 +59,73 @@ namespace Memory_Monitor
             LoadSettings();
             InitializeMonitors();
             InitializeUI();
+            InitializeTrayIcon();
             ApplyTheme(); // Apply saved or default theme
+        }
+
+        private void InitializeTrayIcon()
+        {
+            // Use form icon if available, otherwise use system application icon
+            if (this.Icon != null)
+            {
+                notifyIcon.Icon = this.Icon;
+            }
+            else
+            {
+                notifyIcon.Icon = SystemIcons.Application;
+            }
+            
+            // Set initial tray icon text
+            UpdateTrayIconText();
+            
+            // Set up form to minimize to tray
+            this.Resize += Form1_ResizeMinimizeToTray;
+        }
+
+        private void Form1_ResizeMinimizeToTray(object? sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+                this.ShowInTaskbar = false;
+            }
+        }
+
+        private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
+        {
+            ShowForm();
+        }
+
+        private void ShowToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            ShowForm();
+        }
+
+        private void ExitToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void ShowForm()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            this.Activate();
+        }
+
+        private void UpdateTrayIconText()
+        {
+            // Format: "CPU: 45 GPU: 32"
+            string trayText = $"CPU: {_lastCpuUsage} GPU: {_lastGpuUsage}";
+            
+            // Tooltip text is limited to 63 characters
+            if (trayText.Length > 63)
+            {
+                trayText = trayText.Substring(0, 63);
+            }
+            
+            notifyIcon.Text = trayText;
         }
 
         private void LoadSettings()
@@ -397,17 +467,20 @@ namespace Memory_Monitor
                     float cpuUsage = _cpuMonitor.Update();
                     int cpuPercent = (int)Math.Round(cpuUsage);
 
+                    _lastCpuUsage = cpuPercent;
                     lblCPUUsageValue.Text = $"{cpuPercent}%";
                     cpuUsageGraph.AddDataPoint(cpuUsage);
                 }
                 else
                 {
+                    _lastCpuUsage = 0;
                     lblCPUUsageValue.Text = "N/A";
                     cpuUsageGraph.AddDataPoint(0);
                 }
             }
             catch (Exception ex)
             {
+                _lastCpuUsage = 0;
                 lblCPUUsageValue.Text = "Error";
                 Debug.WriteLine($"Error in UpdateCPUUsage: {ex.Message}");
             }
@@ -422,17 +495,23 @@ namespace Memory_Monitor
                     float gpuUsage = _gpuMonitor.UpdateUsage();
                     int gpuPercent = (int)Math.Round(gpuUsage);
 
+                    _lastGpuUsage = gpuPercent;
                     lblGPUUsageValue.Text = $"{gpuPercent}%";
                     gpuUsageGraph.AddDataPoint(gpuUsage);
                 }
                 else
                 {
+                    _lastGpuUsage = 0;
                     lblGPUUsageValue.Text = "N/A";
                     gpuUsageGraph.AddDataPoint(0);
                 }
+                
+                // Update tray icon text after GPU update (called after CPU)
+                UpdateTrayIconText();
             }
             catch (Exception ex)
             {
+                _lastGpuUsage = 0;
                 lblGPUUsageValue.Text = "Error";
                 Debug.WriteLine($"Error in UpdateGPUUsage: {ex.Message}");
             }
