@@ -1,0 +1,1229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <ComponentGroup Id="PublishedFileComponents" Directory="INSTALLFOLDER">
+      <Component Id="Comp_1" Guid="3A0CF652-D295-A703-86F3-1099CF367B1B">
+        <File Id="File_1" 
+              Name="Accessibility.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Accessibility.dll" />
+      </Component>
+      <Component Id="Comp_2" Guid="13A0FB53-9B2A-EB05-A2BB-36DD5A0133D9">
+        <File Id="File_2" 
+              Name="clretwrc.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\clretwrc.dll" />
+      </Component>
+      <Component Id="Comp_3" Guid="1EB0C739-9F0C-9DF4-18C0-B93BC27FD2D8">
+        <File Id="File_3" 
+              Name="clrgc.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\clrgc.dll" />
+      </Component>
+      <Component Id="Comp_4" Guid="AE4F696F-15E5-C51D-313A-70EA37AAE548">
+        <File Id="File_4" 
+              Name="clrjit.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\clrjit.dll" />
+      </Component>
+      <Component Id="Comp_5" Guid="5D57E7CF-8F1C-8201-426D-BEE4573529D8">
+        <File Id="File_5" 
+              Name="coreclr.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\coreclr.dll" />
+      </Component>
+      <Component Id="Comp_6" Guid="86090D5E-4A26-E471-2E4E-446EB6B83673">
+        <File Id="File_6" 
+              Name="createdump.exe"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\createdump.exe" />
+      </Component>
+      <Component Id="Comp_7" Guid="2EFB6C78-ADAF-AC95-0B32-8680E1F90AA7">
+        <File Id="File_7" 
+              Name="D3DCompiler_47_cor3.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\D3DCompiler_47_cor3.dll" />
+      </Component>
+      <Component Id="Comp_8" Guid="361C9C94-8D81-073F-BC74-B018483B9F65">
+        <File Id="File_8" 
+              Name="DirectWriteForwarder.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\DirectWriteForwarder.dll" />
+      </Component>
+      <Component Id="Comp_9" Guid="A0D526DC-6F43-341C-B85E-D209297B0C5E">
+        <File Id="File_9" 
+              Name="hostfxr.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\hostfxr.dll" />
+      </Component>
+      <Component Id="Comp_10" Guid="FCB7F168-49AE-EC6D-1C5B-B97BA4A392E4">
+        <File Id="File_10" 
+              Name="hostpolicy.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\hostpolicy.dll" />
+      </Component>
+      <Component Id="Comp_11" Guid="178AC87F-77D1-458D-FBC5-4D86A53910D6">
+        <File Id="File_11" 
+              Name="Memory Monitor.deps.json"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.deps.json" />
+      </Component>
+      <Component Id="Comp_12" Guid="62010170-094B-D042-920F-C2C9A99CEAE7">
+        <File Id="File_12" 
+              Name="Memory Monitor.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.dll" />
+      </Component>
+      <!-- Main executable -->
+      <Component Id="Comp_13" Guid="218F24EA-3998-6D81-1EF0-B00FC27A9FD3">
+        <File Id="File_13" 
+              Name="Memory Monitor.exe"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.exe" 
+              KeyPath="yes" />
+      </Component>
+      <Component Id="Comp_14" Guid="93B0D21C-BC4A-F1B4-92A5-0454F96B4235">
+        <File Id="File_14" 
+              Name="Memory Monitor.pdb"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.pdb" />
+      </Component>
+      <Component Id="Comp_15" Guid="DE468B01-A924-0EB9-35DA-B853233C9B9A">
+        <File Id="File_15" 
+              Name="Memory Monitor.runtimeconfig.json"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.runtimeconfig.json" />
+      </Component>
+      <Component Id="Comp_16" Guid="F068E628-0BEF-398E-9287-413742B36F56">
+        <File Id="File_16" 
+              Name="Microsoft.CSharp.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.CSharp.dll" />
+      </Component>
+      <Component Id="Comp_17" Guid="8EFB2042-99AC-4BD1-B8C1-3667172593A6">
+        <File Id="File_17" 
+              Name="Microsoft.DiaSymReader.Native.amd64.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.DiaSymReader.Native.amd64.dll" />
+      </Component>
+      <Component Id="Comp_18" Guid="DC015E8B-CC0B-0359-9CB1-7F70486A7BC3">
+        <File Id="File_18" 
+              Name="Microsoft.VisualBasic.Core.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.VisualBasic.Core.dll" />
+      </Component>
+      <Component Id="Comp_19" Guid="725543D9-E2A6-6809-A3AA-264B1765EDD9">
+        <File Id="File_19" 
+              Name="Microsoft.VisualBasic.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.VisualBasic.dll" />
+      </Component>
+      <Component Id="Comp_20" Guid="2C336A64-2AFF-1343-E2F3-5CDE2403873A">
+        <File Id="File_20" 
+              Name="Microsoft.VisualBasic.Forms.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.VisualBasic.Forms.dll" />
+      </Component>
+      <Component Id="Comp_21" Guid="34B82EE5-B171-1E4B-FFBE-1D18FD6EB70D">
+        <File Id="File_21" 
+              Name="Microsoft.Win32.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.Win32.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_22" Guid="7FEC6609-B1AA-74A1-F2E5-548A18887223">
+        <File Id="File_22" 
+              Name="Microsoft.Win32.Registry.AccessControl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.Win32.Registry.AccessControl.dll" />
+      </Component>
+      <Component Id="Comp_23" Guid="76C5702F-C8BA-27FA-E15A-D8DF716A1396">
+        <File Id="File_23" 
+              Name="Microsoft.Win32.Registry.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.Win32.Registry.dll" />
+      </Component>
+      <Component Id="Comp_24" Guid="FF96049D-FB91-2A87-F034-BFE2D7F4E951">
+        <File Id="File_24" 
+              Name="Microsoft.Win32.SystemEvents.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.Win32.SystemEvents.dll" />
+      </Component>
+      <Component Id="Comp_25" Guid="C579224A-EFBF-63A1-73B2-981AF0883B78">
+        <File Id="File_25" 
+              Name="mscordaccore.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\mscordaccore.dll" />
+      </Component>
+      <Component Id="Comp_26" Guid="121A69CE-12F6-0C8C-D952-B1CBBD8020F4">
+        <File Id="File_26" 
+              Name="mscordaccore_amd64_amd64_8.0.2225.52707.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\mscordaccore_amd64_amd64_8.0.2225.52707.dll" />
+      </Component>
+      <Component Id="Comp_27" Guid="5DA2FFA6-36DE-0380-241F-4F6301C84B61">
+        <File Id="File_27" 
+              Name="mscordbi.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\mscordbi.dll" />
+      </Component>
+      <Component Id="Comp_28" Guid="4A7955D0-E17D-532B-3F81-A3E60F41A518">
+        <File Id="File_28" 
+              Name="mscorlib.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\mscorlib.dll" />
+      </Component>
+      <Component Id="Comp_29" Guid="CE1DA11F-9E84-A7E3-5B49-473CA9345D72">
+        <File Id="File_29" 
+              Name="mscorrc.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\mscorrc.dll" />
+      </Component>
+      <Component Id="Comp_30" Guid="61E39658-3760-60C1-90F9-62DD7A83EE02">
+        <File Id="File_30" 
+              Name="msquic.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\msquic.dll" />
+      </Component>
+      <Component Id="Comp_31" Guid="C01E0D6A-704C-1135-A5C3-9E40E33E14D7">
+        <File Id="File_31" 
+              Name="netstandard.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\netstandard.dll" />
+      </Component>
+      <Component Id="Comp_32" Guid="A39EF855-557D-9F17-F492-B9C602A49C1B">
+        <File Id="File_32" 
+              Name="PenImc_cor3.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PenImc_cor3.dll" />
+      </Component>
+      <Component Id="Comp_33" Guid="BDA67C85-D6C2-94EB-D385-208CD8DC43DD">
+        <File Id="File_33" 
+              Name="PresentationCore.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationCore.dll" />
+      </Component>
+      <Component Id="Comp_34" Guid="E0A0C5AA-3FFA-3716-A240-2017F424AC73">
+        <File Id="File_34" 
+              Name="PresentationFramework-SystemCore.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework-SystemCore.dll" />
+      </Component>
+      <Component Id="Comp_35" Guid="FF25D702-3840-4EAB-FF4F-661504E54329">
+        <File Id="File_35" 
+              Name="PresentationFramework-SystemData.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework-SystemData.dll" />
+      </Component>
+      <Component Id="Comp_36" Guid="EC146B98-4E1F-C272-000B-F3EE2B31D4BC">
+        <File Id="File_36" 
+              Name="PresentationFramework-SystemDrawing.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework-SystemDrawing.dll" />
+      </Component>
+      <Component Id="Comp_37" Guid="B384AC1E-6C6B-60B3-5919-4D30238D996F">
+        <File Id="File_37" 
+              Name="PresentationFramework-SystemXml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework-SystemXml.dll" />
+      </Component>
+      <Component Id="Comp_38" Guid="4823134C-F163-2A2A-37CA-657F4A0CA657">
+        <File Id="File_38" 
+              Name="PresentationFramework-SystemXmlLinq.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework-SystemXmlLinq.dll" />
+      </Component>
+      <Component Id="Comp_39" Guid="169FE38E-FA37-C24C-58AC-9E00A3660D04">
+        <File Id="File_39" 
+              Name="PresentationFramework.Aero.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.Aero.dll" />
+      </Component>
+      <Component Id="Comp_40" Guid="91BE8CFC-6948-EAD0-665C-E9B7745B26E7">
+        <File Id="File_40" 
+              Name="PresentationFramework.Aero2.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.Aero2.dll" />
+      </Component>
+      <Component Id="Comp_41" Guid="FB56328A-5A65-E706-8C9E-A56AEEDAFC62">
+        <File Id="File_41" 
+              Name="PresentationFramework.AeroLite.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.AeroLite.dll" />
+      </Component>
+      <Component Id="Comp_42" Guid="69F217D1-F545-5445-E952-B7E8DA8CAA3E">
+        <File Id="File_42" 
+              Name="PresentationFramework.Classic.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.Classic.dll" />
+      </Component>
+      <Component Id="Comp_43" Guid="6305683D-6A35-E907-C3A0-F47ECA3D4E6A">
+        <File Id="File_43" 
+              Name="PresentationFramework.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.dll" />
+      </Component>
+      <Component Id="Comp_44" Guid="9CA964F9-9FC0-3F92-D8B7-DAED0A1A141D">
+        <File Id="File_44" 
+              Name="PresentationFramework.Luna.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.Luna.dll" />
+      </Component>
+      <Component Id="Comp_45" Guid="50F0F294-9987-7299-FD4F-7EAB7BB4013D">
+        <File Id="File_45" 
+              Name="PresentationFramework.Royale.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationFramework.Royale.dll" />
+      </Component>
+      <Component Id="Comp_46" Guid="6EF292ED-9711-62CD-7D1F-39BD0899C2F8">
+        <File Id="File_46" 
+              Name="PresentationNative_cor3.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationNative_cor3.dll" />
+      </Component>
+      <Component Id="Comp_47" Guid="B0EA8993-52C9-835E-CC42-325BA0743D55">
+        <File Id="File_47" 
+              Name="PresentationUI.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\PresentationUI.dll" />
+      </Component>
+      <Component Id="Comp_48" Guid="4234A7EA-FF0B-80DC-699D-99A8A31012A0">
+        <File Id="File_48" 
+              Name="ReachFramework.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\ReachFramework.dll" />
+      </Component>
+      <Component Id="Comp_49" Guid="C68E171A-6EC9-D237-1260-DED983103B9B">
+        <File Id="File_49" 
+              Name="System.AppContext.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.AppContext.dll" />
+      </Component>
+      <Component Id="Comp_50" Guid="6845B6B9-5500-294C-45B8-84C31FC7DC32">
+        <File Id="File_50" 
+              Name="System.Buffers.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Buffers.dll" />
+      </Component>
+      <Component Id="Comp_51" Guid="F61BD74B-272F-B095-0AEC-30E2AE2C0357">
+        <File Id="File_51" 
+              Name="System.CodeDom.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.CodeDom.dll" />
+      </Component>
+      <Component Id="Comp_52" Guid="D1B96BD6-17F7-2AAB-3534-01C3E9657178">
+        <File Id="File_52" 
+              Name="System.Collections.Concurrent.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Collections.Concurrent.dll" />
+      </Component>
+      <Component Id="Comp_53" Guid="7DD14246-04BF-B595-8C41-455251F346D0">
+        <File Id="File_53" 
+              Name="System.Collections.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Collections.dll" />
+      </Component>
+      <Component Id="Comp_54" Guid="5EC027AA-094A-4B01-9A07-E882D5C57735">
+        <File Id="File_54" 
+              Name="System.Collections.Immutable.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Collections.Immutable.dll" />
+      </Component>
+      <Component Id="Comp_55" Guid="29DDD986-09A1-C826-D1FD-BC70C059A9CA">
+        <File Id="File_55" 
+              Name="System.Collections.NonGeneric.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Collections.NonGeneric.dll" />
+      </Component>
+      <Component Id="Comp_56" Guid="04DD2D49-35DB-53D3-F274-D2485FFE7AAC">
+        <File Id="File_56" 
+              Name="System.Collections.Specialized.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Collections.Specialized.dll" />
+      </Component>
+      <Component Id="Comp_57" Guid="028911FE-16F5-4E26-E1C8-35243A18715D">
+        <File Id="File_57" 
+              Name="System.ComponentModel.Annotations.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.Annotations.dll" />
+      </Component>
+      <Component Id="Comp_58" Guid="41C2BF8E-3323-0E3F-20BB-2BE47CD4D424">
+        <File Id="File_58" 
+              Name="System.ComponentModel.DataAnnotations.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.DataAnnotations.dll" />
+      </Component>
+      <Component Id="Comp_59" Guid="299263B8-4F84-B7DB-E71F-01C0C212E937">
+        <File Id="File_59" 
+              Name="System.ComponentModel.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.dll" />
+      </Component>
+      <Component Id="Comp_60" Guid="1DB10BB3-ACF0-01CF-8996-AED4BED447B3">
+        <File Id="File_60" 
+              Name="System.ComponentModel.EventBasedAsync.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.EventBasedAsync.dll" />
+      </Component>
+      <Component Id="Comp_61" Guid="5E108BB2-37FC-41B1-008A-F64DBBB774DB">
+        <File Id="File_61" 
+              Name="System.ComponentModel.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_62" Guid="7674BD92-3884-C0A4-2A97-5B6871829F0D">
+        <File Id="File_62" 
+              Name="System.ComponentModel.TypeConverter.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ComponentModel.TypeConverter.dll" />
+      </Component>
+      <Component Id="Comp_63" Guid="FCB5D47F-D755-C5B5-147C-C145C415505B">
+        <File Id="File_63" 
+              Name="System.Configuration.ConfigurationManager.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Configuration.ConfigurationManager.dll" />
+      </Component>
+      <Component Id="Comp_64" Guid="59BE2069-5C2B-0B3A-7BEB-B33D8BE13F11">
+        <File Id="File_64" 
+              Name="System.Configuration.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Configuration.dll" />
+      </Component>
+      <Component Id="Comp_65" Guid="60DD2E24-DC3E-3974-9510-8829BD1CF4F6">
+        <File Id="File_65" 
+              Name="System.Console.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Console.dll" />
+      </Component>
+      <Component Id="Comp_66" Guid="DA943FFE-32ED-E1AD-8A75-4C5E0638E125">
+        <File Id="File_66" 
+              Name="System.Core.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Core.dll" />
+      </Component>
+      <Component Id="Comp_67" Guid="0A4F6B5D-B43B-0FCF-BBF5-7C2506AD4C09">
+        <File Id="File_67" 
+              Name="System.Data.Common.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Data.Common.dll" />
+      </Component>
+      <Component Id="Comp_68" Guid="C4453222-67BE-F4E5-B638-EBA3BED22A6F">
+        <File Id="File_68" 
+              Name="System.Data.DataSetExtensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Data.DataSetExtensions.dll" />
+      </Component>
+      <Component Id="Comp_69" Guid="33180942-7AD6-910B-181D-71713E479FBB">
+        <File Id="File_69" 
+              Name="System.Data.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Data.dll" />
+      </Component>
+      <Component Id="Comp_70" Guid="DD8F1F68-8796-FF66-0092-E29611CF9DCB">
+        <File Id="File_70" 
+              Name="System.Design.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Design.dll" />
+      </Component>
+      <Component Id="Comp_71" Guid="A4EF1D8E-BB4B-4159-E0E7-C1EC5A07311E">
+        <File Id="File_71" 
+              Name="System.Diagnostics.Contracts.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.Contracts.dll" />
+      </Component>
+      <Component Id="Comp_72" Guid="BAC77FD2-8E0D-6D6A-053B-53EC7E0F92E5">
+        <File Id="File_72" 
+              Name="System.Diagnostics.Debug.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.Debug.dll" />
+      </Component>
+      <Component Id="Comp_73" Guid="FFA604EE-F6FB-1D07-A1FC-89C543B7DAFC">
+        <File Id="File_73" 
+              Name="System.Diagnostics.DiagnosticSource.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.DiagnosticSource.dll" />
+      </Component>
+      <Component Id="Comp_74" Guid="D3160FB4-B26D-06CA-3E60-E3637AC1A2C2">
+        <File Id="File_74" 
+              Name="System.Diagnostics.EventLog.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.EventLog.dll" />
+      </Component>
+      <Component Id="Comp_75" Guid="B9BF9AE8-917B-4B4B-C54C-085E1EAC142E">
+        <File Id="File_75" 
+              Name="System.Diagnostics.EventLog.Messages.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.EventLog.Messages.dll" />
+      </Component>
+      <Component Id="Comp_76" Guid="B996D1EC-5725-D82B-1955-374EF1DA5FF6">
+        <File Id="File_76" 
+              Name="System.Diagnostics.FileVersionInfo.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.FileVersionInfo.dll" />
+      </Component>
+      <Component Id="Comp_77" Guid="B87AA9E5-C459-DE43-78BD-021BB40C121F">
+        <File Id="File_77" 
+              Name="System.Diagnostics.PerformanceCounter.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.PerformanceCounter.dll" />
+      </Component>
+      <Component Id="Comp_78" Guid="5DA0F71D-2C02-5523-BE27-CF43BA93BFF7">
+        <File Id="File_78" 
+              Name="System.Diagnostics.Process.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.Process.dll" />
+      </Component>
+      <Component Id="Comp_79" Guid="CB08FEA2-EDD9-6F2A-721F-169FC597F754">
+        <File Id="File_79" 
+              Name="System.Diagnostics.StackTrace.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.StackTrace.dll" />
+      </Component>
+      <Component Id="Comp_80" Guid="45AF3991-F6E1-60E3-83BF-3550364A32FE">
+        <File Id="File_80" 
+              Name="System.Diagnostics.TextWriterTraceListener.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.TextWriterTraceListener.dll" />
+      </Component>
+      <Component Id="Comp_81" Guid="A361FE5A-C571-0BDC-31D0-0F64636398BF">
+        <File Id="File_81" 
+              Name="System.Diagnostics.Tools.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.Tools.dll" />
+      </Component>
+      <Component Id="Comp_82" Guid="B04CD64E-6FA0-742C-EC96-EC07C89053EC">
+        <File Id="File_82" 
+              Name="System.Diagnostics.TraceSource.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.TraceSource.dll" />
+      </Component>
+      <Component Id="Comp_83" Guid="B7D17007-513D-28DB-656A-DC7983A0311A">
+        <File Id="File_83" 
+              Name="System.Diagnostics.Tracing.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Diagnostics.Tracing.dll" />
+      </Component>
+      <Component Id="Comp_84" Guid="7543B63C-3D28-9D5A-07A3-2C3B21593F44">
+        <File Id="File_84" 
+              Name="System.DirectoryServices.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.DirectoryServices.dll" />
+      </Component>
+      <Component Id="Comp_85" Guid="31BEFD19-EEC0-0F30-57D3-B329586BE556">
+        <File Id="File_85" 
+              Name="System.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.dll" />
+      </Component>
+      <Component Id="Comp_86" Guid="935BE349-A6D4-500D-2382-3CC74AA47483">
+        <File Id="File_86" 
+              Name="System.Drawing.Common.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Drawing.Common.dll" />
+      </Component>
+      <Component Id="Comp_87" Guid="751CACEB-5239-2325-35EB-FDF6891503E3">
+        <File Id="File_87" 
+              Name="System.Drawing.Design.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Drawing.Design.dll" />
+      </Component>
+      <Component Id="Comp_88" Guid="1F191269-73C6-9B7E-F19F-AFAD421FE490">
+        <File Id="File_88" 
+              Name="System.Drawing.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Drawing.dll" />
+      </Component>
+      <Component Id="Comp_89" Guid="91CBA24A-9B5D-BE4E-654A-E92B24CC0997">
+        <File Id="File_89" 
+              Name="System.Drawing.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Drawing.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_90" Guid="A20E9A57-C189-B4E1-49A3-3BFEC8425AD0">
+        <File Id="File_90" 
+              Name="System.Dynamic.Runtime.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Dynamic.Runtime.dll" />
+      </Component>
+      <Component Id="Comp_91" Guid="E611ACF4-C06B-FD8A-3C37-23D35F71BAC3">
+        <File Id="File_91" 
+              Name="System.Formats.Asn1.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Formats.Asn1.dll" />
+      </Component>
+      <Component Id="Comp_92" Guid="FE05D658-6EAA-14D2-D2C7-9B104CCC3AD9">
+        <File Id="File_92" 
+              Name="System.Formats.Tar.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Formats.Tar.dll" />
+      </Component>
+      <Component Id="Comp_93" Guid="4AA1CB20-B703-D232-2ED3-D59446816CF4">
+        <File Id="File_93" 
+              Name="System.Globalization.Calendars.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Globalization.Calendars.dll" />
+      </Component>
+      <Component Id="Comp_94" Guid="DC94E384-F09B-C6B7-17A0-549B38DA32BE">
+        <File Id="File_94" 
+              Name="System.Globalization.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Globalization.dll" />
+      </Component>
+      <Component Id="Comp_95" Guid="452BC46A-33AD-083C-9B42-6802B15FF73A">
+        <File Id="File_95" 
+              Name="System.Globalization.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Globalization.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_96" Guid="4784B5E0-223B-02D5-F709-24621FFC3EA7">
+        <File Id="File_96" 
+              Name="System.IO.Compression.Brotli.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Compression.Brotli.dll" />
+      </Component>
+      <Component Id="Comp_97" Guid="E57EE09E-E666-3D65-1733-69F0B94BB842">
+        <File Id="File_97" 
+              Name="System.IO.Compression.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Compression.dll" />
+      </Component>
+      <Component Id="Comp_98" Guid="00B1D377-A052-712C-3715-A12FA7D6670D">
+        <File Id="File_98" 
+              Name="System.IO.Compression.FileSystem.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Compression.FileSystem.dll" />
+      </Component>
+      <Component Id="Comp_99" Guid="9F9E3A66-6238-70CF-0096-0DB1147D54F5">
+        <File Id="File_99" 
+              Name="System.IO.Compression.Native.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Compression.Native.dll" />
+      </Component>
+      <Component Id="Comp_100" Guid="78871D20-A913-B409-2AE0-C24941CFB443">
+        <File Id="File_100" 
+              Name="System.IO.Compression.ZipFile.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Compression.ZipFile.dll" />
+      </Component>
+      <Component Id="Comp_101" Guid="8EA75F5E-71D2-3F26-6EA4-C083E7954A4C">
+        <File Id="File_101" 
+              Name="System.IO.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.dll" />
+      </Component>
+      <Component Id="Comp_102" Guid="DD691E29-B412-530F-A75F-02A28BDD346E">
+        <File Id="File_102" 
+              Name="System.IO.FileSystem.AccessControl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.FileSystem.AccessControl.dll" />
+      </Component>
+      <Component Id="Comp_103" Guid="42DA2CF0-C45F-B106-0538-A202C446D771">
+        <File Id="File_103" 
+              Name="System.IO.FileSystem.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.FileSystem.dll" />
+      </Component>
+      <Component Id="Comp_104" Guid="D711575D-CAA5-A674-6DAF-992373531111">
+        <File Id="File_104" 
+              Name="System.IO.FileSystem.DriveInfo.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.FileSystem.DriveInfo.dll" />
+      </Component>
+      <Component Id="Comp_105" Guid="75170876-FBE2-53EC-EBBC-5FF25672695B">
+        <File Id="File_105" 
+              Name="System.IO.FileSystem.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.FileSystem.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_106" Guid="A04C08D8-3CF3-B525-43C9-DE4E732C58FF">
+        <File Id="File_106" 
+              Name="System.IO.FileSystem.Watcher.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.FileSystem.Watcher.dll" />
+      </Component>
+      <Component Id="Comp_107" Guid="A793750E-C968-B29A-4A0E-F2C1F7161C08">
+        <File Id="File_107" 
+              Name="System.IO.IsolatedStorage.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.IsolatedStorage.dll" />
+      </Component>
+      <Component Id="Comp_108" Guid="C80836E4-FCDE-E510-CF79-4ECEFF3291D3">
+        <File Id="File_108" 
+              Name="System.IO.MemoryMappedFiles.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.MemoryMappedFiles.dll" />
+      </Component>
+      <Component Id="Comp_109" Guid="00A7757C-79E9-FF91-6819-42D79C98C7AF">
+        <File Id="File_109" 
+              Name="System.IO.Packaging.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Packaging.dll" />
+      </Component>
+      <Component Id="Comp_110" Guid="03B5D861-BFD4-880A-F9A8-95DE38B0ABE6">
+        <File Id="File_110" 
+              Name="System.IO.Pipes.AccessControl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Pipes.AccessControl.dll" />
+      </Component>
+      <Component Id="Comp_111" Guid="C58E6EE2-E559-5D78-390D-17FC482EF44E">
+        <File Id="File_111" 
+              Name="System.IO.Pipes.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.Pipes.dll" />
+      </Component>
+      <Component Id="Comp_112" Guid="8BD3AED5-03D8-E16D-F765-EB786116180F">
+        <File Id="File_112" 
+              Name="System.IO.UnmanagedMemoryStream.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.IO.UnmanagedMemoryStream.dll" />
+      </Component>
+      <Component Id="Comp_113" Guid="719B431A-AA5C-207E-92B4-2FA7902F080D">
+        <File Id="File_113" 
+              Name="System.Linq.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Linq.dll" />
+      </Component>
+      <Component Id="Comp_114" Guid="F38A961F-BF78-EC30-650B-C78E0CF85EB5">
+        <File Id="File_114" 
+              Name="System.Linq.Expressions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Linq.Expressions.dll" />
+      </Component>
+      <Component Id="Comp_115" Guid="ADDF1B0A-4D5A-06AF-2034-10F5B0140474">
+        <File Id="File_115" 
+              Name="System.Linq.Parallel.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Linq.Parallel.dll" />
+      </Component>
+      <Component Id="Comp_116" Guid="888BD1FF-5179-D836-E1BF-4FC146FEC191">
+        <File Id="File_116" 
+              Name="System.Linq.Queryable.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Linq.Queryable.dll" />
+      </Component>
+      <Component Id="Comp_117" Guid="7512CF68-D395-4D29-7EE3-6466A4082B48">
+        <File Id="File_117" 
+              Name="System.Management.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Management.dll" />
+      </Component>
+      <Component Id="Comp_118" Guid="53734835-CC99-DF11-F4E0-8BA6839B2A1F">
+        <File Id="File_118" 
+              Name="System.Memory.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Memory.dll" />
+      </Component>
+      <Component Id="Comp_119" Guid="FA8D3F41-A666-854D-9301-16F73746DF36">
+        <File Id="File_119" 
+              Name="System.Net.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.dll" />
+      </Component>
+      <Component Id="Comp_120" Guid="F2D2096F-40C1-9F2C-FE17-DF3E1FDA55D5">
+        <File Id="File_120" 
+              Name="System.Net.Http.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Http.dll" />
+      </Component>
+      <Component Id="Comp_121" Guid="9C1A2F40-4F7F-801A-020B-54A3DA9A121A">
+        <File Id="File_121" 
+              Name="System.Net.Http.Json.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Http.Json.dll" />
+      </Component>
+      <Component Id="Comp_122" Guid="08FA2B08-0608-8D3B-1C44-719D73F6761F">
+        <File Id="File_122" 
+              Name="System.Net.HttpListener.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.HttpListener.dll" />
+      </Component>
+      <Component Id="Comp_123" Guid="575C8E37-7C1B-2573-98A9-257251F91AD0">
+        <File Id="File_123" 
+              Name="System.Net.Mail.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Mail.dll" />
+      </Component>
+      <Component Id="Comp_124" Guid="F50C4259-7A3C-320A-F46A-F11A0C724445">
+        <File Id="File_124" 
+              Name="System.Net.NameResolution.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.NameResolution.dll" />
+      </Component>
+      <Component Id="Comp_125" Guid="68699C59-B1D3-2D34-2675-A57AFDFB16F9">
+        <File Id="File_125" 
+              Name="System.Net.NetworkInformation.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.NetworkInformation.dll" />
+      </Component>
+      <Component Id="Comp_126" Guid="E37B2963-FF33-7A9E-3C36-C2A5136B70B8">
+        <File Id="File_126" 
+              Name="System.Net.Ping.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Ping.dll" />
+      </Component>
+      <Component Id="Comp_127" Guid="49F88DF7-EE4A-F73E-CDEA-474D8F3A75CB">
+        <File Id="File_127" 
+              Name="System.Net.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_128" Guid="29FC66CD-A7FC-7CF3-A8D5-B4E232100F73">
+        <File Id="File_128" 
+              Name="System.Net.Quic.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Quic.dll" />
+      </Component>
+      <Component Id="Comp_129" Guid="A2F6A4FF-C20C-1CE7-8575-4FD567355E74">
+        <File Id="File_129" 
+              Name="System.Net.Requests.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Requests.dll" />
+      </Component>
+      <Component Id="Comp_130" Guid="68013136-B8B2-256A-EFF6-E24D5C0E26D6">
+        <File Id="File_130" 
+              Name="System.Net.Security.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Security.dll" />
+      </Component>
+      <Component Id="Comp_131" Guid="68992DF1-BDED-4502-A839-E35392877CC9">
+        <File Id="File_131" 
+              Name="System.Net.ServicePoint.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.ServicePoint.dll" />
+      </Component>
+      <Component Id="Comp_132" Guid="D6C51710-6448-F8DE-0264-1498D89FCB89">
+        <File Id="File_132" 
+              Name="System.Net.Sockets.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.Sockets.dll" />
+      </Component>
+      <Component Id="Comp_133" Guid="AFAE804C-508D-6EAF-F9AB-858EEFB82160">
+        <File Id="File_133" 
+              Name="System.Net.WebClient.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.WebClient.dll" />
+      </Component>
+      <Component Id="Comp_134" Guid="3C68C3CB-1DCB-A1AE-BF2A-453137944A8D">
+        <File Id="File_134" 
+              Name="System.Net.WebHeaderCollection.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.WebHeaderCollection.dll" />
+      </Component>
+      <Component Id="Comp_135" Guid="E9C822F2-1C18-5403-FD90-5480448306AC">
+        <File Id="File_135" 
+              Name="System.Net.WebProxy.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.WebProxy.dll" />
+      </Component>
+      <Component Id="Comp_136" Guid="B2C472AC-79C3-0752-0D71-F09C9C35A61E">
+        <File Id="File_136" 
+              Name="System.Net.WebSockets.Client.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.WebSockets.Client.dll" />
+      </Component>
+      <Component Id="Comp_137" Guid="13B567AB-90DB-BC00-EFC0-4F4B4B18F3F1">
+        <File Id="File_137" 
+              Name="System.Net.WebSockets.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Net.WebSockets.dll" />
+      </Component>
+      <Component Id="Comp_138" Guid="6354D1A3-0841-1D57-8345-576526CA5815">
+        <File Id="File_138" 
+              Name="System.Numerics.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Numerics.dll" />
+      </Component>
+      <Component Id="Comp_139" Guid="E74FD78B-8B9C-24BF-2C3C-A2FD1428F345">
+        <File Id="File_139" 
+              Name="System.Numerics.Vectors.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Numerics.Vectors.dll" />
+      </Component>
+      <Component Id="Comp_140" Guid="A84B490E-8EC5-F273-D029-19A3F68CEE7A">
+        <File Id="File_140" 
+              Name="System.ObjectModel.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ObjectModel.dll" />
+      </Component>
+      <Component Id="Comp_141" Guid="2A77AE79-5564-06E6-B7F0-516F2A26613B">
+        <File Id="File_141" 
+              Name="System.Printing.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Printing.dll" />
+      </Component>
+      <Component Id="Comp_142" Guid="BB39D5FB-4D79-3657-4F31-3609545E1C15">
+        <File Id="File_142" 
+              Name="System.Private.CoreLib.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Private.CoreLib.dll" />
+      </Component>
+      <Component Id="Comp_143" Guid="2818CAA0-5E65-19D2-5870-289748D1B2C5">
+        <File Id="File_143" 
+              Name="System.Private.DataContractSerialization.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Private.DataContractSerialization.dll" />
+      </Component>
+      <Component Id="Comp_144" Guid="50D998F4-AA0E-A464-3C80-D6B88A21E1B1">
+        <File Id="File_144" 
+              Name="System.Private.Uri.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Private.Uri.dll" />
+      </Component>
+      <Component Id="Comp_145" Guid="EAFEB9B3-A0EB-D155-6296-4BFD65D0F44E">
+        <File Id="File_145" 
+              Name="System.Private.Xml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Private.Xml.dll" />
+      </Component>
+      <Component Id="Comp_146" Guid="32C9FFF3-DEC1-6929-B824-CA184ECD69C5">
+        <File Id="File_146" 
+              Name="System.Private.Xml.Linq.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Private.Xml.Linq.dll" />
+      </Component>
+      <Component Id="Comp_147" Guid="0396C324-A18A-C876-4CFC-6BBE0F9BF0D4">
+        <File Id="File_147" 
+              Name="System.Reflection.DispatchProxy.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.DispatchProxy.dll" />
+      </Component>
+      <Component Id="Comp_148" Guid="4565B597-409E-953F-CEA0-760D252B3076">
+        <File Id="File_148" 
+              Name="System.Reflection.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.dll" />
+      </Component>
+      <Component Id="Comp_149" Guid="A112D884-A421-2A71-0F3D-F7DA247E3B1A">
+        <File Id="File_149" 
+              Name="System.Reflection.Emit.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Emit.dll" />
+      </Component>
+      <Component Id="Comp_150" Guid="AFEB3AC2-38EC-814E-34B2-7312006B2F1D">
+        <File Id="File_150" 
+              Name="System.Reflection.Emit.ILGeneration.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Emit.ILGeneration.dll" />
+      </Component>
+      <Component Id="Comp_151" Guid="9D2E74B2-0052-6EEE-3FC4-2E1DE0678512">
+        <File Id="File_151" 
+              Name="System.Reflection.Emit.Lightweight.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Emit.Lightweight.dll" />
+      </Component>
+      <Component Id="Comp_152" Guid="B541B505-5075-B7AD-4836-B1A69BE7A5A6">
+        <File Id="File_152" 
+              Name="System.Reflection.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_153" Guid="F5D44F4F-5756-D027-251C-805BEB69EB1F">
+        <File Id="File_153" 
+              Name="System.Reflection.Metadata.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Metadata.dll" />
+      </Component>
+      <Component Id="Comp_154" Guid="3A65C3FE-FC27-F221-20A0-1C6F6644F33D">
+        <File Id="File_154" 
+              Name="System.Reflection.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_155" Guid="3B114D2E-15C8-A52E-AEA1-7DD4DCF98882">
+        <File Id="File_155" 
+              Name="System.Reflection.TypeExtensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Reflection.TypeExtensions.dll" />
+      </Component>
+      <Component Id="Comp_156" Guid="FC198E95-EB5E-10A3-654C-D3213F9E1C56">
+        <File Id="File_156" 
+              Name="System.Resources.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Resources.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_157" Guid="15B4F29C-476C-2088-B4B0-F5B766732B24">
+        <File Id="File_157" 
+              Name="System.Resources.Reader.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Resources.Reader.dll" />
+      </Component>
+      <Component Id="Comp_158" Guid="64EC0DBA-38EB-2339-F51A-40FB205E475B">
+        <File Id="File_158" 
+              Name="System.Resources.ResourceManager.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Resources.ResourceManager.dll" />
+      </Component>
+      <Component Id="Comp_159" Guid="43AA9E37-92E7-863C-C98B-965C2C8569E5">
+        <File Id="File_159" 
+              Name="System.Resources.Writer.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Resources.Writer.dll" />
+      </Component>
+      <Component Id="Comp_160" Guid="D5CDC982-9DFF-653D-F807-6A1A4BC83B6A">
+        <File Id="File_160" 
+              Name="System.Runtime.CompilerServices.Unsafe.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.CompilerServices.Unsafe.dll" />
+      </Component>
+      <Component Id="Comp_161" Guid="7DFC231F-DA2B-E699-D90A-5E70C8AAECFF">
+        <File Id="File_161" 
+              Name="System.Runtime.CompilerServices.VisualC.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.CompilerServices.VisualC.dll" />
+      </Component>
+      <Component Id="Comp_162" Guid="757D08A8-08C1-B6CF-C674-C22B493D705B">
+        <File Id="File_162" 
+              Name="System.Runtime.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.dll" />
+      </Component>
+      <Component Id="Comp_163" Guid="AE08FBB3-ECCE-FABF-C331-CEE466C50C87">
+        <File Id="File_163" 
+              Name="System.Runtime.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_164" Guid="66E13FC2-5A9B-6E37-7BDC-8B39FD2861E1">
+        <File Id="File_164" 
+              Name="System.Runtime.Handles.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Handles.dll" />
+      </Component>
+      <Component Id="Comp_165" Guid="D4B1A3BD-135F-E830-A7E3-ADA854330391">
+        <File Id="File_165" 
+              Name="System.Runtime.InteropServices.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.InteropServices.dll" />
+      </Component>
+      <Component Id="Comp_166" Guid="6FBA9F3E-E8BA-1E77-8DEF-5D8828961AC1">
+        <File Id="File_166" 
+              Name="System.Runtime.InteropServices.JavaScript.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.InteropServices.JavaScript.dll" />
+      </Component>
+      <Component Id="Comp_167" Guid="85E80477-13E9-39EC-12BF-106FFF87FDC7">
+        <File Id="File_167" 
+              Name="System.Runtime.InteropServices.RuntimeInformation.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.InteropServices.RuntimeInformation.dll" />
+      </Component>
+      <Component Id="Comp_168" Guid="F2EBEEB4-61FB-B6E7-CE5E-2745EBAB7179">
+        <File Id="File_168" 
+              Name="System.Runtime.Intrinsics.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Intrinsics.dll" />
+      </Component>
+      <Component Id="Comp_169" Guid="62365B15-55BE-A0D1-5CA3-9C1B771DE8B3">
+        <File Id="File_169" 
+              Name="System.Runtime.Loader.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Loader.dll" />
+      </Component>
+      <Component Id="Comp_170" Guid="264259C8-CCEE-DFD6-2D1A-8CC9A914250F">
+        <File Id="File_170" 
+              Name="System.Runtime.Numerics.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Numerics.dll" />
+      </Component>
+      <Component Id="Comp_171" Guid="54D201F2-A830-5601-0C2E-401353AFBD37">
+        <File Id="File_171" 
+              Name="System.Runtime.Serialization.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Serialization.dll" />
+      </Component>
+      <Component Id="Comp_172" Guid="952327A2-1C57-D79B-33DC-0777E3E6FB7E">
+        <File Id="File_172" 
+              Name="System.Runtime.Serialization.Formatters.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Serialization.Formatters.dll" />
+      </Component>
+      <Component Id="Comp_173" Guid="BED70027-95BB-9F9C-1E3A-03023C692A94">
+        <File Id="File_173" 
+              Name="System.Runtime.Serialization.Json.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Serialization.Json.dll" />
+      </Component>
+      <Component Id="Comp_174" Guid="C6BD6FA5-0696-2E47-8752-7A11BF2E0B6B">
+        <File Id="File_174" 
+              Name="System.Runtime.Serialization.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Serialization.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_175" Guid="B778BE77-01F1-4C2E-804B-CE889A08F3C7">
+        <File Id="File_175" 
+              Name="System.Runtime.Serialization.Xml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Runtime.Serialization.Xml.dll" />
+      </Component>
+      <Component Id="Comp_176" Guid="FFA6149D-DED4-0D15-7321-9D823E0E54C3">
+        <File Id="File_176" 
+              Name="System.Security.AccessControl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.AccessControl.dll" />
+      </Component>
+      <Component Id="Comp_177" Guid="EBC353FB-1143-BDAF-ECB8-28629FDEF850">
+        <File Id="File_177" 
+              Name="System.Security.Claims.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Claims.dll" />
+      </Component>
+      <Component Id="Comp_178" Guid="1324C666-137D-C6DD-4670-E382D390040E">
+        <File Id="File_178" 
+              Name="System.Security.Cryptography.Algorithms.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Algorithms.dll" />
+      </Component>
+      <Component Id="Comp_179" Guid="71A5B346-ED1D-5E13-5E0D-EF169F481F13">
+        <File Id="File_179" 
+              Name="System.Security.Cryptography.Cng.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Cng.dll" />
+      </Component>
+      <Component Id="Comp_180" Guid="221B2B0F-3F6F-6E56-6FF4-F58B205B095C">
+        <File Id="File_180" 
+              Name="System.Security.Cryptography.Csp.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Csp.dll" />
+      </Component>
+      <Component Id="Comp_181" Guid="8B05F373-2F1D-82F8-40B5-507F26A109C8">
+        <File Id="File_181" 
+              Name="System.Security.Cryptography.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.dll" />
+      </Component>
+      <Component Id="Comp_182" Guid="5D467A75-58AF-D43B-26AF-93BC0DD648B6">
+        <File Id="File_182" 
+              Name="System.Security.Cryptography.Encoding.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Encoding.dll" />
+      </Component>
+      <Component Id="Comp_183" Guid="7B5B2D53-4FB1-22A2-A4F6-8E7EE440077F">
+        <File Id="File_183" 
+              Name="System.Security.Cryptography.OpenSsl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.OpenSsl.dll" />
+      </Component>
+      <Component Id="Comp_184" Guid="9BA37B5C-AD0E-B264-2112-3095FA12437C">
+        <File Id="File_184" 
+              Name="System.Security.Cryptography.Pkcs.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Pkcs.dll" />
+      </Component>
+      <Component Id="Comp_185" Guid="521A6D81-F20B-88DA-0B4F-B3D5127F79FB">
+        <File Id="File_185" 
+              Name="System.Security.Cryptography.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_186" Guid="F4090E9B-E1E8-8A73-6CAE-BF906C3B445A">
+        <File Id="File_186" 
+              Name="System.Security.Cryptography.ProtectedData.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.ProtectedData.dll" />
+      </Component>
+      <Component Id="Comp_187" Guid="AAED526A-7546-EEB5-285D-259CD1D3A120">
+        <File Id="File_187" 
+              Name="System.Security.Cryptography.X509Certificates.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.X509Certificates.dll" />
+      </Component>
+      <Component Id="Comp_188" Guid="747F9959-0817-5132-C221-0FFCB16617B7">
+        <File Id="File_188" 
+              Name="System.Security.Cryptography.Xml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Cryptography.Xml.dll" />
+      </Component>
+      <Component Id="Comp_189" Guid="722817BC-D45A-82AF-C88D-E4E85C652BD7">
+        <File Id="File_189" 
+              Name="System.Security.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.dll" />
+      </Component>
+      <Component Id="Comp_190" Guid="B2C7BF1A-2B7E-97FF-089E-3AEC0B83F1D5">
+        <File Id="File_190" 
+              Name="System.Security.Permissions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Permissions.dll" />
+      </Component>
+      <Component Id="Comp_191" Guid="C3854460-2680-23EC-54BF-B66833055F88">
+        <File Id="File_191" 
+              Name="System.Security.Principal.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Principal.dll" />
+      </Component>
+      <Component Id="Comp_192" Guid="2672B7BB-788E-8ADF-8665-1F1046001365">
+        <File Id="File_192" 
+              Name="System.Security.Principal.Windows.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.Principal.Windows.dll" />
+      </Component>
+      <Component Id="Comp_193" Guid="CC53E086-3C0E-8473-17C0-3CF109812C28">
+        <File Id="File_193" 
+              Name="System.Security.SecureString.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Security.SecureString.dll" />
+      </Component>
+      <Component Id="Comp_194" Guid="5ADF12BF-3834-4D60-54CF-FEDCFF8CBAC6">
+        <File Id="File_194" 
+              Name="System.ServiceModel.Web.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ServiceModel.Web.dll" />
+      </Component>
+      <Component Id="Comp_195" Guid="109500E9-2244-3A38-B792-2F0E8D909F14">
+        <File Id="File_195" 
+              Name="System.ServiceProcess.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ServiceProcess.dll" />
+      </Component>
+      <Component Id="Comp_196" Guid="C8AD6519-E31D-0B7B-20F2-F6D90AAE1810">
+        <File Id="File_196" 
+              Name="System.Text.Encoding.CodePages.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.Encoding.CodePages.dll" />
+      </Component>
+      <Component Id="Comp_197" Guid="5B0272F0-B079-69B6-229A-1617A945BAB7">
+        <File Id="File_197" 
+              Name="System.Text.Encoding.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.Encoding.dll" />
+      </Component>
+      <Component Id="Comp_198" Guid="0B354C4A-EE52-C833-1894-EE342E779380">
+        <File Id="File_198" 
+              Name="System.Text.Encoding.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.Encoding.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_199" Guid="2BD9A6F8-A024-B9B6-FF8B-7AF29286AFDD">
+        <File Id="File_199" 
+              Name="System.Text.Encodings.Web.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.Encodings.Web.dll" />
+      </Component>
+      <Component Id="Comp_200" Guid="D45A4C81-0352-3392-5896-43110CEC20EB">
+        <File Id="File_200" 
+              Name="System.Text.Json.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.Json.dll" />
+      </Component>
+      <Component Id="Comp_201" Guid="9E8E2F4B-CC0F-DD13-0E25-66BF20C2067F">
+        <File Id="File_201" 
+              Name="System.Text.RegularExpressions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Text.RegularExpressions.dll" />
+      </Component>
+      <Component Id="Comp_202" Guid="0348A341-1A73-A164-E401-1F8C6B55B4BA">
+        <File Id="File_202" 
+              Name="System.Threading.AccessControl.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.AccessControl.dll" />
+      </Component>
+      <Component Id="Comp_203" Guid="39B118AB-132D-865C-E58D-83F3CA16CF8D">
+        <File Id="File_203" 
+              Name="System.Threading.Channels.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Channels.dll" />
+      </Component>
+      <Component Id="Comp_204" Guid="7B04DD10-3F4C-E712-5AF2-E75B61CE786C">
+        <File Id="File_204" 
+              Name="System.Threading.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.dll" />
+      </Component>
+      <Component Id="Comp_205" Guid="195DA9D6-7AD0-CE77-BF46-8C805113F28D">
+        <File Id="File_205" 
+              Name="System.Threading.Overlapped.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Overlapped.dll" />
+      </Component>
+      <Component Id="Comp_206" Guid="2B66DC46-8862-B4C3-8C6D-887B256D920C">
+        <File Id="File_206" 
+              Name="System.Threading.Tasks.Dataflow.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Tasks.Dataflow.dll" />
+      </Component>
+      <Component Id="Comp_207" Guid="98879A29-A4B0-BEA7-31CD-3486697616BF">
+        <File Id="File_207" 
+              Name="System.Threading.Tasks.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Tasks.dll" />
+      </Component>
+      <Component Id="Comp_208" Guid="18C78FFE-2765-6321-F189-ABEEE6F3A212">
+        <File Id="File_208" 
+              Name="System.Threading.Tasks.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Tasks.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_209" Guid="77CAF908-0736-E403-3EA2-E821AA4EAEE4">
+        <File Id="File_209" 
+              Name="System.Threading.Tasks.Parallel.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Tasks.Parallel.dll" />
+      </Component>
+      <Component Id="Comp_210" Guid="03F9F441-467F-4C11-427A-B498CF41E7E9">
+        <File Id="File_210" 
+              Name="System.Threading.Thread.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Thread.dll" />
+      </Component>
+      <Component Id="Comp_211" Guid="28E3D05B-6A2A-807A-9253-E405D1B69E96">
+        <File Id="File_211" 
+              Name="System.Threading.ThreadPool.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.ThreadPool.dll" />
+      </Component>
+      <Component Id="Comp_212" Guid="F6B3DAAE-54DF-7EBE-110F-25573C328839">
+        <File Id="File_212" 
+              Name="System.Threading.Timer.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Threading.Timer.dll" />
+      </Component>
+      <Component Id="Comp_213" Guid="3E0F1613-5AC1-000F-D5A6-9C57A9602927">
+        <File Id="File_213" 
+              Name="System.Transactions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Transactions.dll" />
+      </Component>
+      <Component Id="Comp_214" Guid="E8DBF71E-FA3A-BE88-AB00-10BF7E769350">
+        <File Id="File_214" 
+              Name="System.Transactions.Local.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Transactions.Local.dll" />
+      </Component>
+      <Component Id="Comp_215" Guid="0794CA89-21BF-4D6D-9394-8AAD4946D303">
+        <File Id="File_215" 
+              Name="System.ValueTuple.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.ValueTuple.dll" />
+      </Component>
+      <Component Id="Comp_216" Guid="22D924EB-55D3-DA14-AABD-08A77C730FA0">
+        <File Id="File_216" 
+              Name="System.Web.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Web.dll" />
+      </Component>
+      <Component Id="Comp_217" Guid="BB58C692-CE16-4AB8-1030-B5C0D9A14B15">
+        <File Id="File_217" 
+              Name="System.Web.HttpUtility.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Web.HttpUtility.dll" />
+      </Component>
+      <Component Id="Comp_218" Guid="5883D486-08A7-8D47-7A63-67C7269002D4">
+        <File Id="File_218" 
+              Name="System.Windows.Controls.Ribbon.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Controls.Ribbon.dll" />
+      </Component>
+      <Component Id="Comp_219" Guid="ADE1C4A6-CA58-73AE-4169-61FCB20B4F06">
+        <File Id="File_219" 
+              Name="System.Windows.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.dll" />
+      </Component>
+      <Component Id="Comp_220" Guid="F20B92F5-A61D-90FD-347E-3900A8F24BFC">
+        <File Id="File_220" 
+              Name="System.Windows.Extensions.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Extensions.dll" />
+      </Component>
+      <Component Id="Comp_221" Guid="53D028AD-AF44-5A63-6948-EEC45F8BDA66">
+        <File Id="File_221" 
+              Name="System.Windows.Forms.Design.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Forms.Design.dll" />
+      </Component>
+      <Component Id="Comp_222" Guid="83BA892C-7948-752F-DCFA-F1E5C2105007">
+        <File Id="File_222" 
+              Name="System.Windows.Forms.Design.Editors.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Forms.Design.Editors.dll" />
+      </Component>
+      <Component Id="Comp_223" Guid="AC6549A2-F7A2-C591-9E1A-5A48BAC5D73D">
+        <File Id="File_223" 
+              Name="System.Windows.Forms.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Forms.dll" />
+      </Component>
+      <Component Id="Comp_224" Guid="3B25DA7C-6355-CCCC-D77C-0FB3DD428AB0">
+        <File Id="File_224" 
+              Name="System.Windows.Forms.Primitives.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Forms.Primitives.dll" />
+      </Component>
+      <Component Id="Comp_225" Guid="3CBCADCE-05A4-52C1-17D9-660A81DEB85A">
+        <File Id="File_225" 
+              Name="System.Windows.Input.Manipulations.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Input.Manipulations.dll" />
+      </Component>
+      <Component Id="Comp_226" Guid="37F95C7F-E2C7-3C39-7756-57D33EA95819">
+        <File Id="File_226" 
+              Name="System.Windows.Presentation.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Windows.Presentation.dll" />
+      </Component>
+      <Component Id="Comp_227" Guid="ED5B245B-17F4-8AC3-F6D4-989CCF477447">
+        <File Id="File_227" 
+              Name="System.Xaml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xaml.dll" />
+      </Component>
+      <Component Id="Comp_228" Guid="92A34A1E-E307-A63E-D089-17A5209316E0">
+        <File Id="File_228" 
+              Name="System.Xml.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.dll" />
+      </Component>
+      <Component Id="Comp_229" Guid="8726D80C-2351-FE7C-1611-42A32422E12B">
+        <File Id="File_229" 
+              Name="System.Xml.Linq.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.Linq.dll" />
+      </Component>
+      <Component Id="Comp_230" Guid="B73AF1BF-3916-BEEA-E3F9-9D940969CE1B">
+        <File Id="File_230" 
+              Name="System.Xml.ReaderWriter.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.ReaderWriter.dll" />
+      </Component>
+      <Component Id="Comp_231" Guid="E5614E2E-C9C9-792C-713D-CE7AF7C85A14">
+        <File Id="File_231" 
+              Name="System.Xml.Serialization.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.Serialization.dll" />
+      </Component>
+      <Component Id="Comp_232" Guid="F028960E-339A-E7BB-9F97-3BFC3D303968">
+        <File Id="File_232" 
+              Name="System.Xml.XDocument.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.XDocument.dll" />
+      </Component>
+      <Component Id="Comp_233" Guid="070D45A3-99B1-9F3F-E70F-8CE93046AD76">
+        <File Id="File_233" 
+              Name="System.Xml.XmlDocument.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.XmlDocument.dll" />
+      </Component>
+      <Component Id="Comp_234" Guid="88598929-293C-A300-CB98-5031CF0C030F">
+        <File Id="File_234" 
+              Name="System.Xml.XmlSerializer.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.XmlSerializer.dll" />
+      </Component>
+      <Component Id="Comp_235" Guid="D7FB6A8C-212B-FB12-051F-BD78EF2059D1">
+        <File Id="File_235" 
+              Name="System.Xml.XPath.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.XPath.dll" />
+      </Component>
+      <Component Id="Comp_236" Guid="77EC76CC-07DB-0FBF-D661-C153A1193CEF">
+        <File Id="File_236" 
+              Name="System.Xml.XPath.XDocument.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\System.Xml.XPath.XDocument.dll" />
+      </Component>
+      <Component Id="Comp_237" Guid="1102E584-3AF8-1DCC-D19D-AF321E628325">
+        <File Id="File_237" 
+              Name="UIAutomationClient.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\UIAutomationClient.dll" />
+      </Component>
+      <Component Id="Comp_238" Guid="DCD0E5D9-60EC-8FBB-8978-7BCC0631EA52">
+        <File Id="File_238" 
+              Name="UIAutomationClientSideProviders.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\UIAutomationClientSideProviders.dll" />
+      </Component>
+      <Component Id="Comp_239" Guid="0B0AD387-5EA1-CA7A-3CB7-43DABD741378">
+        <File Id="File_239" 
+              Name="UIAutomationProvider.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\UIAutomationProvider.dll" />
+      </Component>
+      <Component Id="Comp_240" Guid="57592A63-52CD-9A82-C6E3-A2F15BAB6F8D">
+        <File Id="File_240" 
+              Name="UIAutomationTypes.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\UIAutomationTypes.dll" />
+      </Component>
+      <Component Id="Comp_241" Guid="E3A57430-2120-7118-58E2-1313A010FC8F">
+        <File Id="File_241" 
+              Name="vcruntime140_cor3.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\vcruntime140_cor3.dll" />
+      </Component>
+      <Component Id="Comp_242" Guid="410EE0A8-D0C8-F5F6-45F9-97EBED2B67D1">
+        <File Id="File_242" 
+              Name="WindowsBase.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\WindowsBase.dll" />
+      </Component>
+      <Component Id="Comp_243" Guid="8C3887CB-97B3-B3A0-7E40-7408C2F1108E">
+        <File Id="File_243" 
+              Name="WindowsFormsIntegration.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\WindowsFormsIntegration.dll" />
+      </Component>
+      <Component Id="Comp_244" Guid="8F4BE45C-38CA-F6F3-A38A-3D435297F1B8">
+        <File Id="File_244" 
+              Name="wpfgfx_cor3.dll"
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\wpfgfx_cor3.dll" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

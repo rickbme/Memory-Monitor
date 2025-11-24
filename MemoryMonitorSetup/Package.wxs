@@ -11,25 +11,15 @@
     
     <MediaTemplate EmbedCab="yes" />
     
-    <!-- Check for .NET 8 Desktop Runtime via registry -->
-    <Property Id="DOTNET8INSTALLED">
-      <RegistrySearch Id="DotNet8Registry"
-                      Root="HKLM"
-                      Key="SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedhost"
-                      Name="Version"
-                      Type="raw" />
-    </Property>
-    
-    <Launch Condition="Installed OR DOTNET8INSTALLED" 
-            Message="This application requires .NET 8.0 Desktop Runtime or later. Please download and install it from https://dotnet.microsoft.com/download/dotnet/8.0" />
+    <!-- Note: .NET runtime check removed - application is now self-contained -->
     
     <Feature Id="Main" Title="Memory Monitor" Level="1">
-      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="PublishedFileComponents" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
     </Feature>
     
     <!-- Add/Remove Programs Icon -->
-    <Icon Id="AppIcon.exe" SourceFile="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" />
+    <Icon Id="AppIcon.exe" SourceFile="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.exe" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
     <Property Id="ARPHELPLINK" Value="https://github.com/rickbme/Memory-Monitor" />
     <Property Id="ARPNOREPAIR" Value="yes" />
@@ -47,38 +37,6 @@
   </Fragment>
   
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <!-- Main executable -->
-      <Component Id="MainExecutable" Guid="12345678-ABCD-4321-ABCD-123456789ABC">
-        <File Id="MemoryMonitorExe" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.exe" 
-              KeyPath="yes" />
-      </Component>
-      
-      <!-- Application DLL -->
-      <Component Id="MemoryMonitorDll" Guid="23456789-BCDE-4321-BCDE-23456789ABCD">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.dll" />
-      </Component>
-      
-      <!-- Configuration files -->
-      <Component Id="MemoryMonitorDeps" Guid="34567890-CDEF-4321-CDEF-34567890ABCD">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.deps.json" />
-      </Component>
-      
-      <Component Id="MemoryMonitorRuntime" Guid="45678901-DEF0-4321-DEF0-45678901ABCD">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\Memory Monitor.runtimeconfig.json" />
-      </Component>
-      
-      <!-- System dependencies -->
-      <Component Id="SystemCodeDom" Guid="56789012-EF01-4321-EF01-56789012ABCD">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.CodeDom.dll" />
-      </Component>
-      
-      <Component Id="SystemManagement" Guid="67890123-F012-4321-F012-67890123ABCD">
-        <File Source="..\Memory Monitor\bin\Release\net8.0-windows\System.Management.dll" />
-      </Component>
-    </ComponentGroup>
-    
     <ComponentGroup Id="StartMenuShortcuts" Directory="ApplicationProgramsFolder">
       <Component Id="StartMenuShortcut" Guid="78901234-0123-4321-0123-78901234ABCD">
         <Shortcut Id="ApplicationStartMenuShortcut"
