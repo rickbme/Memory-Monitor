@@ -1,4 +1,4 @@
-﻿namespace Memory_Monitor
+namespace Memory_Monitor
 {
     partial class Form1
     {
@@ -29,28 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.lblSystemMemoryTitle = new System.Windows.Forms.Label();
-            this.lblSystemMemoryValue = new System.Windows.Forms.Label();
-            this.progressBarSystemMemory = new System.Windows.Forms.ProgressBar();
-            this.lblGPUMemoryTitle = new System.Windows.Forms.Label();
-            this.lblGPUMemoryValue = new System.Windows.Forms.Label();
-            this.progressBarGPUMemory = new System.Windows.Forms.ProgressBar();
-            this.lblSystemMemoryPercent = new System.Windows.Forms.Label();
-            this.lblGPUMemoryPercent = new System.Windows.Forms.Label();
             this.updateTimer = new System.Windows.Forms.Timer(this.components);
             this.lblProcessesTitle = new System.Windows.Forms.Label();
             this.listViewProcesses = new System.Windows.Forms.ListView();
             this.columnProcessName = new System.Windows.Forms.ColumnHeader();
             this.columnMemoryUsage = new System.Windows.Forms.ColumnHeader();
             this.columnMemoryMB = new System.Windows.Forms.ColumnHeader();
-            this.systemMemoryGraph = new Memory_Monitor.MemoryGraphControl();
-            this.gpuMemoryGraph = new Memory_Monitor.MemoryGraphControl();
-            this.lblCPUUsageTitle = new System.Windows.Forms.Label();
-            this.lblCPUUsageValue = new System.Windows.Forms.Label();
-            this.cpuUsageGraph = new Memory_Monitor.MemoryGraphControl();
-            this.lblGPUUsageTitle = new System.Windows.Forms.Label();
-            this.lblGPUUsageValue = new System.Windows.Forms.Label();
-            this.gpuUsageGraph = new Memory_Monitor.MemoryGraphControl();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.darkModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,17 +43,21 @@
             this.showNetworkMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblDiskUsageTitle = new System.Windows.Forms.Label();
-            this.lblDiskUsageValue = new System.Windows.Forms.Label();
-            this.diskUsageGauge = new Memory_Monitor.CircularGaugeControl();
-            this.lblNetworkUsageTitle = new System.Windows.Forms.Label();
-            this.lblNetworkUsageValue = new System.Windows.Forms.Label();
-            this.networkUsageGauge = new Memory_Monitor.CircularGaugeControl();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ramUsageGauge = new Memory_Monitor.EnhancedGaugeControl();
+            this.cpuLoadGauge = new Memory_Monitor.EnhancedGaugeControl();
+            this.diskUsageGauge = new Memory_Monitor.EnhancedGaugeControl();
+            this.networkUsageGauge = new Memory_Monitor.EnhancedGaugeControl();
+            this.gpuVramGauge = new Memory_Monitor.EnhancedGaugeControl();
+            this.lblRamGauge = new System.Windows.Forms.Label();
+            this.lblCpuGauge = new System.Windows.Forms.Label();
+            this.lblDiskGauge = new System.Windows.Forms.Label();
+            this.lblNetworkGauge = new System.Windows.Forms.Label();
+            this.lblGpuGauge = new System.Windows.Forms.Label();
             this.menuStrip.SuspendLayout();
             this.trayContextMenu.SuspendLayout();
             this.SuspendLayout();
@@ -81,8 +69,8 @@
             this.helpToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(760, 24);
-            this.menuStrip.TabIndex = 18;
+            this.menuStrip.Size = new System.Drawing.Size(1000, 24);
+            this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip1";
             // 
             // viewToolStripMenuItem
@@ -112,6 +100,7 @@
             // showDiskMonitorToolStripMenuItem
             // 
             this.showDiskMonitorToolStripMenuItem.CheckOnClick = true;
+            this.showDiskMonitorToolStripMenuItem.Checked = true;
             this.showDiskMonitorToolStripMenuItem.Name = "showDiskMonitorToolStripMenuItem";
             this.showDiskMonitorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.showDiskMonitorToolStripMenuItem.Text = "Show Disk Monitor";
@@ -120,6 +109,7 @@
             // showNetworkMonitorToolStripMenuItem
             // 
             this.showNetworkMonitorToolStripMenuItem.CheckOnClick = true;
+            this.showNetworkMonitorToolStripMenuItem.Checked = true;
             this.showNetworkMonitorToolStripMenuItem.Name = "showNetworkMonitorToolStripMenuItem";
             this.showNetworkMonitorToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.showNetworkMonitorToolStripMenuItem.Text = "Show Network Monitor";
@@ -140,235 +130,125 @@
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
-            // lblCPUUsageTitle
+            // RAM Usage Gauge
             // 
-            this.lblCPUUsageTitle.AutoSize = true;
-            this.lblCPUUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblCPUUsageTitle.Location = new System.Drawing.Point(20, 35);
-            this.lblCPUUsageTitle.Name = "lblCPUUsageTitle";
-            this.lblCPUUsageTitle.Size = new System.Drawing.Size(95, 21);
-            this.lblCPUUsageTitle.TabIndex = 0;
-            this.lblCPUUsageTitle.Text = "CPU Usage";
+            this.ramUsageGauge.BackColor = System.Drawing.Color.Transparent;
+            this.ramUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(50, 55, 60);
+            this.ramUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(58, 150, 221);
+            this.ramUsageGauge.NeedleColor = System.Drawing.Color.FromArgb(58, 150, 221);
+            this.ramUsageGauge.Location = new System.Drawing.Point(30, 50);
+            this.ramUsageGauge.MaxValue = 100F;
+            this.ramUsageGauge.MinimumSize = new System.Drawing.Size(180, 180);
+            this.ramUsageGauge.Name = "ramUsageGauge";
+            this.ramUsageGauge.Size = new System.Drawing.Size(200, 200);
+            this.ramUsageGauge.TabIndex = 1;
+            this.ramUsageGauge.Unit = "%";
             // 
-            // lblCPUUsageValue
+            // RAM Label
             // 
-            this.lblCPUUsageValue.AutoSize = true;
-            this.lblCPUUsageValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblCPUUsageValue.ForeColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.lblCPUUsageValue.Location = new System.Drawing.Point(20, 60);
-            this.lblCPUUsageValue.Name = "lblCPUUsageValue";
-            this.lblCPUUsageValue.Size = new System.Drawing.Size(52, 32);
-            this.lblCPUUsageValue.TabIndex = 1;
-            this.lblCPUUsageValue.Text = "0%";
+            this.lblRamGauge.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblRamGauge.Location = new System.Drawing.Point(30, 255);
+            this.lblRamGauge.Name = "lblRamGauge";
+            this.lblRamGauge.Size = new System.Drawing.Size(200, 25);
+            this.lblRamGauge.TabIndex = 2;
+            this.lblRamGauge.Text = "RAM USAGE";
+            this.lblRamGauge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // cpuUsageGraph
+            // CPU Load Gauge
             // 
-            this.cpuUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.cpuUsageGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.cpuUsageGraph.Location = new System.Drawing.Point(20, 100);
-            this.cpuUsageGraph.MaxDataPoints = 60;
-            this.cpuUsageGraph.Name = "cpuUsageGraph";
-            this.cpuUsageGraph.Size = new System.Drawing.Size(300, 60);
-            this.cpuUsageGraph.TabIndex = 2;
+            this.cpuLoadGauge.BackColor = System.Drawing.Color.Transparent;
+            this.cpuLoadGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(50, 55, 60);
+            this.cpuLoadGauge.GaugeColor = System.Drawing.Color.FromArgb(220, 50, 50);
+            this.cpuLoadGauge.NeedleColor = System.Drawing.Color.FromArgb(220, 50, 50);
+            this.cpuLoadGauge.Location = new System.Drawing.Point(270, 50);
+            this.cpuLoadGauge.MaxValue = 100F;
+            this.cpuLoadGauge.MinimumSize = new System.Drawing.Size(180, 180);
+            this.cpuLoadGauge.Name = "cpuLoadGauge";
+            this.cpuLoadGauge.Size = new System.Drawing.Size(200, 200);
+            this.cpuLoadGauge.TabIndex = 3;
+            this.cpuLoadGauge.Unit = "%";
             // 
-            // lblGPUUsageTitle
+            // CPU Label
             // 
-            this.lblGPUUsageTitle.AutoSize = true;
-            this.lblGPUUsageTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUUsageTitle.Location = new System.Drawing.Point(340, 35);
-            this.lblGPUUsageTitle.Name = "lblGPUUsageTitle";
-            this.lblGPUUsageTitle.Size = new System.Drawing.Size(95, 21);
-            this.lblGPUUsageTitle.TabIndex = 3;
-            this.lblGPUUsageTitle.Text = "GPU Usage";
+            this.lblCpuGauge.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblCpuGauge.Location = new System.Drawing.Point(270, 255);
+            this.lblCpuGauge.Name = "lblCpuGauge";
+            this.lblCpuGauge.Size = new System.Drawing.Size(200, 25);
+            this.lblCpuGauge.TabIndex = 4;
+            this.lblCpuGauge.Text = "CPU LOAD";
+            this.lblCpuGauge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblGPUUsageValue
-            // 
-            this.lblGPUUsageValue.AutoSize = true;
-            this.lblGPUUsageValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblGPUUsageValue.ForeColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.lblGPUUsageValue.Location = new System.Drawing.Point(340, 60);
-            this.lblGPUUsageValue.Name = "lblGPUUsageValue";
-            this.lblGPUUsageValue.Size = new System.Drawing.Size(52, 32);
-            this.lblGPUUsageValue.TabIndex = 4;
-            this.lblGPUUsageValue.Text = "0%";
-            // 
-            // gpuUsageGraph
-            // 
-            this.gpuUsageGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.gpuUsageGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuUsageGraph.Location = new System.Drawing.Point(340, 100);
-            this.gpuUsageGraph.MaxDataPoints = 60;
-            this.gpuUsageGraph.Name = "gpuUsageGraph";
-            this.gpuUsageGraph.Size = new System.Drawing.Size(300, 60);
-            this.gpuUsageGraph.TabIndex = 5;
-            // 
-            // lblDiskUsageTitle
-            // 
-            this.lblDiskUsageTitle.AutoSize = true;
-            this.lblDiskUsageTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
-            this.lblDiskUsageTitle.Location = new System.Drawing.Point(680, 35);
-            this.lblDiskUsageTitle.Name = "lblDiskUsageTitle";
-            this.lblDiskUsageTitle.Size = new System.Drawing.Size(40, 20);
-            this.lblDiskUsageTitle.TabIndex = 24;
-            this.lblDiskUsageTitle.Text = "Disk";
-            this.lblDiskUsageTitle.Visible = false;
-            // 
-            // lblDiskUsageValue
-            // 
-            this.lblDiskUsageValue.AutoSize = true;
-            this.lblDiskUsageValue.Font = new System.Drawing.Font("Segoe UI", 8F);
-            this.lblDiskUsageValue.ForeColor = System.Drawing.Color.FromArgb(255, 140, 0);
-            this.lblDiskUsageValue.Location = new System.Drawing.Point(680, 58);
-            this.lblDiskUsageValue.Name = "lblDiskUsageValue";
-            this.lblDiskUsageValue.MaximumSize = new System.Drawing.Size(130, 0);
-            this.lblDiskUsageValue.Size = new System.Drawing.Size(58, 13);
-            this.lblDiskUsageValue.TabIndex = 25;
-            this.lblDiskUsageValue.Text = "0 MB/s";
-            this.lblDiskUsageValue.Visible = false;
-            // 
-            // diskUsageGauge
+            // Disk I/O Gauge
             // 
             this.diskUsageGauge.BackColor = System.Drawing.Color.Transparent;
-            this.diskUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.diskUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(255, 140, 0);
-            this.diskUsageGauge.Location = new System.Drawing.Point(660, 80);
+            this.diskUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(50, 55, 60);
+            this.diskUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(50, 200, 80);
+            this.diskUsageGauge.NeedleColor = System.Drawing.Color.FromArgb(50, 200, 80);
+            this.diskUsageGauge.Location = new System.Drawing.Point(510, 50);
             this.diskUsageGauge.MaxValue = 500F;
-            this.diskUsageGauge.MinimumSize = new System.Drawing.Size(120, 120);
+            this.diskUsageGauge.MinimumSize = new System.Drawing.Size(180, 180);
             this.diskUsageGauge.Name = "diskUsageGauge";
-            this.diskUsageGauge.NeedleColor = System.Drawing.Color.FromArgb(255, 140, 0);
-            this.diskUsageGauge.Size = new System.Drawing.Size(150, 150);
-            this.diskUsageGauge.TabIndex = 26;
-            this.diskUsageGauge.Visible = false;
+            this.diskUsageGauge.Size = new System.Drawing.Size(200, 200);
+            this.diskUsageGauge.TabIndex = 5;
+            this.diskUsageGauge.Unit = "MB/s";
             // 
-            // lblNetworkUsageTitle
+            // Disk Label
             // 
-            this.lblNetworkUsageTitle.AutoSize = true;
-            this.lblNetworkUsageTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
-            this.lblNetworkUsageTitle.Location = new System.Drawing.Point(680, 245);
-            this.lblNetworkUsageTitle.Name = "lblNetworkUsageTitle";
-            this.lblNetworkUsageTitle.Size = new System.Drawing.Size(70, 20);
-            this.lblNetworkUsageTitle.TabIndex = 27;
-            this.lblNetworkUsageTitle.Text = "Network";
-            this.lblNetworkUsageTitle.Visible = false;
+            this.lblDiskGauge.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblDiskGauge.Location = new System.Drawing.Point(510, 255);
+            this.lblDiskGauge.Name = "lblDiskGauge";
+            this.lblDiskGauge.Size = new System.Drawing.Size(200, 25);
+            this.lblDiskGauge.TabIndex = 6;
+            this.lblDiskGauge.Text = "DISK I/O";
+            this.lblDiskGauge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblNetworkUsageValue
-            // 
-            this.lblNetworkUsageValue.AutoSize = true;
-            this.lblNetworkUsageValue.Font = new System.Drawing.Font("Segoe UI", 8F);
-            this.lblNetworkUsageValue.ForeColor = System.Drawing.Color.FromArgb(138, 43, 226);
-            this.lblNetworkUsageValue.Location = new System.Drawing.Point(680, 268);
-            this.lblNetworkUsageValue.Name = "lblNetworkUsageValue";
-            this.lblNetworkUsageValue.MaximumSize = new System.Drawing.Size(130, 0);
-            this.lblNetworkUsageValue.Size = new System.Drawing.Size(58, 13);
-            this.lblNetworkUsageValue.TabIndex = 28;
-            this.lblNetworkUsageValue.Text = "0 MB/s";
-            this.lblNetworkUsageValue.Visible = false;
-            // 
-            // networkUsageGauge
+            // Network/Ethernet Gauge
             // 
             this.networkUsageGauge.BackColor = System.Drawing.Color.Transparent;
-            this.networkUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.networkUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(138, 43, 226);
-            this.networkUsageGauge.Location = new System.Drawing.Point(660, 290);
-            this.networkUsageGauge.MinimumSize = new System.Drawing.Size(120, 120);
+            this.networkUsageGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(50, 55, 60);
+            this.networkUsageGauge.GaugeColor = System.Drawing.Color.FromArgb(255, 200, 50);
+            this.networkUsageGauge.NeedleColor = System.Drawing.Color.FromArgb(255, 200, 50);
+            this.networkUsageGauge.Location = new System.Drawing.Point(150, 310);
+            this.networkUsageGauge.MaxValue = 1000F;
+            this.networkUsageGauge.MinimumSize = new System.Drawing.Size(180, 180);
             this.networkUsageGauge.Name = "networkUsageGauge";
-            this.networkUsageGauge.Size = new System.Drawing.Size(150, 150);
-            this.networkUsageGauge.TabIndex = 29;
-            this.networkUsageGauge.Visible = false;
+            this.networkUsageGauge.Size = new System.Drawing.Size(200, 200);
+            this.networkUsageGauge.TabIndex = 7;
+            this.networkUsageGauge.Unit = "Mbps";
             // 
-            // lblSystemMemoryTitle
+            // Network Label
             // 
-            this.lblSystemMemoryTitle.AutoSize = true;
-            this.lblSystemMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryTitle.Location = new System.Drawing.Point(20, 180);
-            this.lblSystemMemoryTitle.Name = "lblSystemMemoryTitle";
-            this.lblSystemMemoryTitle.Size = new System.Drawing.Size(130, 21);
-            this.lblSystemMemoryTitle.TabIndex = 6;
-            this.lblSystemMemoryTitle.Text = "System Memory";
+            this.lblNetworkGauge.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblNetworkGauge.Location = new System.Drawing.Point(150, 515);
+            this.lblNetworkGauge.Name = "lblNetworkGauge";
+            this.lblNetworkGauge.Size = new System.Drawing.Size(200, 25);
+            this.lblNetworkGauge.TabIndex = 8;
+            this.lblNetworkGauge.Text = "ETHERNET";
+            this.lblNetworkGauge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblSystemMemoryValue
+            // GPU VRAM Gauge
             // 
-            this.lblSystemMemoryValue.AutoSize = true;
-            this.lblSystemMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblSystemMemoryValue.Location = new System.Drawing.Point(20, 205);
-            this.lblSystemMemoryValue.Name = "lblSystemMemoryValue";
-            this.lblSystemMemoryValue.Size = new System.Drawing.Size(106, 15);
-            this.lblSystemMemoryValue.TabIndex = 7;
-            this.lblSystemMemoryValue.Text = "0 GB / 0 GB Used";
+            this.gpuVramGauge.BackColor = System.Drawing.Color.Transparent;
+            this.gpuVramGauge.GaugeBackgroundColor = System.Drawing.Color.FromArgb(50, 55, 60);
+            this.gpuVramGauge.GaugeColor = System.Drawing.Color.FromArgb(160, 90, 240);
+            this.gpuVramGauge.NeedleColor = System.Drawing.Color.FromArgb(160, 90, 240);
+            this.gpuVramGauge.Location = new System.Drawing.Point(400, 310);
+            this.gpuVramGauge.MaxValue = 24F;
+            this.gpuVramGauge.MinimumSize = new System.Drawing.Size(180, 180);
+            this.gpuVramGauge.Name = "gpuVramGauge";
+            this.gpuVramGauge.Size = new System.Drawing.Size(200, 200);
+            this.gpuVramGauge.TabIndex = 9;
+            this.gpuVramGauge.Unit = "GB";
             // 
-            // progressBarSystemMemory
+            // GPU Label
             // 
-            this.progressBarSystemMemory.Location = new System.Drawing.Point(20, 225);
-            this.progressBarSystemMemory.Name = "progressBarSystemMemory";
-            this.progressBarSystemMemory.Size = new System.Drawing.Size(240, 20);
-            this.progressBarSystemMemory.TabIndex = 8;
-            // 
-            // lblSystemMemoryPercent
-            // 
-            this.lblSystemMemoryPercent.AutoSize = true;
-            this.lblSystemMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblSystemMemoryPercent.Location = new System.Drawing.Point(270, 227);
-            this.lblSystemMemoryPercent.Name = "lblSystemMemoryPercent";
-            this.lblSystemMemoryPercent.Size = new System.Drawing.Size(26, 15);
-            this.lblSystemMemoryPercent.TabIndex = 9;
-            this.lblSystemMemoryPercent.Text = "0%";
-            // 
-            // systemMemoryGraph
-            // 
-            this.systemMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.systemMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 120, 215);
-            this.systemMemoryGraph.Location = new System.Drawing.Point(20, 250);
-            this.systemMemoryGraph.MaxDataPoints = 60;
-            this.systemMemoryGraph.Name = "systemMemoryGraph";
-            this.systemMemoryGraph.Size = new System.Drawing.Size(300, 60);
-            this.systemMemoryGraph.TabIndex = 10;
-            // 
-            // lblGPUMemoryTitle
-            // 
-            this.lblGPUMemoryTitle.AutoSize = true;
-            this.lblGPUMemoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryTitle.Location = new System.Drawing.Point(340, 180);
-            this.lblGPUMemoryTitle.Name = "lblGPUMemoryTitle";
-            this.lblGPUMemoryTitle.Size = new System.Drawing.Size(112, 21);
-            this.lblGPUMemoryTitle.TabIndex = 11;
-            this.lblGPUMemoryTitle.Text = "GPU Memory";
-            // 
-            // lblGPUMemoryValue
-            // 
-            this.lblGPUMemoryValue.AutoSize = true;
-            this.lblGPUMemoryValue.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblGPUMemoryValue.Location = new System.Drawing.Point(340, 205);
-            this.lblGPUMemoryValue.Name = "lblGPUMemoryValue";
-            this.lblGPUMemoryValue.Size = new System.Drawing.Size(106, 15);
-            this.lblGPUMemoryValue.TabIndex = 12;
-            this.lblGPUMemoryValue.Text = "0 GB / 0 GB Used";
-            // 
-            // progressBarGPUMemory
-            // 
-            this.progressBarGPUMemory.Location = new System.Drawing.Point(340, 225);
-            this.progressBarGPUMemory.Name = "progressBarGPUMemory";
-            this.progressBarGPUMemory.Size = new System.Drawing.Size(240, 20);
-            this.progressBarGPUMemory.TabIndex = 13;
-            // 
-            // lblGPUMemoryPercent
-            // 
-            this.lblGPUMemoryPercent.AutoSize = true;
-            this.lblGPUMemoryPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblGPUMemoryPercent.Location = new System.Drawing.Point(590, 227);
-            this.lblGPUMemoryPercent.Name = "lblGPUMemoryPercent";
-            this.lblGPUMemoryPercent.Size = new System.Drawing.Size(26, 15);
-            this.lblGPUMemoryPercent.TabIndex = 14;
-            this.lblGPUMemoryPercent.Text = "0%";
-            // 
-            // gpuMemoryGraph
-            // 
-            this.gpuMemoryGraph.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            this.gpuMemoryGraph.LineColor = System.Drawing.Color.FromArgb(0, 200, 80);
-            this.gpuMemoryGraph.Location = new System.Drawing.Point(340, 250);
-            this.gpuMemoryGraph.MaxDataPoints = 60;
-            this.gpuMemoryGraph.Name = "gpuMemoryGraph";
-            this.gpuMemoryGraph.Size = new System.Drawing.Size(300, 60);
-            this.gpuMemoryGraph.TabIndex = 15;
+            this.lblGpuGauge.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblGpuGauge.Location = new System.Drawing.Point(400, 515);
+            this.lblGpuGauge.Name = "lblGpuGauge";
+            this.lblGpuGauge.Size = new System.Drawing.Size(200, 25);
+            this.lblGpuGauge.TabIndex = 10;
+            this.lblGpuGauge.Text = "GPU VRAM";
+            this.lblGpuGauge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // updateTimer
             // 
@@ -379,10 +259,10 @@
             // 
             this.lblProcessesTitle.AutoSize = true;
             this.lblProcessesTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 330);
+            this.lblProcessesTitle.Location = new System.Drawing.Point(20, 560);
             this.lblProcessesTitle.Name = "lblProcessesTitle";
             this.lblProcessesTitle.Size = new System.Drawing.Size(234, 21);
-            this.lblProcessesTitle.TabIndex = 16;
+            this.lblProcessesTitle.TabIndex = 11;
             this.lblProcessesTitle.Text = "Processes Using > 400 MB RAM";
             // 
             // listViewProcesses
@@ -392,11 +272,11 @@
             this.columnMemoryUsage,
             this.columnMemoryMB});
             this.listViewProcesses.FullRowSelect = true;
-            this.listViewProcesses.Location = new System.Drawing.Point(20, 360);
+            this.listViewProcesses.Location = new System.Drawing.Point(20, 590);
             this.listViewProcesses.Name = "listViewProcesses";
             this.listViewProcesses.OwnerDraw = true;
-            this.listViewProcesses.Size = new System.Drawing.Size(620, 250);
-            this.listViewProcesses.TabIndex = 17;
+            this.listViewProcesses.Size = new System.Drawing.Size(760, 200);
+            this.listViewProcesses.TabIndex = 12;
             this.listViewProcesses.UseCompatibleStateImageBehavior = false;
             this.listViewProcesses.View = System.Windows.Forms.View.Details;
             this.listViewProcesses.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.ListView_DrawColumnHeader);
@@ -458,36 +338,24 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(840, 630);
+            this.ClientSize = new System.Drawing.Size(800, 850);
+            this.Controls.Add(this.lblGpuGauge);
+            this.Controls.Add(this.lblNetworkGauge);
+            this.Controls.Add(this.lblDiskGauge);
+            this.Controls.Add(this.lblCpuGauge);
+            this.Controls.Add(this.lblRamGauge);
+            this.Controls.Add(this.gpuVramGauge);
             this.Controls.Add(this.networkUsageGauge);
-            this.Controls.Add(this.lblNetworkUsageValue);
-            this.Controls.Add(this.lblNetworkUsageTitle);
             this.Controls.Add(this.diskUsageGauge);
-            this.Controls.Add(this.lblDiskUsageValue);
-            this.Controls.Add(this.lblDiskUsageTitle);
+            this.Controls.Add(this.cpuLoadGauge);
+            this.Controls.Add(this.ramUsageGauge);
             this.Controls.Add(this.listViewProcesses);
             this.Controls.Add(this.lblProcessesTitle);
-            this.Controls.Add(this.gpuMemoryGraph);
-            this.Controls.Add(this.lblGPUMemoryPercent);
-            this.Controls.Add(this.progressBarGPUMemory);
-            this.Controls.Add(this.lblGPUMemoryValue);
-            this.Controls.Add(this.lblGPUMemoryTitle);
-            this.Controls.Add(this.systemMemoryGraph);
-            this.Controls.Add(this.lblSystemMemoryPercent);
-            this.Controls.Add(this.progressBarSystemMemory);
-            this.Controls.Add(this.lblSystemMemoryValue);
-            this.Controls.Add(this.lblSystemMemoryTitle);
-            this.Controls.Add(this.gpuUsageGraph);
-            this.Controls.Add(this.lblGPUUsageValue);
-            this.Controls.Add(this.lblGPUUsageTitle);
-            this.Controls.Add(this.cpuUsageGraph);
-            this.Controls.Add(this.lblCPUUsageValue);
-            this.Controls.Add(this.lblCPUUsageTitle);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = true;
-            this.MinimumSize = new System.Drawing.Size(520, 700);
+            this.MinimumSize = new System.Drawing.Size(800, 850);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "System Monitor";
@@ -501,28 +369,12 @@
 
         #endregion
 
-        private System.Windows.Forms.Label lblSystemMemoryTitle;
-        private System.Windows.Forms.Label lblSystemMemoryValue;
-        private System.Windows.Forms.ProgressBar progressBarSystemMemory;
-        private System.Windows.Forms.Label lblSystemMemoryPercent;
-        private System.Windows.Forms.Label lblGPUMemoryTitle;
-        private System.Windows.Forms.Label lblGPUMemoryValue;
-        private System.Windows.Forms.ProgressBar progressBarGPUMemory;
-        private System.Windows.Forms.Label lblGPUMemoryPercent;
         private System.Windows.Forms.Timer updateTimer;
         private System.Windows.Forms.Label lblProcessesTitle;
         private System.Windows.Forms.ListView listViewProcesses;
         private System.Windows.Forms.ColumnHeader columnProcessName;
         private System.Windows.Forms.ColumnHeader columnMemoryUsage;
         private System.Windows.Forms.ColumnHeader columnMemoryMB;
-        private MemoryGraphControl systemMemoryGraph;
-        private MemoryGraphControl gpuMemoryGraph;
-        private System.Windows.Forms.Label lblCPUUsageTitle;
-        private System.Windows.Forms.Label lblCPUUsageValue;
-        private MemoryGraphControl cpuUsageGraph;
-        private System.Windows.Forms.Label lblGPUUsageTitle;
-        private System.Windows.Forms.Label lblGPUUsageValue;
-        private MemoryGraphControl gpuUsageGraph;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem darkModeToolStripMenuItem;
@@ -531,16 +383,20 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem showDiskMonitorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showNetworkMonitorToolStripMenuItem;
-        private System.Windows.Forms.Label lblDiskUsageTitle;
-        private System.Windows.Forms.Label lblDiskUsageValue;
-        private CircularGaugeControl diskUsageGauge;
-        private System.Windows.Forms.Label lblNetworkUsageTitle;
-        private System.Windows.Forms.Label lblNetworkUsageValue;
-        private CircularGaugeControl networkUsageGauge;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ContextMenuStrip trayContextMenu;
         private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private EnhancedGaugeControl ramUsageGauge;
+        private EnhancedGaugeControl cpuLoadGauge;
+        private EnhancedGaugeControl diskUsageGauge;
+        private EnhancedGaugeControl networkUsageGauge;
+        private EnhancedGaugeControl gpuVramGauge;
+        private System.Windows.Forms.Label lblRamGauge;
+        private System.Windows.Forms.Label lblCpuGauge;
+        private System.Windows.Forms.Label lblDiskGauge;
+        private System.Windows.Forms.Label lblNetworkGauge;
+        private System.Windows.Forms.Label lblGpuGauge;
     }
 }
