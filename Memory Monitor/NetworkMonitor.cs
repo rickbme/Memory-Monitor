@@ -8,7 +8,7 @@ namespace Memory_Monitor
     /// </summary>
     public class NetworkMonitor : IDisposable
     {
-        private const long BYTES_TO_MB = 1024 * 1024;
+        private const long BYTES_TO_MEGABITS = 1024 * 1024 / 8; // Convert bytes to megabits (1 MB = 8 Mb)
 
         private class NetworkAdapterInfo
         {
@@ -19,17 +19,17 @@ namespace Memory_Monitor
             public long LastBytesSent { get; set; }
             public long LastBytesReceived { get; set; }
             public DateTime LastUpdate { get; set; } = DateTime.Now;
-            public float UploadMBps { get; set; }
-            public float DownloadMBps { get; set; }
+            public float UploadMbps { get; set; }
+            public float DownloadMbps { get; set; }
         }
 
         private List<NetworkAdapterInfo> _adapters = new List<NetworkAdapterInfo>();
         private bool _isAvailable;
 
         public bool IsAvailable => _isAvailable;
-        public float TotalUploadMBps { get; private set; }
-        public float TotalDownloadMBps { get; private set; }
-        public float TotalThroughputMBps => TotalUploadMBps + TotalDownloadMBps;
+        public float TotalUploadMbps { get; private set; }
+        public float TotalDownloadMbps { get; private set; }
+        public float TotalThroughputMbps => TotalUploadMbps + TotalDownloadMbps;
 
         public NetworkMonitor()
         {
@@ -157,9 +157,9 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Updates and returns the current network throughput
+        /// Updates and returns the current network throughput in Mbps (megabits per second)
         /// </summary>
-        public (float uploadMBps, float downloadMBps, float totalMBps) Update()
+        public (float uploadMbps, float downloadMbps, float totalMbps) Update()
         {
             try
             {
@@ -172,22 +172,22 @@ namespace Memory_Monitor
                     {
                         if (adapter.BytesSentCounter != null && adapter.BytesReceivedCounter != null)
                         {
-                            // Get bytes/sec and convert to MB/sec
+                            // Get bytes/sec and convert to Mbps (megabits per second)
                             float sentBytes = adapter.BytesSentCounter.NextValue();
                             float receivedBytes = adapter.BytesReceivedCounter.NextValue();
 
-                            adapter.UploadMBps = sentBytes / BYTES_TO_MB;
-                            adapter.DownloadMBps = receivedBytes / BYTES_TO_MB;
+                            adapter.UploadMbps = (sentBytes / BYTES_TO_MEGABITS) * 8;
+                            adapter.DownloadMbps = (receivedBytes / BYTES_TO_MEGABITS) * 8;
 
-                            totalUpload += adapter.UploadMBps;
-                            totalDownload += adapter.DownloadMBps;
+                            totalUpload += adapter.UploadMbps;
+                            totalDownload += adapter.DownloadMbps;
                         }
                     }
 
-                    TotalUploadMBps = totalUpload;
-                    TotalDownloadMBps = totalDownload;
+                    TotalUploadMbps = totalUpload;
+                    TotalDownloadMbps = totalDownload;
 
-                    return (TotalUploadMBps, TotalDownloadMBps, TotalThroughputMBps);
+                    return (TotalUploadMbps, TotalDownloadMbps, TotalThroughputMbps);
                 }
             }
             catch (Exception ex)
@@ -195,8 +195,8 @@ namespace Memory_Monitor
                 Debug.WriteLine($"Error updating network throughput: {ex.Message}");
             }
 
-            TotalUploadMBps = 0;
-            TotalDownloadMBps = 0;
+            TotalUploadMbps = 0;
+            TotalDownloadMbps = 0;
             return (0, 0, 0);
         }
 

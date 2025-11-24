@@ -9,8 +9,9 @@ namespace Memory_Monitor
         private const long BYTES_TO_MB = 1024 * 1024;
         private const long BYTES_TO_GB = 1024 * 1024 * 1024;
         private const int MIN_MEMORY_MB = 400;
-        private const float MAX_DISK_SPEED_MBPS = 500f; // Max MB/s for disk graph scaling
-        private const float MAX_NETWORK_SPEED_MBPS = 125f; // Max MB/s for network graph scaling (1 Gbps)
+
+        // Auto-scaling thresholds for gauges (in Mbps)
+        private static readonly float[] SCALE_OPTIONS = { 10f, 25f, 50f, 100f, 250f, 500f, 1000f, 2500f, 5000f, 10000f };
 
         private CPUMonitor? _cpuMonitor;
         private GPUMonitor? _gpuMonitor;
@@ -19,6 +20,14 @@ namespace Memory_Monitor
 
         private bool _showDiskMonitor = false;
         private bool _showNetworkMonitor = false;
+
+        // Track peak values for auto-scaling
+        private float _diskPeakMbps = 0;
+        private float _networkPeakMbps = 0;
+
+        // Track CPU and GPU values for tray icon
+        private int _lastCpuUsage = 0;
+        private int _lastGpuUsage = 0;
 
         // Windows API for memory info
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -50,7 +59,73 @@ namespace Memory_Monitor
             LoadSettings();
             InitializeMonitors();
             InitializeUI();
+            InitializeTrayIcon();
             ApplyTheme(); // Apply saved or default theme
+        }
+
+        private void InitializeTrayIcon()
+        {
+            // Use form icon if available, otherwise use system application icon
+            if (this.Icon != null)
+            {
+                notifyIcon.Icon = this.Icon;
+            }
+            else
+            {
+                notifyIcon.Icon = SystemIcons.Application;
+            }
+            
+            // Set initial tray icon text
+            UpdateTrayIconText();
+            
+            // Set up form to minimize to tray
+            this.Resize += Form1_ResizeMinimizeToTray;
+        }
+
+        private void Form1_ResizeMinimizeToTray(object? sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+                this.ShowInTaskbar = false;
+            }
+        }
+
+        private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
+        {
+            ShowForm();
+        }
+
+        private void ShowToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            ShowForm();
+        }
+
+        private void ExitToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void ShowForm()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            this.Activate();
+        }
+
+        private void UpdateTrayIconText()
+        {
+            // Format: "CPU: 45 GPU: 32"
+            string trayText = $"CPU: {_lastCpuUsage} GPU: {_lastGpuUsage}";
+            
+            // Tooltip text is limited to 63 characters
+            if (trayText.Length > 63)
+            {
+                trayText = trayText.Substring(0, 63);
+            }
+            
+            notifyIcon.Text = trayText;
         }
 
         private void LoadSettings()
@@ -149,11 +224,19 @@ namespace Memory_Monitor
             progressBarGPUMemory.Value = 0;
             progressBarGPUMemory.Maximum = 100;
 
-            // Set initial values for Disk
-            lblDiskUsageValue.Text = _diskMonitor?.IsAvailable == true ? "0 MB/s" : "N/A";
+            // Set initial values for Disk (now in Mbps)
+            lblDiskUsageTitle.Text = "Disk Speed";
+            lblDiskUsageValue.Text = _diskMonitor?.IsAvailable == true ? "0 Mbps" : "N/A";
+            
+            // Configure disk gauge
+            diskUsageGauge.MaxValue = 100f; // Start with 100 Mbps scale
 
-            // Set initial values for Network
-            lblNetworkUsageValue.Text = _networkMonitor?.IsAvailable == true ? "0 MB/s" : "N/A";
+            // Set initial values for Network (now in Mbps)
+            lblNetworkUsageTitle.Text = "Network Speed";
+            lblNetworkUsageValue.Text = _networkMonitor?.IsAvailable == true ? "0 Mbps" : "N/A";
+            
+            // Configure network gauge
+            networkUsageGauge.MaxValue = 100f; // Start with 100 Mbps scale
 
             // Apply visibility settings
             UpdateMonitorVisibility();
@@ -165,17 +248,39 @@ namespace Memory_Monitor
             UpdateAllMetrics();
         }
 
+        /// <summary>
+        /// Determines the appropriate scale for a gauge based on current and peak values
+        /// </summary>
+        private float GetAutoScale(float currentValue, float peakValue)
+        {
+            // Use the higher of current or peak for scale selection
+            float targetValue = Math.Max(currentValue, peakValue);
+            
+            // Find the smallest scale that can accommodate the value with some headroom
+            // Scale up when value exceeds 95% of current scale
+            foreach (float scale in SCALE_OPTIONS)
+            {
+                if (targetValue <= scale * 0.95f) // Use 95% of scale as threshold
+                {
+                    return scale;
+                }
+            }
+            
+            // If value exceeds all scales, use the largest
+            return SCALE_OPTIONS[^1];
+        }
+
         private void UpdateMonitorVisibility()
         {
             // Show/hide disk monitor controls
             lblDiskUsageTitle.Visible = _showDiskMonitor;
             lblDiskUsageValue.Visible = _showDiskMonitor;
-            diskUsageGraph.Visible = _showDiskMonitor;
+            diskUsageGauge.Visible = _showDiskMonitor;
 
             // Show/hide network monitor controls
             lblNetworkUsageTitle.Visible = _showNetworkMonitor;
             lblNetworkUsageValue.Visible = _showNetworkMonitor;
-            networkUsageGraph.Visible = _showNetworkMonitor;
+            networkUsageGauge.Visible = _showNetworkMonitor;
 
             // Trigger resize to recalculate layout
             Form1_Resize(this, EventArgs.Empty);
@@ -237,6 +342,9 @@ namespace Memory_Monitor
             // Apply to graphs
             ApplyGraphColors(colors);
 
+            // Apply to gauges
+            ApplyGaugeColors(colors);
+
             // Apply to ListView
             ApplyListViewColors(colors);
         }
@@ -291,21 +399,32 @@ namespace Memory_Monitor
             gpuMemoryGraph.BackColor = colors.GraphBackground;
             gpuMemoryGraph.LineColor = colors.GPUColor;
 
-            // Disk graph
-            diskUsageGraph.BackColor = colors.GraphBackground;
-            diskUsageGraph.LineColor = colors.DiskColor;
-
-            // Network graph
-            networkUsageGraph.BackColor = colors.GraphBackground;
-            networkUsageGraph.LineColor = colors.NetworkColor;
-
             // Force graphs to redraw
             cpuUsageGraph.Invalidate();
             gpuUsageGraph.Invalidate();
             systemMemoryGraph.Invalidate();
             gpuMemoryGraph.Invalidate();
-            diskUsageGraph.Invalidate();
-            networkUsageGraph.Invalidate();
+        }
+
+        private void ApplyGaugeColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
+            Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
+            Color DiskColor, Color NetworkColor,
+            Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
+            Color MenuText) colors)
+        {
+            // Disk gauge
+            diskUsageGauge.GaugeBackgroundColor = colors.GraphBackground;
+            diskUsageGauge.GaugeColor = colors.DiskColor;
+            diskUsageGauge.NeedleColor = colors.DiskColor;
+
+            // Network gauge
+            networkUsageGauge.GaugeBackgroundColor = colors.GraphBackground;
+            networkUsageGauge.GaugeColor = colors.NetworkColor;
+            networkUsageGauge.NeedleColor = colors.NetworkColor;
+
+            // Force gauges to redraw
+            diskUsageGauge.Invalidate();
+            networkUsageGauge.Invalidate();
         }
 
         private void ApplyListViewColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
@@ -348,17 +467,20 @@ namespace Memory_Monitor
                     float cpuUsage = _cpuMonitor.Update();
                     int cpuPercent = (int)Math.Round(cpuUsage);
 
+                    _lastCpuUsage = cpuPercent;
                     lblCPUUsageValue.Text = $"{cpuPercent}%";
                     cpuUsageGraph.AddDataPoint(cpuUsage);
                 }
                 else
                 {
+                    _lastCpuUsage = 0;
                     lblCPUUsageValue.Text = "N/A";
                     cpuUsageGraph.AddDataPoint(0);
                 }
             }
             catch (Exception ex)
             {
+                _lastCpuUsage = 0;
                 lblCPUUsageValue.Text = "Error";
                 Debug.WriteLine($"Error in UpdateCPUUsage: {ex.Message}");
             }
@@ -373,17 +495,23 @@ namespace Memory_Monitor
                     float gpuUsage = _gpuMonitor.UpdateUsage();
                     int gpuPercent = (int)Math.Round(gpuUsage);
 
+                    _lastGpuUsage = gpuPercent;
                     lblGPUUsageValue.Text = $"{gpuPercent}%";
                     gpuUsageGraph.AddDataPoint(gpuUsage);
                 }
                 else
                 {
+                    _lastGpuUsage = 0;
                     lblGPUUsageValue.Text = "N/A";
                     gpuUsageGraph.AddDataPoint(0);
                 }
+                
+                // Update tray icon text after GPU update (called after CPU)
+                UpdateTrayIconText();
             }
             catch (Exception ex)
             {
+                _lastGpuUsage = 0;
                 lblGPUUsageValue.Text = "Error";
                 Debug.WriteLine($"Error in UpdateGPUUsage: {ex.Message}");
             }
@@ -395,24 +523,31 @@ namespace Memory_Monitor
             {
                 if (_diskMonitor != null && _diskMonitor.IsAvailable)
                 {
-                    var (readMBps, writeMBps, totalMBps) = _diskMonitor.Update();
+                    var (readMbps, writeMbps, totalMbps) = _diskMonitor.Update();
 
-                    // Display total throughput
-                    lblDiskUsageValue.Text = $"{totalMBps:F1} MB/s (R: {readMBps:F1} | W: {writeMBps:F1})";
+                    // Update peak value
+                    _diskPeakMbps = Math.Max(_diskPeakMbps, totalMbps);
                     
-                    // Scale for graph (0-100 based on MAX_DISK_SPEED_MBPS)
-                    float scaledValue = (totalMBps / MAX_DISK_SPEED_MBPS) * 100f;
-                    diskUsageGraph.AddDataPoint(Math.Min(scaledValue, 100f));
+                    // Auto-scale the gauge
+                    float newScale = GetAutoScale(totalMbps, _diskPeakMbps);
+                    diskUsageGauge.MaxValue = newScale;
+
+                    // Display current speed with scale
+                    lblDiskUsageValue.Text = $"{totalMbps:F1} Mbps (Scale: {newScale:F0})";
+                    
+                    // Update gauge
+                    diskUsageGauge.SetValue(totalMbps, $"{totalMbps:F1}");
                 }
                 else
                 {
                     lblDiskUsageValue.Text = "N/A";
-                    diskUsageGraph.AddDataPoint(0);
+                    diskUsageGauge.SetValue(0, "0");
                 }
             }
             catch (Exception ex)
             {
                 lblDiskUsageValue.Text = "Error";
+                diskUsageGauge.SetValue(0, "0");
                 Debug.WriteLine($"Error in UpdateDiskUsage: {ex.Message}");
             }
         }
@@ -423,24 +558,31 @@ namespace Memory_Monitor
             {
                 if (_networkMonitor != null && _networkMonitor.IsAvailable)
                 {
-                    var (uploadMBps, downloadMBps, totalMBps) = _networkMonitor.Update();
+                    var (uploadMbps, downloadMbps, totalMbps) = _networkMonitor.Update();
 
-                    // Display total throughput
-                    lblNetworkUsageValue.Text = $"{totalMBps:F1} MB/s (? {uploadMBps:F1} | ? {downloadMBps:F1})";
+                    // Update peak value
+                    _networkPeakMbps = Math.Max(_networkPeakMbps, totalMbps);
                     
-                    // Scale for graph (0-100 based on MAX_NETWORK_SPEED_MBPS)
-                    float scaledValue = (totalMBps / MAX_NETWORK_SPEED_MBPS) * 100f;
-                    networkUsageGraph.AddDataPoint(Math.Min(scaledValue, 100f));
+                    // Auto-scale the gauge
+                    float newScale = GetAutoScale(totalMbps, _networkPeakMbps);
+                    networkUsageGauge.MaxValue = newScale;
+
+                    // Display current speed with scale
+                    lblNetworkUsageValue.Text = $"{totalMbps:F1} Mbps (Scale: {newScale:F0})";
+                    
+                    // Update gauge
+                    networkUsageGauge.SetValue(totalMbps, $"{totalMbps:F1}");
                 }
                 else
                 {
                     lblNetworkUsageValue.Text = "N/A";
-                    networkUsageGraph.AddDataPoint(0);
+                    networkUsageGauge.SetValue(0, "0");
                 }
             }
             catch (Exception ex)
             {
                 lblNetworkUsageValue.Text = "Error";
+                networkUsageGauge.SetValue(0, "0");
                 Debug.WriteLine($"Error in UpdateNetworkUsage: {ex.Message}");
             }
         }
@@ -595,9 +737,13 @@ namespace Memory_Monitor
                 const int spacing = 20;
                 const int menuHeight = 24;
                 
-                // Calculate column widths (50% each with margin)
-                int columnWidth = (formWidth - (3 * margin)) / 2;
-                int rightColumnX = margin + columnWidth + spacing;
+                // Determine if we show disk/network gauges
+                bool showDiskMonitor = _showDiskMonitor;
+                bool showNetworkMonitor = _showNetworkMonitor;
+                
+                // Always use 2 columns for main content
+                int columnWidth = (formWidth - (margin * 3)) / 2;
+                int col2X = margin + columnWidth + spacing;
 
                 int currentY = menuHeight + margin;
 
@@ -611,67 +757,80 @@ namespace Memory_Monitor
                 cpuUsageGraph.Size = new Size(columnWidth, 60);
 
                 // GPU Usage (right)
-                lblGPUUsageTitle.Location = new Point(rightColumnX, currentY);
-                lblGPUUsageValue.Location = new Point(rightColumnX, currentY + 25);
-                gpuUsageGraph.Location = new Point(rightColumnX, currentY + 65);
+                lblGPUUsageTitle.Location = new Point(col2X, currentY);
+                lblGPUUsageValue.Location = new Point(col2X, currentY + 25);
+                gpuUsageGraph.Location = new Point(col2X, currentY + 65);
                 gpuUsageGraph.Size = new Size(columnWidth, 60);
 
                 currentY += usageHeight;
 
-                // Disk/Network section (conditional second row)
-                if (_showDiskMonitor || _showNetworkMonitor)
-                {
-                    if (_showDiskMonitor)
-                    {
-                        lblDiskUsageTitle.Location = new Point(margin, currentY);
-                        lblDiskUsageValue.Location = new Point(margin, currentY + 25);
-                        diskUsageGraph.Location = new Point(margin, currentY + 65);
-                        diskUsageGraph.Size = new Size(columnWidth, 60);
-                    }
-
-                    if (_showNetworkMonitor)
-                    {
-                        lblNetworkUsageTitle.Location = new Point(rightColumnX, currentY);
-                        lblNetworkUsageValue.Location = new Point(rightColumnX, currentY + 25);
-                        networkUsageGraph.Location = new Point(rightColumnX, currentY + 65);
-                        networkUsageGraph.Size = new Size(columnWidth, 60);
-                    }
-
-                    currentY += usageHeight;
-                }
-
                 // Memory section
-                int memoryHeight = 150;
+                int memoryHeight = 160;
 
                 // System Memory (left)
                 lblSystemMemoryTitle.Location = new Point(margin, currentY);
                 lblSystemMemoryValue.Location = new Point(margin, currentY + 25);
-                progressBarSystemMemory.Location = new Point(margin, currentY + 45);
+                progressBarSystemMemory.Location = new Point(margin, currentY + 50);
                 progressBarSystemMemory.Size = new Size(columnWidth - 60, 20);
-                lblSystemMemoryPercent.Location = new Point(margin + columnWidth - 50, currentY + 47);
-                systemMemoryGraph.Location = new Point(margin, currentY + 70);
+                lblSystemMemoryPercent.Location = new Point(margin + columnWidth - 50, currentY + 52);
+                systemMemoryGraph.Location = new Point(margin, currentY + 80);
                 systemMemoryGraph.Size = new Size(columnWidth, 60);
 
                 // GPU Memory (right)
-                lblGPUMemoryTitle.Location = new Point(rightColumnX, currentY);
-                lblGPUMemoryValue.Location = new Point(rightColumnX, currentY + 25);
-                progressBarGPUMemory.Location = new Point(rightColumnX, currentY + 45);
+                lblGPUMemoryTitle.Location = new Point(col2X, currentY);
+                lblGPUMemoryValue.Location = new Point(col2X, currentY + 25);
+                progressBarGPUMemory.Location = new Point(col2X, currentY + 50);
                 progressBarGPUMemory.Size = new Size(columnWidth - 60, 20);
-                lblGPUMemoryPercent.Location = new Point(rightColumnX + columnWidth - 50, currentY + 47);
-                gpuMemoryGraph.Location = new Point(rightColumnX, currentY + 70);
+                lblGPUMemoryPercent.Location = new Point(col2X + columnWidth - 50, currentY + 52);
+                gpuMemoryGraph.Location = new Point(col2X, currentY + 80);
                 gpuMemoryGraph.Size = new Size(columnWidth, 60);
 
                 currentY += memoryHeight;
 
-                // Process list (bottom section)
+                // Gauge section - below memory graphs
+                if (showDiskMonitor || showNetworkMonitor)
+                {
+                    int gaugeSize = Math.Min(columnWidth - 40, 160);
+                    int gaugeSectionHeight = 0;
+                    
+                    if (showDiskMonitor)
+                    {
+                        int gaugeX = margin + (columnWidth - gaugeSize) / 2;
+                        
+                        lblDiskUsageTitle.Location = new Point(margin, currentY);
+                        lblDiskUsageValue.Location = new Point(margin, currentY + 23);
+                        diskUsageGauge.Location = new Point(gaugeX, currentY + 45);
+                        diskUsageGauge.Size = new Size(gaugeSize, gaugeSize);
+                        
+                        gaugeSectionHeight = Math.Max(gaugeSectionHeight, 45 + gaugeSize);
+                    }
+
+                    if (showNetworkMonitor)
+                    {
+                        int gaugeX = col2X + (columnWidth - gaugeSize) / 2;
+                        
+                        lblNetworkUsageTitle.Location = new Point(col2X, currentY);
+                        lblNetworkUsageValue.Location = new Point(col2X, currentY + 23);
+                        networkUsageGauge.Location = new Point(gaugeX, currentY + 45);
+                        networkUsageGauge.Size = new Size(gaugeSize, gaugeSize);
+                        
+                        gaugeSectionHeight = Math.Max(gaugeSectionHeight, 45 + gaugeSize);
+                    }
+                    
+                    currentY += gaugeSectionHeight + 20; // Add spacing after gauges
+                }
+
+                // Process list (uses full width, below gauges)
                 lblProcessesTitle.Location = new Point(margin, currentY);
                 
                 int listViewY = currentY + 30;
                 int listViewHeight = formHeight - listViewY - margin;
+                int listViewWidth = formWidth - (2 * margin); // Full width
+                
                 listViewProcesses.Location = new Point(margin, listViewY);
-                listViewProcesses.Size = new Size(formWidth - (2 * margin), Math.Max(100, listViewHeight));
+                listViewProcesses.Size = new Size(listViewWidth, Math.Max(100, listViewHeight));
 
-                // Adjust column widths
+                // Adjust column widths for full-width list
                 if (listViewProcesses.Columns.Count >= 3)
                 {
                     int totalWidth = listViewProcesses.ClientSize.Width - 4; // Subtract scrollbar space

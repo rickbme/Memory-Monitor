@@ -1,0 +1,202 @@
+# Final Layout: Gauges Below Memory Graphs
+
+## Layout Restructuring Complete
+
+The form has been reorganized to place the disk and network gauges below their respective memory graphs in a clean 2-column layout.
+
+## New Layout Structure
+
+### Column Layout (2 Columns)
+```
+?????????????????????????????????????????????????????
+?      LEFT COLUMN        ?      RIGHT COLUMN       ?
+?????????????????????????????????????????????????????
+?  CPU Usage              ?  GPU Usage              ?
+?  [Value + Graph]        ?  [Value + Graph]        ?
+?????????????????????????????????????????????????????
+?  System Memory          ?  GPU Memory             ?
+?  [Progress + Graph]     ?  [Progress + Graph]     ?
+?????????????????????????????????????????????????????
+?  Disk Gauge (optional)  ?  Network Gauge (opt)    ?
+?  [   ??   ]            ?  [   ??   ]            ?
+?????????????????????????????????????????????????????
+???????????????????????????????????????????????????
+?  Processes Using > 400 MB RAM (Full Width)      ?
+?  [Process List Table]                           ?
+???????????????????????????????????????????????????
+```
+
+## Key Changes
+
+### 1. **Two-Column Layout**
+- **Left Column**: CPU ? System Memory ? Disk Gauge
+- **Right Column**: GPU ? GPU Memory ? Network Gauge
+- Each column width: `(formWidth - 60px) / 2`
+- Spacing between columns: 20px
+
+### 2. **Gauge Positioning**
+- Disk gauge: Below system memory graph (left column)
+- Network gauge: Below GPU memory graph (right column)
+- Both gauges aligned horizontally at the same Y position
+- Size: Maximum 160px, centered in column
+
+### 3. **Form Minimum Size**
+- **Previous**: 680 × 650 pixels
+- **New**: 520 × 700 pixels
+- Width reduced by 160px (no third column needed)
+- Height increased by 50px (gauges below graphs)
+
+### 4. **Vertical Spacing**
+```
+Menu:           24px (fixed)
+Margin:         20px
+CPU/GPU:        160px (title + value + graph)
+Memory:         160px (title + value + progress + graph)
+Gauges:         ~225px (title + value + gauge + spacing)
+Process List:   Remaining height
+Bottom Margin:  20px
+```
+
+## Benefits
+
+### Space Efficiency:
+1. **Narrower Form**: Minimum width reduced from 680px to 520px
+2. **Better Proportions**: 2 columns instead of 3 provides better balance
+3. **Vertical Organization**: Logical grouping (usage ? memory ? I/O)
+4. **Full Width Process List**: More space for process information
+
+### Visual Hierarchy:
+```
+Level 1: CPU/GPU Usage Metrics (top priority)
+Level 2: Memory Metrics (secondary)
+Level 3: Disk/Network I/O (tertiary, optional)
+Level 4: Process Details (reference)
+```
+
+### User Experience:
+1. **Easier to Scan**: Top-to-bottom flow within each column
+2. **Related Metrics Grouped**: CPU/System Memory and GPU/GPU Memory
+3. **Optional Gauges**: Can be hidden without affecting main layout
+4. **Responsive**: Works well at narrower widths
+
+## Responsive Behavior
+
+### With Both Gauges Visible:
+```
+Width: 520px minimum
+???????????????????????????????
+? CPU/Sys Mem  ? GPU/GPU Mem  ?
+? Disk Gauge   ? Net Gauge    ?
+?                              ?
+? Process List (Full Width)   ?
+????????????????????????????????
+```
+
+### With One Gauge Visible:
+```
+Width: 520px minimum
+???????????????????????????????
+? CPU/Sys Mem  ? GPU/GPU Mem  ?
+? Disk Gauge   ?              ?
+?                              ?
+? Process List (Full Width)   ?
+????????????????????????????????
+```
+
+### With No Gauges:
+```
+Width: 520px minimum
+???????????????????????????????
+? CPU/Sys Mem  ? GPU/GPU Mem  ?
+?                              ?
+? Process List (Full Width)   ?
+????????????????????????????????
+```
+
+## Layout Calculation Logic
+
+### Column Width:
+```csharp
+int columnWidth = (formWidth - (margin * 3)) / 2;
+// margin * 3 = left margin + center spacing + right margin
+```
+
+### Gauge Positioning:
+```csharp
+int gaugeSize = Math.Min(columnWidth - 40, 160);
+int gaugeX = margin + (columnWidth - gaugeSize) / 2; // Center in column
+```
+
+### Dynamic Height:
+```csharp
+currentY = menuHeight + usage + memory;
+if (showGauges) {
+    currentY += gaugeHeight + spacing;
+}
+// Process list starts here
+```
+
+## Alignment Details
+
+### Horizontal:
+- Left column starts at: `20px`
+- Right column starts at: `20px + columnWidth + 20px`
+- Gauges centered within their respective columns
+- Process list uses full width: `formWidth - 40px`
+
+### Vertical:
+- Section titles aligned at same Y across columns
+- Graphs end at same Y position
+- Gauges aligned at same Y position
+- Process list starts below all metrics
+
+## Size Specifications
+
+### Minimum Dimensions:
+- **Width**: 520px (fits 2 × 240px columns + margins)
+- **Height**: 700px (all sections + process list minimum)
+
+### Column Sizing:
+- **Column Width**: `(width - 60) / 2` pixels
+- **Minimum Column**: 240px (at 520px width)
+- **Recommended Width**: 640-800px for comfortable viewing
+
+### Gauge Sizing:
+- **Maximum Size**: 160px × 160px
+- **Minimum Size**: 120px × 120px (inherent control minimum)
+- **Actual Size**: `Math.Min(columnWidth - 40, 160)`
+
+## Accessibility
+
+### At Minimum Width (520px):
+- Each column: ~240px
+- Gauges: ~200px (max within column)
+- Process table: 480px (readable with 3 columns)
+
+### At Comfortable Width (640px):
+- Each column: ~300px
+- Gauges: 160px (maximum size)
+- Process table: 600px (comfortable reading)
+
+### At Large Width (800px+):
+- Each column: ~380px
+- Gauges: 160px (capped at maximum)
+- Process table: 760px+ (excellent readability)
+
+## Performance Considerations
+
+1. **Fewer Calculations**: 2 columns instead of 3
+2. **Simpler Logic**: No conditional third column
+3. **Consistent Layout**: Gauges always in same position structure
+4. **Faster Resize**: Simpler calculations in Form1_Resize
+
+## Visual Balance
+
+The layout now provides excellent visual balance:
+
+1. **Symmetry**: Left and right columns mirror each other
+2. **Alignment**: All section tops and bottoms align
+3. **White Space**: Proper margins and spacing throughout
+4. **Hierarchy**: Clear visual priority of information
+
+This creates a professional, easy-to-read monitoring dashboard that works efficiently at various window sizes.

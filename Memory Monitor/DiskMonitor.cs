@@ -7,24 +7,24 @@ namespace Memory_Monitor
     /// </summary>
     public class DiskMonitor : IDisposable
     {
-        private const long BYTES_TO_MB = 1024 * 1024;
+        private const long BYTES_TO_MEGABITS = 1024 * 1024 / 8; // Convert bytes to megabits (1 MB = 8 Mb)
 
         private class DiskCounters
         {
             public string DiskName { get; set; } = "";
             public PerformanceCounter? ReadCounter { get; set; }
             public PerformanceCounter? WriteCounter { get; set; }
-            public float LastReadMBps { get; set; }
-            public float LastWriteMBps { get; set; }
+            public float LastReadMbps { get; set; }
+            public float LastWriteMbps { get; set; }
         }
 
         private List<DiskCounters> _diskCounters = new List<DiskCounters>();
         private bool _isAvailable;
 
         public bool IsAvailable => _isAvailable;
-        public float TotalReadMBps { get; private set; }
-        public float TotalWriteMBps { get; private set; }
-        public float TotalThroughputMBps => TotalReadMBps + TotalWriteMBps;
+        public float TotalReadMbps { get; private set; }
+        public float TotalWriteMbps { get; private set; }
+        public float TotalThroughputMbps => TotalReadMbps + TotalWriteMbps;
 
         public DiskMonitor()
         {
@@ -87,9 +87,9 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Updates and returns the current disk throughput
+        /// Updates and returns the current disk throughput in Mbps (megabits per second)
         /// </summary>
-        public (float readMBps, float writeMBps, float totalMBps) Update()
+        public (float readMbps, float writeMbps, float totalMbps) Update()
         {
             try
             {
@@ -102,22 +102,22 @@ namespace Memory_Monitor
                     {
                         if (disk.ReadCounter != null && disk.WriteCounter != null)
                         {
-                            // Get bytes/sec and convert to MB/sec
+                            // Get bytes/sec and convert to Mbps (megabits per second)
                             float readBytes = disk.ReadCounter.NextValue();
                             float writeBytes = disk.WriteCounter.NextValue();
 
-                            disk.LastReadMBps = readBytes / BYTES_TO_MB;
-                            disk.LastWriteMBps = writeBytes / BYTES_TO_MB;
+                            disk.LastReadMbps = (readBytes / BYTES_TO_MEGABITS) * 8;
+                            disk.LastWriteMbps = (writeBytes / BYTES_TO_MEGABITS) * 8;
 
-                            totalRead += disk.LastReadMBps;
-                            totalWrite += disk.LastWriteMBps;
+                            totalRead += disk.LastReadMbps;
+                            totalWrite += disk.LastWriteMbps;
                         }
                     }
 
-                    TotalReadMBps = totalRead;
-                    TotalWriteMBps = totalWrite;
+                    TotalReadMbps = totalRead;
+                    TotalWriteMbps = totalWrite;
 
-                    return (TotalReadMBps, TotalWriteMBps, TotalThroughputMBps);
+                    return (TotalReadMbps, TotalWriteMbps, TotalThroughputMbps);
                 }
             }
             catch (Exception ex)
@@ -125,8 +125,8 @@ namespace Memory_Monitor
                 Debug.WriteLine($"Error updating disk throughput: {ex.Message}");
             }
 
-            TotalReadMBps = 0;
-            TotalWriteMBps = 0;
+            TotalReadMbps = 0;
+            TotalWriteMbps = 0;
             return (0, 0, 0);
         }
 
