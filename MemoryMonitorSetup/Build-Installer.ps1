@@ -44,20 +44,35 @@ try {
     Write-Host "? Installer build successful" -ForegroundColor Green
     Write-Host ""
     
-    # Step 5: Show output location
-    $MsiPath = Join-Path $SolutionRoot "MemoryMonitorSetup\bin\Release\en-US\MemoryMonitorSetup.msi"
+    # Step 5: Show output location (try both possible locations)
+    $MsiPath = Join-Path $SolutionRoot "MemoryMonitorSetup\bin\Release\MemoryMonitorSetup.msi"
+    $MsiPathAlt = Join-Path $SolutionRoot "MemoryMonitorSetup\bin\Release\en-US\MemoryMonitorSetup.msi"
+    
     if (Test-Path $MsiPath) {
         $MsiInfo = Get-Item $MsiPath
         Write-Host "========================================" -ForegroundColor Green
         Write-Host "? BUILD COMPLETE!" -ForegroundColor Green
         Write-Host "========================================" -ForegroundColor Green
         Write-Host "Installer Location: $MsiPath" -ForegroundColor Cyan
-        Write-Host "Installer Size: $([math]::Round($MsiInfo.Length/1MB,2)) MB" -ForegroundColor Cyan
+        Write-Host "Installer Size: $([math]::Round($MsiInfo.Length/1KB,2)) KB" -ForegroundColor Cyan
         Write-Host "Created: $($MsiInfo.LastWriteTime)" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "To install, run: msiexec /i `"$MsiPath`" /l*v install.log" -ForegroundColor Yellow
+    } elseif (Test-Path $MsiPathAlt) {
+        $MsiInfo = Get-Item $MsiPathAlt
+        Write-Host "========================================" -ForegroundColor Green
+        Write-Host "? BUILD COMPLETE!" -ForegroundColor Green
+        Write-Host "========================================" -ForegroundColor Green
+        Write-Host "Installer Location: $MsiPathAlt" -ForegroundColor Cyan
+        Write-Host "Installer Size: $([math]::Round($MsiInfo.Length/1KB,2)) KB" -ForegroundColor Cyan
+        Write-Host "Created: $($MsiInfo.LastWriteTime)" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "To install, run: msiexec /i `"$MsiPathAlt`" /l*v install.log" -ForegroundColor Yellow
     } else {
-        Write-Warning "MSI file not found at expected location: $MsiPath"
+        Write-Warning "MSI file not found in expected locations."
+        Write-Host "Searched:" -ForegroundColor Yellow
+        Write-Host "  - $MsiPath" -ForegroundColor Yellow
+        Write-Host "  - $MsiPathAlt" -ForegroundColor Yellow
     }
     
 } catch {

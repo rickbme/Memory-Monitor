@@ -11,6 +11,18 @@
     
     <MediaTemplate EmbedCab="yes" />
     
+    <!-- Check for .NET 8 Desktop Runtime via registry -->
+    <Property Id="DOTNET8INSTALLED">
+      <RegistrySearch Id="DotNet8Registry"
+                      Root="HKLM"
+                      Key="SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedhost"
+                      Name="Version"
+                      Type="raw" />
+    </Property>
+    
+    <Launch Condition="Installed OR DOTNET8INSTALLED" 
+            Message="This application requires .NET 8.0 Desktop Runtime or later. Please download and install it from https://dotnet.microsoft.com/download/dotnet/8.0" />
+    
     <Feature Id="Main" Title="Memory Monitor" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
