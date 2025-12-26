@@ -31,6 +31,10 @@ namespace Memory_Monitor
         private int _cpuTempCheckCount = 0;
         private const int CPU_TEMP_CHECK_THRESHOLD = 5; // Check for 5 seconds before showing warning
 
+        // For dragging borderless window
+        private bool _isDragging = false;
+        private Point _dragStartPoint;
+
         #region Windows API
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -58,10 +62,111 @@ namespace Memory_Monitor
         public MiniMonitorForm()
         {
             InitializeComponent();
+            SetupBorderlessWindow();
             InitializeMonitors();
             InitializeUI();
             InitializeTrayIcon();
             ApplyTheme();
+        }
+
+        private void SetupBorderlessWindow()
+        {
+            // Find the target monitor (prefer secondary monitor with 1920x480 or similar)
+            Screen targetScreen = FindTargetMonitor();
+            
+            // Position window to fill the target monitor
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = targetScreen.Bounds.Location;
+            this.Size = targetScreen.Bounds.Size;
+            
+            // Enable mouse events for dragging
+            this.MouseDown += MiniMonitorForm_MouseDown;
+            this.MouseMove += MiniMonitorForm_MouseMove;
+            this.MouseUp += MiniMonitorForm_MouseUp;
+            
+            // Add keyboard shortcut to close (Escape key)
+            this.KeyPreview = true;
+            this.KeyDown += MiniMonitorForm_KeyDown;
+
+            Debug.WriteLine($"Window positioned on: {targetScreen.DeviceName} at {targetScreen.Bounds}");
+        }
+
+        private Screen FindTargetMonitor()
+        {
+            // Look for a monitor that matches mini monitor dimensions (wide and short)
+            foreach (Screen screen in Screen.AllScreens)
+            {
+                // Check for typical mini monitor aspect ratios (4:1 or wider)
+                float aspectRatio = (float)screen.Bounds.Width / screen.Bounds.Height;
+                
+                if (aspectRatio >= 3.5f) // Very wide aspect ratio like 1920x480 (4:1)
+                {
+                    Debug.WriteLine($"Found mini monitor: {screen.DeviceName} - {screen.Bounds.Width}x{screen.Bounds.Height}");
+                    return screen;
+                }
+            }
+
+            // If no mini monitor found, use secondary monitor if available
+            if (Screen.AllScreens.Length > 1)
+            {
+                foreach (Screen screen in Screen.AllScreens)
+                {
+                    if (!screen.Primary)
+                    {
+                        Debug.WriteLine($"Using secondary monitor: {screen.DeviceName}");
+                        return screen;
+                    }
+                }
+            }
+
+            // Fall back to primary monitor
+            Debug.WriteLine("Using primary monitor");
+            return Screen.PrimaryScreen ?? Screen.AllScreens[0];
+        }
+
+        private void MiniMonitorForm_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _isDragging = true;
+                _dragStartPoint = e.Location;
+            }
+        }
+
+        private void MiniMonitorForm_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (_isDragging)
+            {
+                Point newLocation = this.Location;
+                newLocation.X += e.X - _dragStartPoint.X;
+                newLocation.Y += e.Y - _dragStartPoint.Y;
+                this.Location = newLocation;
+            }
+        }
+
+        private void MiniMonitorForm_MouseUp(object? sender, MouseEventArgs e)
+        {
+            _isDragging = false;
+        }
+
+        private void MiniMonitorForm_KeyDown(object? sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Escape:
+                    // Minimize to tray on Escape
+                    this.WindowState = FormWindowState.Minimized;
+                    this.Hide();
+                    this.ShowInTaskbar = false;
+                    e.Handled = true;
+                    break;
+                    
+                case Keys.F11:
+                    // Toggle TopMost
+                    this.TopMost = !this.TopMost;
+                    e.Handled = true;
+                    break;
+            }
         }
 
         private void InitializeMonitors()
@@ -396,11 +501,43 @@ namespace Memory_Monitor
 
         private void ExitToolStripMenuItem_Click(object? sender, EventArgs e) => Application.Exit();
 
+        private void MoveToMonitorToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            MoveToNextMonitor();
+        }
+
+        private void TopMostToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            this.TopMost = topMostToolStripMenuItem.Checked;
+        }
+
+        private void MoveToNextMonitor()
+        {
+            if (Screen.AllScreens.Length <= 1) return;
+
+            // Find current screen
+            Screen currentScreen = Screen.FromControl(this);
+            int currentIndex = Array.IndexOf(Screen.AllScreens, currentScreen);
+            
+            // Move to next screen (wrap around)
+            int nextIndex = (currentIndex + 1) % Screen.AllScreens.Length;
+            Screen nextScreen = Screen.AllScreens[nextIndex];
+
+            // Position and resize to fill the next screen
+            this.Location = nextScreen.Bounds.Location;
+            this.Size = nextScreen.Bounds.Size;
+            
+            // Re-layout gauges for new size
+            LayoutGauges();
+
+            Debug.WriteLine($"Moved to monitor: {nextScreen.DeviceName} at {nextScreen.Bounds}");
+        }
+
         private void ShowForm()
         {
             Show();
             WindowState = FormWindowState.Normal;
-            ShowInTaskbar = true;
+            ShowInTaskbar = false; // Keep out of taskbar for borderless mode
             Activate();
         }
 
@@ -424,32 +561,37 @@ namespace Memory_Monitor
             int formWidth = ClientSize.Width;
             int formHeight = ClientSize.Height;
 
-            // 6 gauges in a row with equal spacing
+            // 6 gauges in a row with minimal spacing for larger gauges
             int gaugeCount = 6;
-            int margin = 20;
-            int availableWidth = formWidth - (margin * 2);
+            int marginX = 10;  // Reduced side margins
+            int spacing = 5;   // Small gap between gauges
+            
+            int availableWidth = formWidth - (marginX * 2) - (spacing * (gaugeCount - 1));
             int gaugeWidth = availableWidth / gaugeCount;
-            int gaugeHeight = formHeight - 20; // Leave small margin top/bottom
-
-            int startX = margin;
-            int startY = 10;
+            
+            // Use more of the vertical space
+            int gaugeHeight = (int)(formHeight * 0.95f); // Use 95% of height
+            
+            // Center vertically
+            int startY = (formHeight - gaugeHeight) / 2;
+            int startX = marginX;
 
             ramGauge.Location = new Point(startX, startY);
             ramGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            cpuGauge.Location = new Point(startX + gaugeWidth, startY);
+            cpuGauge.Location = new Point(startX + gaugeWidth + spacing, startY);
             cpuGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            gpuUsageGauge.Location = new Point(startX + gaugeWidth * 2, startY);
+            gpuUsageGauge.Location = new Point(startX + (gaugeWidth + spacing) * 2, startY);
             gpuUsageGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            gpuVramGauge.Location = new Point(startX + gaugeWidth * 3, startY);
+            gpuVramGauge.Location = new Point(startX + (gaugeWidth + spacing) * 3, startY);
             gpuVramGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            diskGauge.Location = new Point(startX + gaugeWidth * 4, startY);
+            diskGauge.Location = new Point(startX + (gaugeWidth + spacing) * 4, startY);
             diskGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            networkGauge.Location = new Point(startX + gaugeWidth * 5, startY);
+            networkGauge.Location = new Point(startX + (gaugeWidth + spacing) * 5, startY);
             networkGauge.Size = new Size(gaugeWidth, gaugeHeight);
         }
 

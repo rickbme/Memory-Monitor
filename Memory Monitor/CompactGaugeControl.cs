@@ -112,10 +112,15 @@ namespace Memory_Monitor
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            int size = Math.Min(Width, Height - 25); // Leave room for label
+            // Calculate size to fit both gauge and label
+            int labelHeight = 25;
+            int availableHeight = Height - labelHeight;
+            int size = Math.Min(Width, availableHeight);
+            
+            // Center the gauge horizontally and vertically within available space
             int centerX = Width / 2;
-            int centerY = size / 2 + 5;
-            int gaugeRadius = (int)(size * 0.40f);
+            int centerY = availableHeight / 2;
+            int gaugeRadius = (int)(size * 0.42f); // Slightly larger radius
 
             if (gaugeRadius < 15) return;
 
@@ -125,14 +130,14 @@ namespace Memory_Monitor
             DrawNeedle(g, centerX, centerY, gaugeRadius);
             DrawCenterHub(g, centerX, centerY);
             
-            // Draw secondary value (temperature) above digital display if present
+            // Draw secondary value (temperature) if present
             if (!string.IsNullOrEmpty(_secondaryValue))
             {
                 DrawSecondaryValue(g, centerX, centerY, gaugeRadius);
             }
             
             DrawDigitalValue(g, centerX, centerY, gaugeRadius);
-            DrawLabel(g, centerX, size);
+            DrawLabel(g, centerX, availableHeight);
         }
 
         private void DrawGaugeFace(Graphics g, int cx, int cy, int radius)
@@ -283,10 +288,10 @@ namespace Memory_Monitor
 
         private void DrawSecondaryValue(Graphics g, int cx, int cy, int radius)
         {
-            // Draw temperature below the center hub, inside the gauge
-            int tempY = cy + 48;
+            // Draw temperature below the center hub, scaled to gauge size
+            int tempY = cy + (int)(radius * 0.35f);
 
-            using (var font = new Font("Consolas", 10f, FontStyle.Bold))
+            using (var font = new Font("Consolas", Math.Max(8f, radius * 0.12f), FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             {
                 // Draw glow effect
@@ -305,9 +310,9 @@ namespace Memory_Monitor
 
         private void DrawDigitalValue(Graphics g, int cx, int cy, int radius)
         {
-            int displayY = cy + radius - 10;
+            int displayY = cy + (int)(radius * 0.65f);
             int displayW = (int)(radius * 0.9f);
-            int displayH = 20;
+            int displayH = (int)(radius * 0.18f);
             int displayX = cx - displayW / 2;
 
             Rectangle displayRect = new Rectangle(displayX, displayY, displayW, displayH);
@@ -319,8 +324,9 @@ namespace Memory_Monitor
             using (var borderPen = new Pen(Color.FromArgb(60, 65, 70), 1))
                 g.DrawRectangle(borderPen, displayRect);
 
-            // Value text
-            using (var font = new Font("Consolas", 9f, FontStyle.Bold))
+            // Value text - scale font with gauge size
+            float fontSize = Math.Max(8f, radius * 0.1f);
+            using (var font = new Font("Consolas", fontSize, FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             using (var textBrush = new SolidBrush(_gaugeColor))
             {
@@ -328,13 +334,13 @@ namespace Memory_Monitor
             }
         }
 
-        private void DrawLabel(Graphics g, int cx, int gaugeHeight)
+        private void DrawLabel(Graphics g, int cx, int gaugeAreaHeight)
         {
             if (string.IsNullOrEmpty(_label)) return;
 
-            int labelY = gaugeHeight + 8;
+            int labelY = gaugeAreaHeight + 15;
 
-            using (var font = new Font("Segoe UI", 9f, FontStyle.Bold))
+            using (var font = new Font("Segoe UI", 18f, FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             using (var brush = new SolidBrush(_labelColor))
             {

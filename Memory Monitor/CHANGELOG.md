@@ -5,6 +5,32 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2024
+
+### Added
+- **Borderless Full Screen Mode** - Application now runs without title bar for clean display
+- **Auto Monitor Detection** - Automatically detects and positions on mini monitor (4:1 aspect ratio)
+- **Move to Next Monitor** - Tray menu option to cycle through available monitors
+- **Always on Top Toggle** - Tray menu option and F11 keyboard shortcut
+- **Window Dragging** - Click and drag anywhere to reposition the borderless window
+- **Keyboard Shortcuts**:
+  - `Escape` - Minimize to system tray
+  - `F11` - Toggle always on top
+
+### Changed
+- **Gauge Sizing** - Larger gauges using 95% of vertical space with minimal margins
+- **Gauge Centering** - Gauges now properly centered both horizontally and vertically
+- **Label Font Size** - Increased gauge labels from 10pt to 14pt for better readability
+- **Scaled Elements** - Temperature display, digital readout, and labels now scale proportionally with gauge size
+- **Gauge Radius** - Increased from 40% to 42% of available space for larger dials
+- **Reduced Margins** - Side margins reduced from 20px to 10px, 5px spacing between gauges
+
+### UI Improvements
+- Removed window title bar and borders for dedicated display use
+- Form automatically sizes to fill target monitor
+- Gauges dynamically resize when window size changes
+- All gauge text elements scale with gauge size
+
 ## [2.0.0] - 2024
 
 ### Added
@@ -56,6 +82,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Notes
+
+### Upgrading to 2.1.0
+- Application now runs in borderless full screen mode by default
+- Use the system tray icon to access controls (no title bar)
+- Press `Escape` to minimize to tray, `F11` to toggle always on top
+- Application auto-detects mini monitors with 4:1 aspect ratio
 
 ### Upgrading to 2.0.0
 - The application now requires **Administrator privileges** to access hardware sensors

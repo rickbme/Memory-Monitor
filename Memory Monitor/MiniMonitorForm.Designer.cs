@@ -23,6 +23,9 @@ namespace Memory_Monitor
             this.trayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.moveToMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.topMostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ramGauge = new Memory_Monitor.CompactGaugeControl();
             this.cpuGauge = new Memory_Monitor.CompactGaugeControl();
@@ -50,26 +53,50 @@ namespace Memory_Monitor
             this.trayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showToolStripMenuItem,
             this.toolStripSeparator1,
+            this.moveToMonitorToolStripMenuItem,
+            this.topMostToolStripMenuItem,
+            this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.trayContextMenu.Name = "trayContextMenu";
-            this.trayContextMenu.Size = new System.Drawing.Size(104, 54);
+            this.trayContextMenu.Size = new System.Drawing.Size(180, 120);
             // 
             // showToolStripMenuItem
             // 
             this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-            this.showToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.showToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.showToolStripMenuItem.Text = "Show";
             this.showToolStripMenuItem.Click += new System.EventHandler(this.ShowToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(100, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(176, 6);
+            // 
+            // moveToMonitorToolStripMenuItem
+            // 
+            this.moveToMonitorToolStripMenuItem.Name = "moveToMonitorToolStripMenuItem";
+            this.moveToMonitorToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.moveToMonitorToolStripMenuItem.Text = "Move to Next Monitor";
+            this.moveToMonitorToolStripMenuItem.Click += new System.EventHandler(this.MoveToMonitorToolStripMenuItem_Click);
+            // 
+            // topMostToolStripMenuItem
+            // 
+            this.topMostToolStripMenuItem.Name = "topMostToolStripMenuItem";
+            this.topMostToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.topMostToolStripMenuItem.Text = "Always on Top";
+            this.topMostToolStripMenuItem.Checked = true;
+            this.topMostToolStripMenuItem.CheckOnClick = true;
+            this.topMostToolStripMenuItem.Click += new System.EventHandler(this.TopMostToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -163,14 +190,17 @@ namespace Memory_Monitor
             this.Controls.Add(this.gpuUsageGauge);
             this.Controls.Add(this.cpuGauge);
             this.Controls.Add(this.ramGauge);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "MiniMonitorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "System Monitor";
+            this.TopMost = true;
             this.Resize += new System.EventHandler(this.MiniMonitorForm_Resize);
             this.trayContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -180,6 +210,9 @@ namespace Memory_Monitor
         private System.Windows.Forms.ContextMenuStrip trayContextMenu;
         private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem moveToMonitorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topMostToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private CompactGaugeControl ramGauge;
         private CompactGaugeControl cpuGauge;
