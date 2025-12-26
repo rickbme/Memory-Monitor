@@ -26,6 +26,11 @@ namespace Memory_Monitor
         private int _lastCpuUsage = 0;
         private int _lastGpuUsage = 0;
 
+        // CPU temperature warning
+        private bool _cpuTempWarningShown = false;
+        private int _cpuTempCheckCount = 0;
+        private const int CPU_TEMP_CHECK_THRESHOLD = 5; // Check for 5 seconds before showing warning
+
         #region Windows API
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -191,15 +196,23 @@ namespace Memory_Monitor
                     float usage = _cpuMonitor.Update();
                     _lastCpuUsage = (int)Math.Round(usage);
                     
-                    // Also get temperature if available
-                    if (_cpuMonitor.IsTemperatureAvailable)
+                    // Try to get temperature - only display if we get a valid reading > 0
+                    int temp = _cpuMonitor.UpdateTemperature();
+                    if (temp > 0)
                     {
-                        int temp = _cpuMonitor.UpdateTemperature();
                         cpuGauge.SetValue(usage, $"{_lastCpuUsage}%", $"{temp}°C");
+                        _cpuTempCheckCount = 0; // Reset counter when temp is available
                     }
                     else
                     {
                         cpuGauge.SetValue(usage, $"{_lastCpuUsage}%");
+                        
+                        // Check if we should show the warning
+                        _cpuTempCheckCount++;
+                        if (!_cpuTempWarningShown && _cpuTempCheckCount >= CPU_TEMP_CHECK_THRESHOLD)
+                        {
+                            ShowCpuTempWarning();
+                        }
                     }
                 }
                 else
@@ -208,6 +221,84 @@ namespace Memory_Monitor
                 }
             }
             catch { cpuGauge.SetValue(0, "ERR"); }
+        }
+
+        private void ShowCpuTempWarning()
+        {
+            _cpuTempWarningShown = true;
+            
+            // Create a semi-transparent overlay panel with the warning message
+            Panel warningPanel = new Panel
+            {
+                BackColor = Color.FromArgb(220, 30, 30, 35),
+                Size = new Size(500, 120),
+                BorderStyle = BorderStyle.None
+            };
+
+            Label titleLabel = new Label
+            {
+                Text = "? CPU Temperature Not Available",
+                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(255, 200, 50),
+                AutoSize = false,
+                Size = new Size(480, 25),
+                Location = new Point(10, 10),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            Label messageLabel = new Label
+            {
+                Text = "To enable CPU temperature monitoring:\n" +
+                       "1. Run HWiNFO (download from hwinfo.com)\n" +
+                       "2. Go to Settings ? Enable 'Shared Memory Support'\n" +
+                       "3. Keep HWiNFO running in the background",
+                Font = new Font("Segoe UI", 9f, FontStyle.Regular),
+                ForeColor = Color.FromArgb(200, 200, 200),
+                AutoSize = false,
+                Size = new Size(400, 60),
+                Location = new Point(50, 35),
+                TextAlign = ContentAlignment.TopLeft
+            };
+
+            Button dismissButton = new Button
+            {
+                Text = "Dismiss",
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(60, 65, 70),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(80, 28),
+                Location = new Point(210, 85),
+                Cursor = Cursors.Hand
+            };
+            dismissButton.FlatAppearance.BorderColor = Color.FromArgb(100, 105, 110);
+            dismissButton.Click += (s, e) =>
+            {
+                this.Controls.Remove(warningPanel);
+                warningPanel.Dispose();
+            };
+
+            warningPanel.Controls.Add(titleLabel);
+            warningPanel.Controls.Add(messageLabel);
+            warningPanel.Controls.Add(dismissButton);
+
+            // Center the panel on the form
+            warningPanel.Location = new Point(
+                (this.ClientSize.Width - warningPanel.Width) / 2,
+                (this.ClientSize.Height - warningPanel.Height) / 2
+            );
+
+            // Add border effect
+            warningPanel.Paint += (s, e) =>
+            {
+                using (Pen borderPen = new Pen(Color.FromArgb(255, 200, 50), 2))
+                {
+                    e.Graphics.DrawRectangle(borderPen, 0, 0, warningPanel.Width - 1, warningPanel.Height - 1);
+                }
+            };
+
+            this.Controls.Add(warningPanel);
+            warningPanel.BringToFront();
         }
 
         private void UpdateGPUUsage()

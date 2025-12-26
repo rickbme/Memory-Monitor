@@ -79,10 +79,10 @@ namespace Memory_Monitor
         {
             try
             {
-                if (_hardwareMonitor != null && IsTemperatureAvailable)
+                if (_hardwareMonitor != null)
                 {
                     var temp = _hardwareMonitor.GetCpuTemperature();
-                    if (temp.HasValue)
+                    if (temp.HasValue && temp.Value > 0)
                     {
                         CurrentTemperatureCelsius = temp.Value;
                         return CurrentTemperatureCelsius;

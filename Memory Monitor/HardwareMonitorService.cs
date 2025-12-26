@@ -31,7 +31,8 @@ namespace Memory_Monitor
     }
 
     /// <summary>
-    /// Wrapper service for LibreHardwareMonitor to provide CPU and other hardware temperatures
+    /// Wrapper service for LibreHardwareMonitor to provide CPU and other hardware temperatures.
+    /// Falls back to HWiNFO shared memory if LibreHardwareMonitor doesn't work.
     /// </summary>
     public class HardwareMonitorService : IDisposable
     {
@@ -39,9 +40,10 @@ namespace Memory_Monitor
         private UpdateVisitor? _updateVisitor;
         private IHardware? _cpuHardware;
         private IHardware? _motherboardHardware;
+        private HWiNFOReader? _hwinfoReader;
         private bool _isInitialized = false;
         private bool _sensorsFound = false;
-        private bool _useWmiFallback = false;
+        private bool _useHwinfoFallback = false;
 
         // Cached sensor references for quick updates
         private ISensor? _cpuPackageTemp;
@@ -49,7 +51,7 @@ namespace Memory_Monitor
         private ISensor? _motherboardCpuTemp;
 
         public bool IsAvailable => _isInitialized && _computer != null;
-        public bool IsCpuTemperatureAvailable => _isInitialized;
+        public bool IsCpuTemperatureAvailable => _sensorsFound || _useHwinfoFallback;
 
         public HardwareMonitorService()
         {
@@ -79,7 +81,7 @@ namespace Memory_Monitor
 
                 Debug.WriteLine("LibreHardwareMonitor Computer opened");
 
-                // Initial update using visitor pattern - do it multiple times
+                // Initial update using visitor pattern
                 for (int i = 0; i < 3; i++)
                 {
                     _computer.Accept(_updateVisitor);
@@ -107,21 +109,58 @@ namespace Memory_Monitor
                 FindCpuTemperatureSensors();
                 FindMotherboardCpuTemperature();
 
-                // If no valid sensors found, enable WMI fallback
+                // If no valid sensors found from LibreHardwareMonitor, try HWiNFO fallback
                 if (!_sensorsFound)
                 {
-                    Debug.WriteLine("No valid LibreHardwareMonitor sensors found, trying WMI fallback...");
-                    _useWmiFallback = TryWmiTemperature() != null;
-                    Debug.WriteLine($"WMI fallback available: {_useWmiFallback}");
+                    Debug.WriteLine("No valid LibreHardwareMonitor CPU temp sensors, trying HWiNFO fallback...");
+                    TryHwinfoFallback();
                 }
 
-                Debug.WriteLine($"HardwareMonitorService initialized. CPU Found: {_cpuHardware != null}, MB Found: {_motherboardHardware != null}, Sensors Found: {_sensorsFound}, WMI Fallback: {_useWmiFallback}");
+                Debug.WriteLine($"HardwareMonitorService initialized. LHM Sensors: {_sensorsFound}, HWiNFO Fallback: {_useHwinfoFallback}");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to initialize HardwareMonitorService: {ex.Message}");
                 Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 _isInitialized = false;
+                
+                // Even if LHM fails, try HWiNFO
+                TryHwinfoFallback();
+            }
+        }
+
+        private void TryHwinfoFallback()
+        {
+            try
+            {
+                _hwinfoReader = new HWiNFOReader();
+                if (_hwinfoReader.IsAvailable)
+                {
+                    // Test if we can get a temperature
+                    var temp = _hwinfoReader.GetCpuTemperature();
+                    if (temp.HasValue)
+                    {
+                        _useHwinfoFallback = true;
+                        Debug.WriteLine($"HWiNFO fallback enabled: {_hwinfoReader.CpuTempSensorName} = {temp}°C");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("HWiNFO is available but no CPU temperature found");
+                        _hwinfoReader.Dispose();
+                        _hwinfoReader = null;
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("HWiNFO shared memory not available");
+                    _hwinfoReader = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"HWiNFO fallback failed: {ex.Message}");
+                _hwinfoReader?.Dispose();
+                _hwinfoReader = null;
             }
         }
 
@@ -149,7 +188,7 @@ namespace Memory_Monitor
                     }
                 }
 
-                // Check sub-hardware (SuperIO chips like Nuvoton, ITE, etc.)
+                // Check sub-hardware (SuperIO chips)
                 Debug.WriteLine($"Motherboard has {_motherboardHardware.SubHardware.Length} sub-hardware devices:");
                 foreach (var subHardware in _motherboardHardware.SubHardware)
                 {
@@ -238,136 +277,59 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Try to get CPU temperature via WMI (works on some systems)
-        /// </summary>
-        private int? TryWmiTemperature()
-        {
-            try
-            {
-                // Try MSAcpi_ThermalZoneTemperature
-                using (var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature"))
-                {
-                    foreach (ManagementObject obj in searcher.Get())
-                    {
-                        var tempKelvin = Convert.ToDouble(obj["CurrentTemperature"]);
-                        // WMI returns temperature in tenths of Kelvin
-                        int tempCelsius = (int)((tempKelvin / 10.0) - 273.15);
-                        
-                        if (tempCelsius > 0 && tempCelsius < 150)
-                        {
-                            Debug.WriteLine($"WMI Thermal Zone temperature: {tempCelsius}°C");
-                            return tempCelsius;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"WMI MSAcpi_ThermalZoneTemperature failed: {ex.Message}");
-            }
-
-            try
-            {
-                // Try Win32_TemperatureProbe (rarely works but worth trying)
-                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_TemperatureProbe"))
-                {
-                    foreach (ManagementObject obj in searcher.Get())
-                    {
-                        var temp = obj["CurrentReading"];
-                        if (temp != null)
-                        {
-                            int tempCelsius = Convert.ToInt32(temp);
-                            if (tempCelsius > 0 && tempCelsius < 150)
-                            {
-                                Debug.WriteLine($"WMI Win32_TemperatureProbe: {tempCelsius}°C");
-                                return tempCelsius;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"WMI Win32_TemperatureProbe failed: {ex.Message}");
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Get current CPU temperature in Celsius
         /// </summary>
         public int? GetCpuTemperature()
         {
-            if (!_isInitialized) return null;
-
-            try
+            // First, try LibreHardwareMonitor sensors
+            if (_sensorsFound && _computer != null)
             {
-                // Update hardware
-                if (_computer != null)
+                try
                 {
                     _computer.Accept(_updateVisitor);
-                }
 
-                // Try CPU Package sensor first
-                if (_cpuPackageTemp != null && _cpuPackageTemp.Value.HasValue && _cpuPackageTemp.Value.Value > 0)
-                {
-                    int temp = (int)Math.Round(_cpuPackageTemp.Value.Value);
-                    if (temp > 0 && temp < 150)
+                    // Try CPU Package sensor
+                    if (_cpuPackageTemp != null && _cpuPackageTemp.Value.HasValue && _cpuPackageTemp.Value.Value > 0)
                     {
-                        return temp;
+                        int temp = (int)Math.Round(_cpuPackageTemp.Value.Value);
+                        if (temp > 0 && temp < 150) return temp;
+                    }
+
+                    // Try CPU Core Max sensor
+                    if (_cpuCoreMaxTemp != null && _cpuCoreMaxTemp.Value.HasValue && _cpuCoreMaxTemp.Value.Value > 0)
+                    {
+                        int temp = (int)Math.Round(_cpuCoreMaxTemp.Value.Value);
+                        if (temp > 0 && temp < 150) return temp;
+                    }
+
+                    // Try motherboard CPU temperature
+                    if (_motherboardCpuTemp != null && _motherboardCpuTemp.Value.HasValue && _motherboardCpuTemp.Value.Value > 0)
+                    {
+                        int temp = (int)Math.Round(_motherboardCpuTemp.Value.Value);
+                        if (temp > 0 && temp < 150) return temp;
                     }
                 }
-
-                // Try CPU Core Max sensor
-                if (_cpuCoreMaxTemp != null && _cpuCoreMaxTemp.Value.HasValue && _cpuCoreMaxTemp.Value.Value > 0)
+                catch (Exception ex)
                 {
-                    int temp = (int)Math.Round(_cpuCoreMaxTemp.Value.Value);
-                    if (temp > 0 && temp < 150)
-                    {
-                        return temp;
-                    }
-                }
-
-                // Try motherboard CPU temperature
-                if (_motherboardCpuTemp != null && _motherboardCpuTemp.Value.HasValue && _motherboardCpuTemp.Value.Value > 0)
-                {
-                    int temp = (int)Math.Round(_motherboardCpuTemp.Value.Value);
-                    if (temp > 0 && temp < 150)
-                    {
-                        Debug.WriteLine($"Using motherboard CPU temp: {temp}°C");
-                        return temp;
-                    }
-                }
-
-                // Try WMI fallback
-                if (_useWmiFallback)
-                {
-                    var wmiTemp = TryWmiTemperature();
-                    if (wmiTemp.HasValue)
-                    {
-                        return wmiTemp.Value;
-                    }
-                }
-
-                // Last resort: scan all CPU sensors
-                if (_cpuHardware != null)
-                {
-                    foreach (var sensor in _cpuHardware.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Temperature && 
-                            sensor.Value.HasValue && 
-                            sensor.Value.Value > 0 && 
-                            sensor.Value.Value < 150)
-                        {
-                            return (int)Math.Round(sensor.Value.Value);
-                        }
-                    }
+                    Debug.WriteLine($"Error reading LHM temperature: {ex.Message}");
                 }
             }
-            catch (Exception ex)
+
+            // Fallback to HWiNFO
+            if (_useHwinfoFallback && _hwinfoReader != null)
             {
-                Debug.WriteLine($"Error getting CPU temperature: {ex.Message}");
+                try
+                {
+                    var temp = _hwinfoReader.GetCpuTemperature();
+                    if (temp.HasValue)
+                    {
+                        return temp.Value;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error reading HWiNFO temperature: {ex.Message}");
+                }
             }
 
             return null;
@@ -385,8 +347,14 @@ namespace Memory_Monitor
                 _cpuPackageTemp = null;
                 _cpuCoreMaxTemp = null;
                 _motherboardCpuTemp = null;
+                
+                _hwinfoReader?.Dispose();
+                _hwinfoReader = null;
+                
                 _isInitialized = false;
                 _sensorsFound = false;
+                _useHwinfoFallback = false;
+                
                 Debug.WriteLine("HardwareMonitorService disposed");
             }
             catch (Exception ex)
