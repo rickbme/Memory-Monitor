@@ -10,285 +10,203 @@
 
 ## ?? Overview
 
-System Monitor is a comprehensive real-time monitoring tool for Windows that provides detailed insights into your system's performance. Built with modern .NET 8 and Windows Forms, it offers accurate hardware monitoring with native GPU support through NVML (NVIDIA) and ADL (AMD) APIs.
+System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU.
 
 ### ? Key Features
 
-- **Real-Time CPU Monitoring** - Track CPU usage with performance counters
-- **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) GPU support
-  - GPU utilization percentage
-  - VRAM usage and total memory
-  - Direct hardware access for accurate readings
+- **Real-Time CPU Monitoring** - Track CPU usage with temperature display
+- **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature
 - **System Memory Tracking** - Monitor RAM usage with detailed statistics
-- **Process Management** - View processes using more than 400MB RAM
-- **Historical Graphs** - 60-second history for all metrics
-- **Dark Mode** - Eye-friendly dark theme with persistent preference
-- **Resizable Interface** - Flexible window sizing with dynamic layout
-- **Modern UI** - Clean, professional design with smooth animations
+- **GPU VRAM Monitoring** - Video memory usage and total capacity
+- **Disk I/O Monitoring** - Read/write throughput with auto-scaling
+- **Network Monitoring** - Upload/download speed with auto-scaling
+- **Temperature Display** - CPU and GPU temperatures shown inside gauges
+- **Mini Monitor Optimized** - Designed for 1920x480 secondary displays
+- **Circular Gauge Design** - Beautiful animated needle gauges with glow effects
 
 ---
 
-## ?? Features in Detail
+## ?? Display Layout
 
-### ?? Monitoring Capabilities
+The application displays 6 gauges in a horizontal row, optimized for 1920x480 displays:
 
-#### CPU Usage
-- Real-time CPU utilization percentage
-- Per-second updates
-- Historical trend graph (60 seconds)
-- Performance counter-based tracking
+| Gauge | Color | Information |
+|-------|-------|-------------|
+| **RAM** | Blue | Memory usage (GB used / total) |
+| **CPU** | Red | CPU usage (%) + Temperature |
+| **GPU** | Orange | GPU usage (%) + Temperature |
+| **VRAM** | Purple | Video memory (GB used / total) |
+| **DISK** | Green | Disk I/O throughput (MB/s) |
+| **NET** | Yellow | Network throughput (Mbps) |
 
-#### GPU Monitoring
-- **NVIDIA GPUs** (via NVML):
-  - Accurate GPU utilization
-  - Dedicated VRAM usage (used/total)
-  - Direct driver communication
-  
-- **AMD GPUs** (via ADL):
-  - GPU activity percentage
-  - Total VRAM detection
-  - Native driver integration
+---
 
-- **Intel GPUs**:
-  - Performance counter fallback
-  - Basic utilization tracking
+## ??? Temperature Monitoring
 
-#### Memory Tracking
-- **System RAM**:
-  - Used vs. available memory
-  - Percentage utilization
-  - GB and percentage display
-  
-- **GPU VRAM**:
-  - Dedicated memory usage
-  - Total VRAM size
-  - Real-time updates
+### GPU Temperature
+- **NVIDIA GPUs** - Native support via NVML (nvml.dll)
+- **AMD GPUs** - Native support via ADL (atiadlxx.dll)
+- Displayed inside the GPU usage gauge
 
-#### Process List
-- Displays processes using > 400MB RAM
-- Sorted by memory usage (highest first)
-- Shows:
-  - Process name
-  - Memory in GB
-  - Memory in MB (formatted)
-- Custom-drawn with visual markers
-- No grid lines for clean appearance
+### CPU Temperature
+The application uses multiple methods to obtain CPU temperature:
 
-### ?? User Interface
+1. **LibreHardwareMonitor** (Primary) - Works on most systems
+2. **HWiNFO Shared Memory** (Fallback) - Required for some Intel 12th/13th/14th gen CPUs
 
-#### Themes
-- **Light Mode**: Bright, professional appearance
-- **Dark Mode**: Eye-friendly with reduced brightness
-- Persistent theme preference (saved to user settings)
-- Instant theme switching via menu
+### HWiNFO Setup (For CPU Temperature)
 
-#### Layout
-- **2-Column Grid Design**:
-  - CPU Usage | GPU Usage
-  - System Memory | GPU Memory
-  - Process list spans full width
-- **Resizable Window**:
-  - Minimum size: 680×650 pixels
-  - Graphs scale proportionally
-  - Process list expands vertically
-  - Dynamic layout calculations
+If CPU temperature shows 0°C or doesn't appear:
 
-#### Graphs
-- **Line graphs** for all metrics
-- 60-second rolling history
-- Smooth anti-aliased rendering
-- Color-coded:
-  - CPU/System Memory: Blue
-  - GPU/GPU Memory: Green
-- Grid lines for reference
-- Gradient fill under lines
+1. **Download HWiNFO** from [https://www.hwinfo.com/](https://www.hwinfo.com/)
+2. **Install and run HWiNFO** (Sensors-only mode is sufficient)
+3. **Enable Shared Memory Support:**
+   - Click the **Settings** button (gear icon)
+   - Check **"Shared Memory Support"**
+   - Click **OK**
+4. **Keep HWiNFO running** in the background
+
+> **Why is HWiNFO needed?**  
+> Some modern Intel CPUs require a kernel driver to read temperature sensors. HWiNFO has broader hardware support and exposes sensor data through a shared memory interface.
+
+---
+
+## ?? Requirements
+
+### System Requirements
+- **Operating System**: Windows 10/11 (x64)
+- **.NET Runtime**: .NET 8.0 Desktop Runtime
+- **Privileges**: Administrator (for hardware sensor access)
+
+### GPU Drivers (for GPU monitoring)
+- **NVIDIA**: Latest GeForce/Quadro drivers
+- **AMD**: Latest Radeon drivers
 
 ---
 
 ## ?? Getting Started
 
-### Requirements
-
-- **Operating System**: Windows 10/11 (x64)
-- **.NET Runtime**: .NET 8.0 Desktop Runtime
-- **GPU Drivers** (for native GPU monitoring):
-  - NVIDIA: Latest GeForce/Quadro drivers
-  - AMD: Latest Radeon drivers
-
 ### Installation
 
-1. **Download** the latest release from the [Releases](https://github.com/rickbme/Memory-Monitor/releases) page
-2. **Extract** the ZIP file to your desired location
-3. **Run** `Memory Monitor.exe`
+#### Option 1: MSI Installer
+1. Download the latest `MemoryMonitorSetup.msi` from [Releases](https://github.com/rickbme/Memory-Monitor/releases)
+2. Run the installer
+3. Launch "Memory Monitor" from the Start Menu
 
-### Building from Source
+#### Option 2: Portable
+1. Download the portable ZIP from [Releases](https://github.com/rickbme/Memory-Monitor/releases)
+2. Extract to desired location
+3. Run `Memory Monitor.exe` as Administrator
 
+### Running the Application
+- Right-click and select **"Run as administrator"**
+- Or the application will prompt for elevation automatically
+
+---
+
+## ?? Building from Source
+
+### Prerequisites
+- Visual Studio 2022 or later
+- .NET 8.0 SDK
+- WiX Toolset v4 (for installer)
+
+### Build Steps
 ```bash
 # Clone the repository
 git clone https://github.com/rickbme/Memory-Monitor.git
 cd Memory-Monitor
 
-# Build the project
+# Restore and build
+dotnet restore
 dotnet build --configuration Release
 
-# Run the application
-dotnet run --project "Memory Monitor"
+# Run
+cd "Memory Monitor\bin\Release\net8.0-windows\win-x64"
+.\Memory Monitor.exe
+```
+
+### Creating Installer
+```bash
+dotnet build MemoryMonitorSetup\MemoryMonitorSetup.wixproj --configuration Release
 ```
 
 ---
 
-## ?? Configuration
+## ??? Project Structure
 
-### Settings
-- **Theme Preference**: Automatically saved to `%AppData%\Memory Monitor\`
-- **Window Size**: Remembers last size and position
-- **Update Interval**: 1 second (hardcoded for optimal performance)
-
----
-
-## ??? Architecture
-
-### Technology Stack
-- **.NET 8**: Modern framework with performance improvements
-- **Windows Forms**: Native Windows UI framework
-- **System.Management**: WMI access for system information
-- **Microsoft.VisualBasic**: ComputerInfo for memory stats
-
-### GPU Monitoring
-```
-????????????????????????????????
-?  GPU Detection (WMI)         ?
-?    ?                         ?
-?  Vendor Identification       ?
-?    ?? NVIDIA ? NVML          ?
-?    ?? AMD ? ADL              ?
-?    ?? Intel ? Perf Counters  ?
-?    ?                         ?
-?  Fallback Chain:             ?
-?  Native API ? Perf Counter   ?
-?  ? WMI Estimation            ?
-????????????????????????????????
-```
-
-### Project Structure
 ```
 Memory Monitor/
-??? Form1.cs                    # Main application window
-??? Form1.Designer.cs           # UI layout definition
-??? AboutForm.cs                # About dialog
-??? CPUMonitor.cs               # CPU monitoring logic
-??? GPUMonitor.cs               # GPU detection & monitoring
-??? NVMLInterop.cs              # NVIDIA NVML wrapper
-??? ADLInterop.cs               # AMD ADL wrapper
-??? ThemeManager.cs             # Theme management
-??? MemoryGraphControl.cs       # Custom graph control
-??? Properties/
-    ??? Settings.settings       # User preferences
+??? Memory Monitor/               # Main application
+?   ??? CompactGaugeControl.cs   # Circular gauge UI control
+?   ??? MiniMonitorForm.cs       # Main form (1920x480)
+?   ??? CPUMonitor.cs            # CPU usage & temp monitoring
+?   ??? GPUMonitor.cs            # GPU usage, VRAM & temp monitoring
+?   ??? DiskMonitor.cs           # Disk I/O monitoring
+?   ??? NetworkMonitor.cs        # Network throughput monitoring
+?   ??? HardwareMonitorService.cs # LibreHardwareMonitor wrapper
+?   ??? HWiNFOReader.cs          # HWiNFO shared memory reader
+?   ??? NVMLInterop.cs           # NVIDIA NVML interop
+?   ??? ADLInterop.cs            # AMD ADL interop
+?   ??? app.manifest             # UAC admin manifest
+??? MemoryMonitorSetup/          # WiX installer project
+??? README.md
+??? CHANGELOG.md
 ```
-
-### Key Classes
-
-#### **CPUMonitor**
-- Encapsulates CPU monitoring
-- Uses PerformanceCounter
-- Provides Update() method for readings
-
-#### **GPUMonitor**
-- Detects GPU vendor (NVIDIA/AMD/Intel)
-- Initializes appropriate native API
-- Falls back to performance counters
-- Provides UpdateUsage() and UpdateMemory()
-
-#### **NVMLInterop**
-- P/Invoke wrapper for nvml.dll
-- Direct GPU hardware access
-- Accurate memory and utilization tracking
-
-#### **ADLInterop**
-- P/Invoke wrapper for atiadlxx.dll
-- AMD GPU detection and monitoring
-- Adapter enumeration
-
-#### **ThemeManager**
-- Static theme state management
-- Light and Dark color palettes
-- Persistent settings
-
-#### **MemoryGraphControl**
-- Custom UserControl
-- Renders line graphs
-- 60-point rolling buffer
-- Anti-aliased drawing
 
 ---
 
-## ?? Usage
+## ?? Troubleshooting
 
-### Menu Options
+### CPU Temperature Not Showing
+1. Ensure application is running as **Administrator**
+2. Install and configure **HWiNFO** (see setup section above)
+3. Make sure HWiNFO is running before starting Memory Monitor
 
-#### View Menu
-- **Dark Mode**: Toggle between light and dark themes
+### GPU Temperature Not Showing
+- **NVIDIA**: Ensure latest GeForce drivers are installed
+- **AMD**: Ensure latest Radeon drivers are installed
+- Intel integrated graphics may not support temperature reading
 
-#### Help Menu
-- **About**: Display application information
-
-### Keyboard Shortcuts
-- `Alt+V`: Open View menu
-- `Alt+H`: Open Help menu
-
-### Resizing
-- Drag window edges or corners to resize
-- Double-click title bar to maximize
-- Minimum size enforced for usability
+### Application Won't Start
+1. Ensure .NET 8.0 Runtime is installed
+2. Try running as Administrator
+3. Check Windows Event Viewer for error details
 
 ---
 
 ## ?? GPU Support
 
-### NVIDIA GPUs
-? **Supported via NVML** (nvml.dll)
+### NVIDIA GPUs ?
 - GeForce series (GTX, RTX)
-- Quadro professional cards
-- Tesla datacenter GPUs
+- Full utilization, memory, and temperature support
 
-**Requirements**: Latest NVIDIA drivers
-
-### AMD GPUs
-? **Supported via ADL** (atiadlxx.dll)
+### AMD GPUs ?
 - Radeon RX series
-- Radeon Vega
-- Radeon RDNA/RDNA2/RDNA3
+- Full utilization and temperature support
 
-**Requirements**: Latest AMD Adrenalin drivers
-
-### Intel GPUs
-?? **Limited Support**
-- Uses Windows Performance Counters
-- Basic utilization only
-- No native API available
-
-### Fallback Behavior
-If native APIs are unavailable:
-1. Attempts Performance Counter access
-2. Falls back to WMI for basic info
-3. Gracefully shows "N/A" if unavailable
+### Intel GPUs ??
+- Limited support via Performance Counters
+- No temperature reading available
 
 ---
 
-## ?? Themes
+## ?? Version History
 
-### Light Mode
-- Clean, professional appearance
-- High contrast for bright environments
-- White backgrounds with dark text
+### v2.0.0 (2024)
+- **New**: Mini monitor display support (1920x480)
+- **New**: Circular gauge design with needle indicators
+- **New**: CPU temperature monitoring via LibreHardwareMonitor/HWiNFO
+- **New**: GPU temperature display in gauges
+- **New**: Disk I/O and Network monitoring
+- **New**: Administrator manifest for sensor access
+- **Changed**: Complete UI redesign for horizontal displays
 
-### Dark Mode
-- Reduced eye strain
-- Modern dark gray backgrounds
-- Light text for readability
-- Perfect for low-light environments
-
-**Theme persistence**: Your preference is saved and restored on next launch.
+### v1.0.0 (2025)
+- Initial release
+- CPU, GPU, and memory monitoring
+- Native NVIDIA and AMD GPU support
+- Dark mode theme
 
 ---
 
@@ -310,55 +228,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## ????? Author
-
-**DFS - Dad's Fixit Shop**
-- Electronics • Software • Game Development
-- Making tech accessible, reliable, and fun since 2025
-
----
-
 ## ?? Acknowledgments
 
-- NVIDIA for NVML API documentation
+- [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) - Hardware monitoring library
+- [HWiNFO](https://www.hwinfo.com/) - Hardware information and monitoring tool
+- NVIDIA for NVML API
 - AMD for ADL SDK
-- Microsoft for .NET platform
-- Windows Forms community
 
 ---
 
 ## ?? Support
 
-If you encounter any issues or have questions:
-- Open an [Issue](https://github.com/rickbme/Memory-Monitor/issues)
+If you encounter issues or have feature requests:
+- Open an [Issue](https://github.com/rickbme/Memory-Monitor/issues) on GitHub
 - Check existing issues for solutions
 - Provide system information and error details
 
 ---
 
-## ?? Version History
-
-### v1.0.0 (2025-11-18)
-- Initial release
-- CPU, GPU, and memory monitoring
-- Native NVIDIA and AMD GPU support
-- Dark mode theme
-- Resizable interface
-- Process list viewer
-
----
-
-## ?? Future Enhancements
-
-- [ ] Network usage monitoring
-- [ ] Disk I/O statistics
-- [ ] Temperature sensors
-- [ ] Export data to CSV
-- [ ] System tray mode
-- [ ] Alerts and notifications
-- [ ] Multi-language support
-- [ ] Customizable update intervals
-
----
-
 **Made with ?? by DFS - Dad's Fixit Shop**
+
+*Electronics • Software • Game Development*
