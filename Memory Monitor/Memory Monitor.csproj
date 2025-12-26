@@ -14,10 +14,17 @@
     <PublishSingleFile>false</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    
+    <!-- Application manifest for admin privileges -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Management" Version="10.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -190,7 +190,17 @@ namespace Memory_Monitor
                 {
                     float usage = _cpuMonitor.Update();
                     _lastCpuUsage = (int)Math.Round(usage);
-                    cpuGauge.SetValue(usage, $"{_lastCpuUsage}%");
+                    
+                    // Also get temperature if available
+                    if (_cpuMonitor.IsTemperatureAvailable)
+                    {
+                        int temp = _cpuMonitor.UpdateTemperature();
+                        cpuGauge.SetValue(usage, $"{_lastCpuUsage}%", $"{temp}°C");
+                    }
+                    else
+                    {
+                        cpuGauge.SetValue(usage, $"{_lastCpuUsage}%");
+                    }
                 }
                 else
                 {

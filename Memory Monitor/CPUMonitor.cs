@@ -3,15 +3,18 @@ using System.Diagnostics;
 namespace Memory_Monitor
 {
     /// <summary>
-    /// Monitors CPU usage using performance counters
+    /// Monitors CPU usage using performance counters and temperature via LibreHardwareMonitor
     /// </summary>
     public class CPUMonitor : IMonitor
     {
         private PerformanceCounter? _cpuCounter;
+        private HardwareMonitorService? _hardwareMonitor;
         private bool _isAvailable;
 
         public bool IsAvailable => _isAvailable;
+        public bool IsTemperatureAvailable => _hardwareMonitor?.IsCpuTemperatureAvailable ?? false;
         public float CurrentUsage { get; private set; }
+        public int CurrentTemperatureCelsius { get; private set; }
 
         public CPUMonitor()
         {
@@ -31,6 +34,18 @@ namespace Memory_Monitor
             {
                 Debug.WriteLine($"Failed to initialize CPU counter: {ex.Message}");
                 _isAvailable = false;
+            }
+
+            // Initialize hardware monitor for temperature
+            try
+            {
+                _hardwareMonitor = new HardwareMonitorService();
+                Debug.WriteLine($"CPU temperature available: {IsTemperatureAvailable}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to initialize hardware monitor: {ex.Message}");
+                _hardwareMonitor = null;
             }
         }
 
@@ -57,10 +72,39 @@ namespace Memory_Monitor
             return 0;
         }
 
+        /// <summary>
+        /// Updates and returns the current CPU temperature in Celsius
+        /// </summary>
+        public int UpdateTemperature()
+        {
+            try
+            {
+                if (_hardwareMonitor != null && IsTemperatureAvailable)
+                {
+                    var temp = _hardwareMonitor.GetCpuTemperature();
+                    if (temp.HasValue)
+                    {
+                        CurrentTemperatureCelsius = temp.Value;
+                        return CurrentTemperatureCelsius;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error updating CPU temperature: {ex.Message}");
+            }
+
+            CurrentTemperatureCelsius = 0;
+            return 0;
+        }
+
         public void Dispose()
         {
             _cpuCounter?.Dispose();
             _cpuCounter = null;
+
+            _hardwareMonitor?.Dispose();
+            _hardwareMonitor = null;
         }
     }
 }
