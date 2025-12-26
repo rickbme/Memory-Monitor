@@ -5,7 +5,7 @@ namespace Memory_Monitor
     /// <summary>
     /// Monitors CPU usage using performance counters
     /// </summary>
-    public class CPUMonitor : IDisposable
+    public class CPUMonitor : IMonitor
     {
         private PerformanceCounter? _cpuCounter;
         private bool _isAvailable;

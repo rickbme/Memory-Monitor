@@ -40,6 +40,13 @@ namespace Memory_Monitor
             NVML_ERROR_UNKNOWN = 999
         }
 
+        // Temperature sensor types
+        public enum nvmlTemperatureSensors_t
+        {
+            NVML_TEMPERATURE_GPU = 0,    // Temperature sensor for the GPU die
+            NVML_TEMPERATURE_COUNT
+        }
+
         // Device handle
         [StructLayout(LayoutKind.Sequential)]
         public struct nvmlDevice_t
@@ -85,6 +92,9 @@ namespace Memory_Monitor
 
         [DllImport(NVML_DLL, EntryPoint = "nvmlDeviceGetUtilizationRates")]
         private static extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, out nvmlUtilization_t utilization);
+
+        [DllImport(NVML_DLL, EntryPoint = "nvmlDeviceGetTemperature")]
+        private static extern nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, out uint temp);
 
         // High-level wrapper
         private static bool _isInitialized = false;
@@ -274,6 +284,33 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"NVML GetUtilization error: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get GPU temperature in Celsius
+        /// </summary>
+        public static uint? GetTemperature(nvmlDevice_t device)
+        {
+            if (!_isAvailable) return null;
+
+            try
+            {
+                nvmlReturn_t result = nvmlDeviceGetTemperature(device, nvmlTemperatureSensors_t.NVML_TEMPERATURE_GPU, out uint temp);
+                if (result == nvmlReturn_t.NVML_SUCCESS)
+                {
+                    return temp;
+                }
+                else
+                {
+                    Debug.WriteLine($"NVML GetTemperature failed: {result}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"NVML GetTemperature error: {ex.Message}");
             }
 
             return null;

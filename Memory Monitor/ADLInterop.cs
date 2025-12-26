@@ -66,6 +66,14 @@ namespace Memory_Monitor
             public int Reserved;
         }
 
+        // ADL Temperature structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ADLTemperature
+        {
+            public int Size;
+            public int Temperature;  // Temperature in millidegrees Celsius
+        }
+
         // Memory allocation callback
         private delegate IntPtr ADL_Main_Memory_Alloc(int size);
 
@@ -90,6 +98,9 @@ namespace Memory_Monitor
 
         [DllImport(ATI_ADL_DLL, CallingConvention = CallingConvention.Cdecl)]
         private static extern int ADL_Overdrive5_CurrentActivity_Get(int adapterIndex, ref ADLPMActivity activity);
+
+        [DllImport(ATI_ADL_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ADL_Overdrive5_Temperature_Get(int adapterIndex, int thermalControllerIndex, ref ADLTemperature temperature);
 
         [DllImport(ATI_ADL_DLL, CallingConvention = CallingConvention.Cdecl)]
         private static extern int ADL2_Overdrive6_CurrentStatus_Get(IntPtr context, int adapterIndex, ref int currentStatus);
@@ -307,6 +318,39 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"ADL GetCurrentActivity error: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get GPU temperature in Celsius
+        /// </summary>
+        public static int? GetTemperature(int adapterIndex)
+        {
+            if (!_isAvailable) return null;
+
+            try
+            {
+                ADLTemperature temp = new ADLTemperature
+                {
+                    Size = Marshal.SizeOf(typeof(ADLTemperature))
+                };
+
+                int result = ADL_Overdrive5_Temperature_Get(adapterIndex, 0, ref temp);
+                if (result == ADL_OK)
+                {
+                    // ADL returns temperature in millidegrees, convert to degrees
+                    return temp.Temperature / 1000;
+                }
+                else
+                {
+                    Debug.WriteLine($"ADL GetTemperature failed with code: {result}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ADL GetTemperature error: {ex.Message}");
             }
 
             return null;

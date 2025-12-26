@@ -3,13 +3,8 @@ using System.Net.NetworkInformation;
 
 namespace Memory_Monitor
 {
-    /// <summary>
-    /// Monitors network upload/download speeds for ethernet adapters
-    /// </summary>
-    public class NetworkMonitor : IDisposable
+    public class NetworkMonitor : IMonitor
     {
-        private const long BYTES_TO_MEGABITS = 1024 * 1024 / 8; // Convert bytes to megabits (1 MB = 8 Mb)
-
         private class NetworkAdapterInfo
         {
             public string Name { get; set; } = "";
@@ -40,20 +35,17 @@ namespace Memory_Monitor
         {
             try
             {
-                // Get active network interfaces
                 NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
                 
                 Debug.WriteLine($"Found {interfaces.Length} network interfaces");
 
                 foreach (NetworkInterface ni in interfaces)
                 {
-                    // Only monitor Ethernet and Wireless adapters that are up
                     if (ni.OperationalStatus != OperationalStatus.Up)
                         continue;
 
                     NetworkInterfaceType type = ni.NetworkInterfaceType;
                     
-                    // Filter for physical network adapters
                     if (type != NetworkInterfaceType.Ethernet && 
                         type != NetworkInterfaceType.Wireless80211 &&
                         type != NetworkInterfaceType.GigabitEthernet)
@@ -61,7 +53,6 @@ namespace Memory_Monitor
                         continue;
                     }
 
-                    // Skip loopback and tunnel adapters
                     string name = ni.Name.ToLower();
                     if (name.Contains("loopback") || name.Contains("tunnel") || 
                         name.Contains("virtual") || name.Contains("vmware") ||
@@ -172,12 +163,11 @@ namespace Memory_Monitor
                     {
                         if (adapter.BytesSentCounter != null && adapter.BytesReceivedCounter != null)
                         {
-                            // Get bytes/sec and convert to Mbps (megabits per second)
                             float sentBytes = adapter.BytesSentCounter.NextValue();
                             float receivedBytes = adapter.BytesReceivedCounter.NextValue();
 
-                            adapter.UploadMbps = (sentBytes / BYTES_TO_MEGABITS) * 8;
-                            adapter.DownloadMbps = (receivedBytes / BYTES_TO_MEGABITS) * 8;
+                            adapter.UploadMbps = (float)(sentBytes / Constants.BYTES_TO_MEGABITS);
+                            adapter.DownloadMbps = (float)(receivedBytes / Constants.BYTES_TO_MEGABITS);
 
                             totalUpload += adapter.UploadMbps;
                             totalDownload += adapter.DownloadMbps;

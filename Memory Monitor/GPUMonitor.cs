@@ -6,11 +6,8 @@ namespace Memory_Monitor
     /// <summary>
     /// Monitors GPU usage and memory using native APIs (NVML/ADL) with fallback to WMI
     /// </summary>
-    public class GPUMonitor : IDisposable
+    public class GPUMonitor : IMonitor, IDisposable
     {
-        private const long BYTES_TO_MB = 1024 * 1024;
-        private const long BYTES_TO_GB = 1024 * 1024 * 1024;
-
         public enum GPUVendor
         {
             Unknown,
@@ -23,7 +20,6 @@ namespace Memory_Monitor
         private bool _usageCounterAvailable = false;
         private string _gpuEngineInstance = "";
 
-        // Native API support
         private GPUVendor _vendor = GPUVendor.Unknown;
         private NVMLInterop.nvmlDevice_t? _nvmlDevice = null;
         private int _adlAdapterIndex = -1;
@@ -33,15 +29,18 @@ namespace Memory_Monitor
         public ulong TotalMemoryBytes { get; private set; } = 0;
         public bool IsMemoryAvailable { get; private set; } = false;
         public bool IsUsageAvailable { get; private set; } = false;
+        public bool IsTemperatureAvailable { get; private set; } = false;
+        public bool IsAvailable => IsUsageAvailable || IsMemoryAvailable;
         public GPUVendor Vendor => _vendor;
-        
+
         public float CurrentUsagePercent { get; private set; }
         public ulong CurrentMemoryUsedBytes { get; private set; }
+        public int CurrentTemperatureCelsius { get; private set; }
 
-        public double TotalMemoryGB => TotalMemoryBytes / (double)BYTES_TO_GB;
-        public double UsedMemoryGB => CurrentMemoryUsedBytes / (double)BYTES_TO_GB;
-        public int MemoryUsagePercent => TotalMemoryBytes > 0 
-            ? Math.Min((int)((CurrentMemoryUsedBytes * 100) / TotalMemoryBytes), 100) 
+        public double TotalMemoryGB => TotalMemoryBytes / (double)Constants.BYTES_TO_GB;
+        public double UsedMemoryGB => CurrentMemoryUsedBytes / (double)Constants.BYTES_TO_GB;
+        public int MemoryUsagePercent => TotalMemoryBytes > 0
+            ? Math.Min((int)((CurrentMemoryUsedBytes * 100) / TotalMemoryBytes), 100)
             : 0;
 
         public GPUMonitor()
@@ -200,6 +199,14 @@ namespace Memory_Monitor
                                 Debug.WriteLine($"NVML Total Memory: {TotalMemoryGB:F2} GB");
                             }
 
+                            // Check if temperature is available
+                            var tempCheck = NVMLInterop.GetTemperature(_nvmlDevice.Value);
+                            IsTemperatureAvailable = tempCheck.HasValue;
+                            if (IsTemperatureAvailable)
+                            {
+                                Debug.WriteLine($"NVML Temperature available: {tempCheck.Value}°C");
+                            }
+
                             _useNativeAPI = true;
                             IsUsageAvailable = true;
                             IsMemoryAvailable = true;
@@ -245,6 +252,14 @@ namespace Memory_Monitor
                                 {
                                     TotalMemoryBytes = (ulong)memInfo.Value.MemorySize;
                                     Debug.WriteLine($"ADL Total Memory: {TotalMemoryGB:F2} GB");
+                                }
+
+                                // Check if temperature is available
+                                var tempCheck = ADLInterop.GetTemperature(_adlAdapterIndex);
+                                IsTemperatureAvailable = tempCheck.HasValue;
+                                if (IsTemperatureAvailable)
+                                {
+                                    Debug.WriteLine($"ADL Temperature available: {tempCheck.Value}°C");
                                 }
 
                                 _useNativeAPI = true;
@@ -430,6 +445,62 @@ namespace Memory_Monitor
         }
 
         /// <summary>
+        /// Updates and returns GPU temperature in Celsius
+        /// </summary>
+        public int UpdateTemperature()
+        {
+            try
+            {
+                if (_useNativeAPI)
+                {
+                    switch (_vendor)
+                    {
+                        case GPUVendor.NVIDIA:
+                            return UpdateTemperatureNVML();
+
+                        case GPUVendor.AMD:
+                            return UpdateTemperatureADL();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error updating GPU temperature: {ex.Message}");
+            }
+
+            CurrentTemperatureCelsius = 0;
+            return 0;
+        }
+
+        private int UpdateTemperatureNVML()
+        {
+            if (_nvmlDevice.HasValue)
+            {
+                var temp = NVMLInterop.GetTemperature(_nvmlDevice.Value);
+                if (temp.HasValue)
+                {
+                    CurrentTemperatureCelsius = (int)temp.Value;
+                    return CurrentTemperatureCelsius;
+                }
+            }
+            return 0;
+        }
+
+        private int UpdateTemperatureADL()
+        {
+            if (_adlAdapterIndex >= 0)
+            {
+                var temp = ADLInterop.GetTemperature(_adlAdapterIndex);
+                if (temp.HasValue)
+                {
+                    CurrentTemperatureCelsius = temp.Value;
+                    return CurrentTemperatureCelsius;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Fallback: Get GPU memory from performance counters
         /// </summary>
         private ulong GetGPUMemoryUsageFromPerfCounter()
@@ -488,7 +559,7 @@ namespace Memory_Monitor
 
         public string GetShortName()
         {
-            string[] removeWords = { "NVIDIA", "GeForce", "AMD", "Radeon", "Intel", "Graphics", "(TM)", "®", "™" };
+            string[] removeWords = { "NVIDIA", "GeForce", "AMD", "Radeon", "Intel", "Graphics", "(TM)", "\u2122", "\u00AE" };
             string shortened = GPUName;
 
             foreach (string word in removeWords)

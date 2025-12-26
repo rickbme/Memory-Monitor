@@ -2,13 +2,8 @@ using System.Diagnostics;
 
 namespace Memory_Monitor
 {
-    /// <summary>
-    /// Monitors disk read/write throughput using performance counters
-    /// </summary>
-    public class DiskMonitor : IDisposable
+    public class DiskMonitor : IMonitor
     {
-        private const long BYTES_TO_MEGABITS = 1024 * 1024 / 8; // Convert bytes to megabits (1 MB = 8 Mb)
-
         private class DiskCounters
         {
             public string DiskName { get; set; } = "";
@@ -42,7 +37,6 @@ namespace Memory_Monitor
 
                 foreach (string instanceName in instanceNames)
                 {
-                    // Skip the "_Total" instance and focus on actual disks
                     if (instanceName == "_Total" || string.IsNullOrWhiteSpace(instanceName))
                         continue;
 
@@ -55,7 +49,6 @@ namespace Memory_Monitor
                             WriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", instanceName)
                         };
 
-                        // Initialize counters
                         diskCounter.ReadCounter.NextValue();
                         diskCounter.WriteCounter.NextValue();
 
@@ -86,9 +79,6 @@ namespace Memory_Monitor
             }
         }
 
-        /// <summary>
-        /// Updates and returns the current disk throughput in Mbps (megabits per second)
-        /// </summary>
         public (float readMbps, float writeMbps, float totalMbps) Update()
         {
             try
@@ -102,12 +92,11 @@ namespace Memory_Monitor
                     {
                         if (disk.ReadCounter != null && disk.WriteCounter != null)
                         {
-                            // Get bytes/sec and convert to Mbps (megabits per second)
                             float readBytes = disk.ReadCounter.NextValue();
                             float writeBytes = disk.WriteCounter.NextValue();
 
-                            disk.LastReadMbps = (readBytes / BYTES_TO_MEGABITS) * 8;
-                            disk.LastWriteMbps = (writeBytes / BYTES_TO_MEGABITS) * 8;
+                            disk.LastReadMbps = (float)(readBytes / Constants.BYTES_TO_MEGABITS);
+                            disk.LastWriteMbps = (float)(writeBytes / Constants.BYTES_TO_MEGABITS);
 
                             totalRead += disk.LastReadMbps;
                             totalWrite += disk.LastWriteMbps;

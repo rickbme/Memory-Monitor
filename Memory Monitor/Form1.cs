@@ -6,8 +6,6 @@ namespace Memory_Monitor
 {
     public partial class Form1 : Form
     {
-        private const long BYTES_TO_MB = 1024 * 1024;
-        private const long BYTES_TO_GB = 1024 * 1024 * 1024;
         private const int MIN_MEMORY_MB = 400;
 
         // Auto-scaling thresholds for gauges (in Mbps)
@@ -132,12 +130,10 @@ namespace Memory_Monitor
         {
             try
             {
-                // Load saved theme preference
                 bool darkMode = Properties.Settings.Default.DarkMode;
                 ThemeManager.SetTheme(darkMode ? ThemeManager.Theme.Dark : ThemeManager.Theme.Light);
                 darkModeToolStripMenuItem.Checked = darkMode;
 
-                // Load monitor visibility preferences
                 _showDiskMonitor = Properties.Settings.Default.ShowDiskMonitor;
                 _showNetworkMonitor = Properties.Settings.Default.ShowNetworkMonitor;
                 
@@ -318,13 +314,8 @@ namespace Memory_Monitor
             ApplyListViewColors(colors);
         }
 
-        private void ApplyLabelColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
-            Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
-            Color DiskColor, Color NetworkColor,
-            Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
-            Color MenuText) colors)
+        private void ApplyLabelColors(ThemeColors colors)
         {
-            // Gauge labels below dials
             lblRamGauge.ForeColor = colors.TextPrimary;
             lblCpuGauge.ForeColor = colors.TextPrimary;
             lblDiskGauge.ForeColor = colors.TextPrimary;
@@ -333,13 +324,8 @@ namespace Memory_Monitor
             lblProcessesTitle.ForeColor = colors.TextPrimary;
         }
 
-        private void ApplyGaugeColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
-            Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
-            Color DiskColor, Color NetworkColor,
-            Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
-            Color MenuText) colors)
+        private void ApplyGaugeColors(ThemeColors colors)
         {
-            // Apply colors to enhanced gauges
             ramUsageGauge.GaugeColor = Color.FromArgb(58, 150, 221); // Blue
             ramUsageGauge.NeedleColor = Color.FromArgb(58, 150, 221);
             ramUsageGauge.TextColor = colors.TextPrimary;
@@ -372,11 +358,7 @@ namespace Memory_Monitor
             gpuVramGauge.Invalidate();
         }
 
-        private void ApplyListViewColors((Color FormBackground, Color ControlBackground, Color TextPrimary, 
-            Color TextSecondary, Color GraphBackground, Color GraphGrid, Color CPUColor, Color GPUColor, 
-            Color DiskColor, Color NetworkColor,
-            Color ListViewBackground, Color ListViewText, Color ListViewGrid, Color MenuBackground, 
-            Color MenuText) colors)
+        private void ApplyListViewColors(ThemeColors colors)
         {
             listViewProcesses.BackColor = colors.ListViewBackground;
             listViewProcesses.ForeColor = colors.ListViewText;
@@ -524,11 +506,11 @@ namespace Memory_Monitor
                 ulong availableMemory = memStatus.ullAvailPhys;
                 ulong usedMemory = totalMemory - availableMemory;
 
-                double totalGB = totalMemory / (double)BYTES_TO_GB;
-                double usedGB = usedMemory / (double)BYTES_TO_GB;
+                double totalGB = totalMemory / (double)Constants.BYTES_TO_GB;
+                double usedGB = usedMemory / (double)Constants.BYTES_TO_GB;
 
                 int percentage = (int)((usedMemory * 100) / totalMemory);
-                
+
                 // Update RAM gauge
                 ramUsageGauge.SetValue(percentage, $"{usedGB:F1}/{totalGB:F0}");
             }
@@ -570,12 +552,11 @@ namespace Memory_Monitor
         {
             try
             {
-                // Get all processes using more than MIN_MEMORY_MB
                 var processes = Process.GetProcesses()
                     .Where(p => {
                         try
                         {
-                            return p.WorkingSet64 / BYTES_TO_MB > MIN_MEMORY_MB;
+                            return p.WorkingSet64 / Constants.BYTES_TO_MB > MIN_MEMORY_MB;
                         }
                         catch
                         {
@@ -585,7 +566,6 @@ namespace Memory_Monitor
                     .OrderByDescending(p => p.WorkingSet64)
                     .ToList();
 
-                // Update ListView
                 listViewProcesses.BeginUpdate();
                 listViewProcesses.Items.Clear();
 
@@ -593,8 +573,8 @@ namespace Memory_Monitor
                 {
                     try
                     {
-                        long memoryMB = process.WorkingSet64 / BYTES_TO_MB;
-                        double memoryGB = process.WorkingSet64 / (double)BYTES_TO_GB;
+                        long memoryMB = process.WorkingSet64 / Constants.BYTES_TO_MB;
+                        double memoryGB = process.WorkingSet64 / (double)Constants.BYTES_TO_GB;
 
                         var item = new ListViewItem(process.ProcessName);
                         item.SubItems.Add($"{memoryGB:F2} GB");
@@ -604,7 +584,6 @@ namespace Memory_Monitor
                     }
                     catch
                     {
-                        // Skip processes we can't access
                     }
                 }
 
