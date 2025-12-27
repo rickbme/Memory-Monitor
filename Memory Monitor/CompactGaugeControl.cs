@@ -190,6 +190,18 @@ namespace Memory_Monitor
             }
         }
 
+        /// <summary>
+        /// Simulates a click on the gauge, triggering device selection if applicable.
+        /// Used by touch gesture handler to trigger device selection on tap.
+        /// </summary>
+        public void PerformClick()
+        {
+            if (_isSelectable && _hasMultipleDevices)
+            {
+                OnDeviceSelectionRequested();
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);

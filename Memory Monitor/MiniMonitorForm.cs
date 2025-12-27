@@ -40,6 +40,9 @@ namespace Memory_Monitor
         private Icon? _currentTrayIcon;
         private int _lastMemoryPercentage = 0;
 
+        // Touch gesture support
+        private TouchGestureHandler? _touchHandler;
+
         #region Windows API
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -74,6 +77,7 @@ namespace Memory_Monitor
             InitializeDeviceSelection();
             InitializeApplicationIcon();
             InitializeTrayIcon();
+            InitializeTouchSupport();  // Add touch gesture support
             ApplyTheme();
         }
 
@@ -553,6 +557,178 @@ namespace Memory_Monitor
             networkGauge.TextColor = textColor;
         }
 
+        #region Touch Support
+
+        /// <summary>
+        /// Initialize touch gesture support for the mini monitor.
+        /// Gracefully handles systems without touch capability.
+        /// </summary>
+        private void InitializeTouchSupport()
+        {
+            try
+            {
+                _touchHandler = new TouchGestureHandler(this);
+
+                if (_touchHandler.IsTouchAvailable)
+                {
+                    // Handle horizontal swipes to switch monitors
+                    _touchHandler.SwipeDetected += TouchHandler_SwipeDetected;
+
+                    // Handle taps on gauges for device selection
+                    _touchHandler.TapDetected += TouchHandler_TapDetected;
+
+                    // Handle long press to show context menu
+                    _touchHandler.LongPressDetected += TouchHandler_LongPressDetected;
+
+                    // Handle two-finger tap to toggle always-on-top
+                    _touchHandler.TwoFingerTapDetected += TouchHandler_TwoFingerTapDetected;
+
+                    Debug.WriteLine("Touch gesture support initialized successfully");
+                }
+                else
+                {
+                    Debug.WriteLine("Touch input not available - running without touch support");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to initialize touch support: {ex.Message}");
+                // Continue without touch support - application works fine with mouse/keyboard
+            }
+        }
+
+        /// <summary>
+        /// Process Windows messages for touch input
+        /// </summary>
+        protected override void WndProc(ref Message m)
+        {
+            // Let touch handler process touch/gesture messages first
+            if (_touchHandler?.ProcessMessage(ref m) == true)
+            {
+                m.Result = IntPtr.Zero;
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+
+        private void TouchHandler_SwipeDetected(object? sender, SwipeEventArgs e)
+        {
+            Debug.WriteLine($"Swipe detected: {e.Direction}, distance: {e.Distance}px");
+
+            switch (e.Direction)
+            {
+                case SwipeDirection.Left:
+                case SwipeDirection.Right:
+                    // Swipe horizontally to switch monitors
+                    MoveToNextMonitor();
+                    ShowSwipeFeedback(e.Direction);
+                    break;
+
+                case SwipeDirection.Down:
+                    // Swipe down to minimize to tray
+                    this.WindowState = FormWindowState.Minimized;
+                    this.Hide();
+                    this.ShowInTaskbar = false;
+                    break;
+
+                case SwipeDirection.Up:
+                    // Swipe up could restore if minimized (for future use)
+                    break;
+            }
+        }
+
+        private void TouchHandler_TapDetected(object? sender, TapEventArgs e)
+        {
+            Debug.WriteLine($"Tap detected at {e.Location}, control: {e.TappedControl?.Name ?? "none"}");
+
+            // If tapped on a gauge, trigger device selection
+            if (e.TappedControl is CompactGaugeControl gauge)
+            {
+                gauge.PerformClick();
+            }
+        }
+
+        private void TouchHandler_LongPressDetected(object? sender, LongPressEventArgs e)
+        {
+            Debug.WriteLine($"Long press detected at {e.Location}");
+
+            // Show context menu at touch location
+            Point screenPoint = this.PointToScreen(e.Location);
+            trayContextMenu.Show(screenPoint);
+        }
+
+        private void TouchHandler_TwoFingerTapDetected(object? sender, PointEventArgs e)
+        {
+            Debug.WriteLine($"Two-finger tap detected at {e.Location}");
+
+            // Toggle always-on-top
+            this.TopMost = !this.TopMost;
+            topMostToolStripMenuItem.Checked = this.TopMost;
+
+            // Show visual feedback
+            ShowToastNotification(this.TopMost ? "Always on Top: ON" : "Always on Top: OFF");
+        }
+
+        /// <summary>
+        /// Shows a brief visual feedback for swipe gestures
+        /// </summary>
+        private void ShowSwipeFeedback(SwipeDirection direction)
+        {
+            string arrow = direction switch
+            {
+                SwipeDirection.Left => "?",
+                SwipeDirection.Right => "?",
+                SwipeDirection.Up => "?",
+                SwipeDirection.Down => "?",
+                _ => ""
+            };
+
+            ShowToastNotification($"{arrow} Monitor switched");
+        }
+
+        /// <summary>
+        /// Shows a brief toast-style notification on the form
+        /// </summary>
+        private void ShowToastNotification(string message)
+        {
+            var toast = new Label
+            {
+                Text = message,
+                AutoSize = false,
+                Size = new Size(300, 50),
+                TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = Color.FromArgb(200, 40, 44, 52),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                BorderStyle = BorderStyle.None
+            };
+
+            toast.Location = new Point(
+                (this.ClientSize.Width - toast.Width) / 2,
+                (this.ClientSize.Height - toast.Height) / 2
+            );
+
+            this.Controls.Add(toast);
+            toast.BringToFront();
+
+            // Fade out after 1 second
+            var fadeTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            fadeTimer.Tick += (s, args) =>
+            {
+                fadeTimer.Stop();
+                fadeTimer.Dispose();
+                if (this.Controls.Contains(toast))
+                {
+                    this.Controls.Remove(toast);
+                    toast.Dispose();
+                }
+            };
+            fadeTimer.Start();
+        }
+
+        #endregion
+
         private float GetAutoScale(float currentValue, float peakValue)
         {
             float target = Math.Max(currentValue, peakValue);
@@ -805,6 +981,9 @@ namespace Memory_Monitor
             _gpuMonitor?.Dispose();
             _diskMonitor?.Dispose();
             _networkMonitor?.Dispose();
+            
+            // Dispose touch handler
+            _touchHandler?.Dispose();
             
             // Dispose the dynamic tray icon
             _currentTrayIcon?.Dispose();
