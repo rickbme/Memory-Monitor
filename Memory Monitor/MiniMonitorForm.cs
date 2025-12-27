@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -35,6 +36,10 @@ namespace Memory_Monitor
         private bool _isDragging = false;
         private Point _dragStartPoint;
 
+        // For dynamic tray icon
+        private Icon? _currentTrayIcon;
+        private int _lastMemoryPercentage = 0;
+
         #region Windows API
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -65,6 +70,7 @@ namespace Memory_Monitor
             SetupBorderlessWindow();
             InitializeMonitors();
             InitializeUI();
+            InitializeApplicationIcon();
             InitializeTrayIcon();
             ApplyTheme();
         }
@@ -199,8 +205,32 @@ namespace Memory_Monitor
             UpdateAllMetrics();
         }
 
+        private void InitializeApplicationIcon()
+        {
+            // Load the form's icon from the embedded resource file
+            try
+            {
+                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "mmguage.ico");
+                if (File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
+                }
+                else
+                {
+                    // Fall back to system icon if file not found
+                    this.Icon = SystemIcons.Application;
+                }
+            }
+            catch
+            {
+                // Fall back to system icon if loading fails
+                this.Icon = SystemIcons.Application;
+            }
+        }
+
         private void InitializeTrayIcon()
         {
+            // Use the static gauge icon initially, will be replaced with dynamic icon on first update
             notifyIcon.Icon = this.Icon ?? SystemIcons.Application;
             UpdateTrayIconText();
             this.Resize += (s, e) =>
@@ -211,6 +241,34 @@ namespace Memory_Monitor
                     ShowInTaskbar = false;
                 }
             };
+        }
+
+        private void UpdateTrayIcon(int memoryPercentage)
+        {
+            // Only update if percentage changed to avoid unnecessary redraws
+            if (memoryPercentage == _lastMemoryPercentage && _currentTrayIcon != null)
+                return;
+
+            _lastMemoryPercentage = memoryPercentage;
+
+            // Dispose old icon
+            var oldIcon = _currentTrayIcon;
+
+            try
+            {
+                // Create new dynamic icon showing memory usage
+                // Use color coding: green (low) -> yellow (medium) -> red (high)
+                Color gaugeColor = GaugeIconGenerator.GetColorForPercentage(memoryPercentage);
+                _currentTrayIcon = GaugeIconGenerator.CreateDynamicTrayIcon(memoryPercentage, gaugeColor);
+                notifyIcon.Icon = _currentTrayIcon;
+            }
+            catch
+            {
+                // If icon creation fails, keep the current icon
+            }
+
+            // Dispose old icon after setting new one
+            oldIcon?.Dispose();
         }
 
         private void UpdateTrayIconText()
@@ -287,6 +345,9 @@ namespace Memory_Monitor
                     double totalGB = mem.ullTotalPhys / (double)BYTES_TO_GB;
                     int pct = (int)((used * 100) / mem.ullTotalPhys);
                     ramGauge.SetValue(pct, $"{usedGB:F1}/{totalGB:F0}GB");
+                    
+                    // Update dynamic tray icon with memory percentage
+                    UpdateTrayIcon(pct);
                 }
             }
             catch { ramGauge.SetValue(0, "ERR"); }
@@ -548,6 +609,11 @@ namespace Memory_Monitor
             _gpuMonitor?.Dispose();
             _diskMonitor?.Dispose();
             _networkMonitor?.Dispose();
+            
+            // Dispose the dynamic tray icon
+            _currentTrayIcon?.Dispose();
+            _currentTrayIcon = null;
+            
             base.OnFormClosing(e);
         }
 

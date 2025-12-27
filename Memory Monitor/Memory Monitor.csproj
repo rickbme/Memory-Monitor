@@ -8,6 +8,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     
+    <!-- Application icon for exe file -->
+    <ApplicationIcon>Resources\mmguage.ico</ApplicationIcon>
+    
     <!-- Self-contained deployment configuration -->
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -24,7 +27,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj" />
+    <ProjectReference Include="..\..\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj" SetPlatform="Platform=x64" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy icon to output for runtime loading -->
+    <Content Include="Resources\mmguage.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tools\" />
   </ItemGroup>
 
 </Project>
