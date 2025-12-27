@@ -5,6 +5,51 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2024-12-26
+
+### Added
+- **Custom Application Icon** - New gauge-style icon (`mmguage.ico`) for the executable and desktop shortcut
+- **Dynamic Tray Icon** - System tray icon now shows live RAM usage as a color-coded gauge
+  - Green (0-50%), Yellow (50-80%), Red (80-100%)
+  - Updates in real-time as memory usage changes
+- **GaugeIconGenerator** - New utility class for generating gauge-style icons programmatically
+- **WarningOverlay** - Reusable warning dialog component with proper resource disposal
+
+### Changed
+- **Icon System** - Hybrid approach: static icon for desktop, dynamic icon for system tray
+- **Code Quality Improvements**:
+  - Extracted `WarningOverlay` class from `MiniMonitorForm` for reusability
+  - Added `SafeUpdate()` wrapper to prevent one failed metric from stopping all updates
+  - Fixed font memory leaks in warning dialogs
+  - Fixed nullable warnings in GPU temperature checks
+- **AMD GPU Memory** - Now falls back to Windows performance counters since ADL doesn't provide used memory
+- **Intel GPU Support** - Added clear debug messaging about native monitoring limitations
+- **MaxValue Safety** - `CompactGaugeControl.MaxValue` now enforces minimum of 0.001 to prevent division by zero
+
+### Fixed
+- **Icon Format** - Converted PNG-based icon to proper multi-resolution ICO format (16-256px)
+- **Build Configuration** - Fixed LibreHardwareMonitor x64 platform requirement with `SetPlatform` attribute
+- **Resource Disposal** - Fonts in warning dialogs are now properly disposed when dismissed
+- **Nullable Warnings** - Fixed CS8629 warnings in GPU temperature initialization
+
+### Technical Changes
+- Added `GaugeIconGenerator.cs` - Dynamic tray icon generation with color coding
+- Added `WarningOverlay.cs` - Reusable warning panel with proper disposal pattern
+- Updated `MiniMonitorForm.cs`:
+  - Replaced inline warning panel with `WarningOverlay` class
+  - Added `SafeUpdate()` method for resilient metric updates
+  - Added dynamic tray icon support via `UpdateTrayIcon()`
+- Updated `GPUMonitor.cs`:
+  - AMD memory now uses performance counter fallback
+  - Intel GPU messaging improved
+  - Nullable warning fixes
+- Updated `CompactGaugeControl.cs`:
+  - `MaxValue` minimum changed from 1 to 0.001f
+- Updated `Memory Monitor.csproj`:
+  - Added `<ApplicationIcon>` for exe icon
+  - Added `SetPlatform="Platform=x64"` for LibreHardwareMonitor reference
+  - Added icon copy to output directory
+
 ## [2.1.0] - 2024
 
 ### Added
@@ -82,6 +127,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Notes
+
+### Upgrading to 2.2.0
+- New gauge-style application icon and color-coded dynamic tray icon for RAM usage
+- Tray icon updates in real-time to reflect current RAM usage
+- Experimental support for Intel GPU memory monitoring
 
 ### Upgrading to 2.1.0
 - Application now runs in borderless full screen mode by default
