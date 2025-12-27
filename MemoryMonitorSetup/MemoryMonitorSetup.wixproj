@@ -1,9 +1,1 @@
-<Project Sdk="WixToolset.Sdk/4.0.0">
-  <PropertyGroup>
-    <OutputName>MemoryMonitorSetup</OutputName>
-    <OutputType>Package</OutputType>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Memory Monitor\Memory Monitor.csproj" />
-  </ItemGroup>
-</Project>
+<Project Sdk="WixToolset.Sdk/4.0.0"><PropertyGroup><OutputName>MemoryMonitorSetup</OutputName><OutputType>Package</OutputType><RuntimeIdentifier>win-x64</RuntimeIdentifier><Platform>x64</Platform></PropertyGroup><ItemGroup><ProjectReference Include="..\Memory Monitor\Memory Monitor.csproj"><SetPlatform>Platform=x64</SetPlatform><Properties>RuntimeIdentifier=win-x64</Properties></ProjectReference></ItemGroup></Project>

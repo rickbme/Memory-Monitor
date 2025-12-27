@@ -183,31 +183,39 @@ namespace Memory_Monitor
             int arcRadius = radius - 15;
             Rectangle arcRect = new Rectangle(cx - arcRadius, cy - arcRadius, arcRadius * 2, arcRadius * 2);
 
-            // Glow effect
-            using (var glowPath = new GraphicsPath())
+            // Only draw the colored arc if it has a meaningful sweep angle
+            // Very small sweep angles cause GDI+ issues with LineCap.Round on thick pens
+            if (currentSweep >= 1.0f)
             {
-                glowPath.AddArc(arcRect, startAngle, currentSweep);
-                for (int i = 5; i > 0; i--)
+                // Glow effect
+                using (var glowPath = new GraphicsPath())
                 {
-                    using (var glowPen = new Pen(Color.FromArgb(25, _gaugeColor), i * 2))
+                    glowPath.AddArc(arcRect, startAngle, currentSweep);
+                    for (int i = 5; i > 0; i--)
                     {
-                        glowPen.StartCap = glowPen.EndCap = LineCap.Round;
-                        g.DrawPath(glowPen, glowPath);
+                        using (var glowPen = new Pen(Color.FromArgb(25, _gaugeColor), i * 2))
+                        {
+                            glowPen.StartCap = glowPen.EndCap = LineCap.Round;
+                            g.DrawPath(glowPen, glowPath);
+                        }
                     }
-                }
 
-                using (var arcPen = new Pen(_gaugeColor, 8))
-                {
-                    arcPen.StartCap = arcPen.EndCap = LineCap.Round;
-                    g.DrawPath(arcPen, glowPath);
+                    using (var arcPen = new Pen(_gaugeColor, 8))
+                    {
+                        arcPen.StartCap = arcPen.EndCap = LineCap.Round;
+                        g.DrawPath(arcPen, glowPath);
+                    }
                 }
             }
 
-            // Background arc
+            // Background arc (draw full arc if currentSweep is too small)
+            float bgStart = currentSweep >= 1.0f ? startAngle + currentSweep : startAngle;
+            float bgSweep = currentSweep >= 1.0f ? sweepAngle - currentSweep : sweepAngle;
+
             using (var bgPen = new Pen(Color.FromArgb(50, 50, 50), 8))
             {
                 bgPen.StartCap = bgPen.EndCap = LineCap.Round;
-                g.DrawArc(bgPen, arcRect, startAngle + currentSweep, sweepAngle - currentSweep);
+                g.DrawArc(bgPen, arcRect, bgStart, bgSweep);
             }
         }
 
