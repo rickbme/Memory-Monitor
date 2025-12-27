@@ -15,7 +15,22 @@
     
     <Feature Id="Main" Title="Memory Monitor" Level="1">
       <ComponentGroupRef Id="PublishedFileComponents" />
+      <ComponentGroupRef Id="csComponents" />
+      <ComponentGroupRef Id="deComponents" />
+      <ComponentGroupRef Id="esComponents" />
+      <ComponentGroupRef Id="frComponents" />
+      <ComponentGroupRef Id="itComponents" />
+      <ComponentGroupRef Id="jaComponents" />
+      <ComponentGroupRef Id="koComponents" />
+      <ComponentGroupRef Id="plComponents" />
+      <ComponentGroupRef Id="pt_BRComponents" />
+      <ComponentGroupRef Id="ResourcesComponents" />
+      <ComponentGroupRef Id="ruComponents" />
+      <ComponentGroupRef Id="trComponents" />
+      <ComponentGroupRef Id="zh_HansComponents" />
+      <ComponentGroupRef Id="zh_HantComponents" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
+      <ComponentGroupRef Id="DesktopShortcuts" />
     </Feature>
     
     <!-- Add/Remove Programs Icon -->
@@ -34,6 +49,8 @@
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="ApplicationProgramsFolder" Name="Memory Monitor" />
     </StandardDirectory>
+    
+    <StandardDirectory Id="DesktopFolder" />
   </Fragment>
   
   <Fragment>
@@ -49,6 +66,25 @@
         <RegistryValue Root="HKCU" 
                        Key="Software\MemoryMonitor" 
                        Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+  
+  <Fragment>
+    <ComponentGroup Id="DesktopShortcuts" Directory="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="89012345-1234-5432-1234-89012345BCDE">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="Memory Monitor"
+                  Description="System Resource Monitor"
+                  Target="[INSTALLFOLDER]Memory Monitor.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.exe" />
+        <RegistryValue Root="HKCU" 
+                       Key="Software\MemoryMonitor" 
+                       Name="desktopShortcut" 
                        Type="integer" 
                        Value="1" 
                        KeyPath="yes" />
