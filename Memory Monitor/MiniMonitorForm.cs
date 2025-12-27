@@ -324,13 +324,29 @@ namespace Memory_Monitor
 
         private void UpdateAllMetrics()
         {
-            UpdateRAM();
-            UpdateCPU();
-            UpdateGPUUsage();
-            UpdateGPUMemory();
-            UpdateDisk();
-            UpdateNetwork();
+            // Wrap each update in try-catch to prevent one failure from stopping all updates
+            SafeUpdate(UpdateRAM);
+            SafeUpdate(UpdateCPU);
+            SafeUpdate(UpdateGPUUsage);
+            SafeUpdate(UpdateGPUMemory);
+            SafeUpdate(UpdateDisk);
+            SafeUpdate(UpdateNetwork);
             UpdateTrayIconText();
+        }
+
+        /// <summary>
+        /// Safely executes an update action, catching and logging any exceptions.
+        /// </summary>
+        private void SafeUpdate(Action updateAction)
+        {
+            try
+            {
+                updateAction();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Update error in {updateAction.Method.Name}: {ex.Message}");
+            }
         }
 
         private void UpdateRAM()
@@ -393,78 +409,15 @@ namespace Memory_Monitor
         {
             _cpuTempWarningShown = true;
             
-            // Create a semi-transparent overlay panel with the warning message
-            Panel warningPanel = new Panel
-            {
-                BackColor = Color.FromArgb(220, 30, 30, 35),
-                Size = new Size(500, 120),
-                BorderStyle = BorderStyle.None
-            };
-
-            Label titleLabel = new Label
-            {
-                Text = "? CPU Temperature Not Available",
-                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(255, 200, 50),
-                AutoSize = false,
-                Size = new Size(480, 25),
-                Location = new Point(10, 10),
-                TextAlign = ContentAlignment.MiddleCenter
-            };
-
-            Label messageLabel = new Label
-            {
-                Text = "To enable CPU temperature monitoring:\n" +
-                       "1. Run HWiNFO (download from hwinfo.com)\n" +
-                       "2. Go to Settings ? Enable 'Shared Memory Support'\n" +
-                       "3. Keep HWiNFO running in the background",
-                Font = new Font("Segoe UI", 9f, FontStyle.Regular),
-                ForeColor = Color.FromArgb(200, 200, 200),
-                AutoSize = false,
-                Size = new Size(400, 60),
-                Location = new Point(50, 35),
-                TextAlign = ContentAlignment.TopLeft
-            };
-
-            Button dismissButton = new Button
-            {
-                Text = "Dismiss",
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(60, 65, 70),
-                FlatStyle = FlatStyle.Flat,
-                Size = new Size(80, 28),
-                Location = new Point(210, 85),
-                Cursor = Cursors.Hand
-            };
-            dismissButton.FlatAppearance.BorderColor = Color.FromArgb(100, 105, 110);
-            dismissButton.Click += (s, e) =>
-            {
-                this.Controls.Remove(warningPanel);
-                warningPanel.Dispose();
-            };
-
-            warningPanel.Controls.Add(titleLabel);
-            warningPanel.Controls.Add(messageLabel);
-            warningPanel.Controls.Add(dismissButton);
-
-            // Center the panel on the form
-            warningPanel.Location = new Point(
-                (this.ClientSize.Width - warningPanel.Width) / 2,
-                (this.ClientSize.Height - warningPanel.Height) / 2
+            var warning = new WarningOverlay(
+                "? CPU Temperature Not Available",
+                "To enable CPU temperature monitoring:\n" +
+                "1. Run HWiNFO (download from hwinfo.com)\n" +
+                "2. Go to Settings ? Enable 'Shared Memory Support'\n" +
+                "3. Keep HWiNFO running in the background"
             );
-
-            // Add border effect
-            warningPanel.Paint += (s, e) =>
-            {
-                using (Pen borderPen = new Pen(Color.FromArgb(255, 200, 50), 2))
-                {
-                    e.Graphics.DrawRectangle(borderPen, 0, 0, warningPanel.Width - 1, warningPanel.Height - 1);
-                }
-            };
-
-            this.Controls.Add(warningPanel);
-            warningPanel.BringToFront();
+            
+            warning.ShowOn(this);
         }
 
         private void UpdateGPUUsage()

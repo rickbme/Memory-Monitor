@@ -78,7 +78,7 @@ namespace Memory_Monitor
         public float MaxValue
         {
             get => _maxValue;
-            set { _maxValue = Math.Max(1, value); Invalidate(); }
+            set { _maxValue = Math.Max(0.001f, value); Invalidate(); } // Prevent zero/negative to avoid division errors
         }
 
         public float CurrentValue => _currentValue;

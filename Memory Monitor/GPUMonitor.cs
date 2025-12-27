@@ -155,8 +155,12 @@ namespace Memory_Monitor
                     break;
 
                 case GPUVendor.Intel:
-                    // Intel doesn't have a public monitoring API yet, fall back to performance counters
-                    Debug.WriteLine("Intel GPU detected - using performance counters");
+                    // Intel doesn't expose a public monitoring API like NVML/ADL
+                    // Arc GPUs may work with performance counters, but temperature is not available
+                    Debug.WriteLine("Intel GPU detected - native monitoring not available");
+                    Debug.WriteLine("  Using Windows performance counters for usage/memory");
+                    Debug.WriteLine("  Temperature monitoring not supported for Intel GPUs");
+                    IsTemperatureAvailable = false;
                     break;
 
                 default:
@@ -202,7 +206,7 @@ namespace Memory_Monitor
                             // Check if temperature is available
                             var tempCheck = NVMLInterop.GetTemperature(_nvmlDevice.Value);
                             IsTemperatureAvailable = tempCheck.HasValue;
-                            if (IsTemperatureAvailable)
+                            if (IsTemperatureAvailable && tempCheck.HasValue)
                             {
                                 Debug.WriteLine($"NVML Temperature available: {tempCheck.Value}°C");
                             }
@@ -257,7 +261,7 @@ namespace Memory_Monitor
                                 // Check if temperature is available
                                 var tempCheck = ADLInterop.GetTemperature(_adlAdapterIndex);
                                 IsTemperatureAvailable = tempCheck.HasValue;
-                                if (IsTemperatureAvailable)
+                                if (IsTemperatureAvailable && tempCheck.HasValue)
                                 {
                                     Debug.WriteLine($"ADL Temperature available: {tempCheck.Value}°C");
                                 }
@@ -437,10 +441,17 @@ namespace Memory_Monitor
 
         private ulong UpdateMemoryADL()
         {
-            // ADL doesn't provide used memory, only total
-            // We would need to estimate or use other methods
-            // For now, return 0 to indicate unavailable
-            Debug.WriteLine("ADL does not provide used memory information");
+            // ADL doesn't provide real-time used memory information
+            // Fall back to performance counter for AMD memory usage
+            if (_adlAdapterIndex >= 0)
+            {
+                CurrentMemoryUsedBytes = GetGPUMemoryUsageFromPerfCounter();
+                if (CurrentMemoryUsedBytes > 0)
+                {
+                    return CurrentMemoryUsedBytes;
+                }
+                Debug.WriteLine("ADL: Performance counter fallback returned no memory data");
+            }
             return 0;
         }
 
