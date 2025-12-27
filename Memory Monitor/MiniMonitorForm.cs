@@ -70,6 +70,10 @@ namespace Memory_Monitor
         public MiniMonitorForm()
         {
             InitializeComponent();
+            
+            // Don't show in taskbar - we use system tray instead
+            this.ShowInTaskbar = false;
+            
             SetupBorderlessWindow();
             InitializeMonitors();
             LoadDeviceSelections();  // Load saved device selections before UI init
@@ -79,6 +83,21 @@ namespace Memory_Monitor
             InitializeTrayIcon();
             InitializeTouchSupport();  // Add touch gesture support
             ApplyTheme();
+        }
+
+        /// <summary>
+        /// Override OnLoad to ensure proper window display on startup
+        /// </summary>
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            
+            // Show the window normally on startup
+            this.WindowState = FormWindowState.Normal;
+            this.Show();
+            this.Activate();
+            
+            Debug.WriteLine("Application started - window visible, tray icon active");
         }
 
         private void SetupBorderlessWindow()

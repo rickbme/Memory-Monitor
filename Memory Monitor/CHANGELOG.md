@@ -5,6 +5,53 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-01-XX
+
+### Added
+- **Touch Gesture Support** - Full touch input support for mini monitors with touchscreen capability
+  - **Swipe Left/Right** - Switch between monitors
+  - **Swipe Down** - Minimize to system tray
+  - **Tap on Gauge** - Open device selection popup (for GPU, Disk, Network gauges)
+  - **Long Press** - Show context menu at touch location
+  - **Two-Finger Tap** - Toggle "Always on Top" mode
+- **TouchGestureHandler** - New component using Windows Touch API (`WM_TOUCH`, `WM_GESTURE`)
+- **Visual Feedback** - Toast notifications for gesture actions (monitor switching, always-on-top toggle)
+- **Graceful Degradation** - Application works normally on systems without touch support
+
+### Changed
+- **Minimize to Tray** - Application now minimizes to the system tray instead of the taskbar
+  - Window shows normally on startup
+  - When minimized (Escape key, swipe down, or minimize), hides to system tray
+  - Double-click tray icon or use "Show" menu to restore the window
+  - Keeps the taskbar clean while monitoring continues in background
+- **CompactGaugeControl** - Added `PerformClick()` method to support touch tap gestures
+- **MiniMonitorForm** - Added `WndProc` override for touch message processing
+
+### Technical Changes
+- Added `TouchGestureHandler.cs`:
+  - Windows Touch API P/Invoke declarations
+  - Gesture detection (swipe, tap, long-press, two-finger tap, pinch/zoom)
+  - `IsTouchAvailable` property for capability detection
+  - Proper resource cleanup via `IDisposable`
+- Added event argument classes:
+  - `SwipeEventArgs` with direction and distance
+  - `TapEventArgs` with location and tapped control
+  - `LongPressEventArgs` with location and control
+  - `PointEventArgs` for two-finger tap
+  - `ZoomEventArgs` for pinch gestures
+- Updated `MiniMonitorForm.cs`:
+  - Added `InitializeTouchSupport()` method
+  - Touch gesture event handlers
+  - `ShowToastNotification()` for visual feedback
+  - Touch handler disposal in `OnFormClosing()`
+- Updated `CompactGaugeControl.cs`:
+  - Added `PerformClick()` method for programmatic click simulation
+
+### Notes
+- Touch support requires the mini monitor to be connected via USB data cable (not power-only)
+- The monitor must have HID-compliant touch hardware recognized by Windows
+- All features continue to work with mouse/keyboard when touch is unavailable
+
 ## [2.2.0] - 2024-12-26
 
 ### Added
@@ -127,6 +174,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Notes
+
+### Upgrading to 2.3.0
+- Full touch gesture support for mini monitors with touchscreen capability
+- Touch gestures for switching monitors, minimizing, opening device selection, and toggling always-on-top mode
+- Visual feedback for gesture actions via toast notifications
+- Application now starts minimized to the system tray by default
 
 ### Upgrading to 2.2.0
 - New gauge-style application icon and color-coded dynamic tray icon for RAM usage
