@@ -6,7 +6,7 @@ namespace Memory_Monitor
     /// <summary>
     /// Monitors GPU usage and memory using native APIs (NVML/ADL) with fallback to WMI
     /// </summary>
-    public class GPUMonitor : IMonitor, IDisposable
+    public class GPUMonitor : ISelectableMonitor, IDisposable
     {
         public enum GPUVendor
         {
@@ -16,22 +16,43 @@ namespace Memory_Monitor
             Intel
         }
 
-        private PerformanceCounter? _gpuUsageCounter;
-        private bool _usageCounterAvailable = false;
-        private string _gpuEngineInstance = "";
+        /// <summary>
+        /// Internal representation of a detected GPU
+        /// </summary>
+        private class GPUDevice
+        {
+            public string Id { get; set; } = "";
+            public string Name { get; set; } = "Unknown GPU";
+            public GPUVendor Vendor { get; set; } = GPUVendor.Unknown;
+            public ulong TotalMemoryBytes { get; set; } = 0;
+            public bool IsMemoryAvailable { get; set; } = false;
+            public bool IsUsageAvailable { get; set; } = false;
+            public bool IsTemperatureAvailable { get; set; } = false;
+            public bool UseNativeAPI { get; set; } = false;
+            
+            // NVIDIA specific
+            public NVMLInterop.nvmlDevice_t? NvmlDevice { get; set; } = null;
+            
+            // AMD specific  
+            public int AdlAdapterIndex { get; set; } = -1;
+            
+            // Performance counter fallback
+            public PerformanceCounter? UsageCounter { get; set; }
+            public string GpuEngineInstance { get; set; } = "";
+            public bool UsageCounterAvailable { get; set; } = false;
+        }
 
-        private GPUVendor _vendor = GPUVendor.Unknown;
-        private NVMLInterop.nvmlDevice_t? _nvmlDevice = null;
-        private int _adlAdapterIndex = -1;
-        private bool _useNativeAPI = false;
+        private List<GPUDevice> _detectedGPUs = new List<GPUDevice>();
+        private GPUDevice? _selectedGPU = null;
+        private List<DeviceInfo> _availableDevices = new List<DeviceInfo>();
 
-        public string GPUName { get; private set; } = "Unknown GPU";
-        public ulong TotalMemoryBytes { get; private set; } = 0;
-        public bool IsMemoryAvailable { get; private set; } = false;
-        public bool IsUsageAvailable { get; private set; } = false;
-        public bool IsTemperatureAvailable { get; private set; } = false;
+        public string GPUName => _selectedGPU?.Name ?? "Unknown GPU";
+        public ulong TotalMemoryBytes => _selectedGPU?.TotalMemoryBytes ?? 0;
+        public bool IsMemoryAvailable => _selectedGPU?.IsMemoryAvailable ?? false;
+        public bool IsUsageAvailable => _selectedGPU?.IsUsageAvailable ?? false;
+        public bool IsTemperatureAvailable => _selectedGPU?.IsTemperatureAvailable ?? false;
         public bool IsAvailable => IsUsageAvailable || IsMemoryAvailable;
-        public GPUVendor Vendor => _vendor;
+        public GPUVendor Vendor => _selectedGPU?.Vendor ?? GPUVendor.Unknown;
 
         public float CurrentUsagePercent { get; private set; }
         public ulong CurrentMemoryUsedBytes { get; private set; }
@@ -43,35 +64,43 @@ namespace Memory_Monitor
             ? Math.Min((int)((CurrentMemoryUsedBytes * 100) / TotalMemoryBytes), 100)
             : 0;
 
+        // ISelectableMonitor implementation
+        public IReadOnlyList<DeviceInfo> AvailableDevices => _availableDevices;
+        public DeviceInfo? SelectedDevice => _selectedGPU != null 
+            ? _availableDevices.FirstOrDefault(d => d.Id == _selectedGPU.Id) 
+            : null;
+        public bool HasMultipleDevices => _detectedGPUs.Count > 1;
+        public string CurrentDeviceDisplayName => _selectedGPU?.Name ?? "No GPU";
+
         public GPUMonitor()
         {
-            DetectGPU();
-            InitializeNativeAPIs();
+            DetectAllGPUs();
+            InitializeAllNativeAPIs();
+            BuildDeviceList();
             
-            // Only initialize performance counters if native APIs failed
-            if (!_useNativeAPI)
+            // Select first available GPU by default
+            if (_detectedGPUs.Count > 0)
             {
-                InitializeUsageCounter();
+                SelectDevice(_detectedGPUs[0].Id);
             }
         }
 
         /// <summary>
-        /// Detects GPU hardware via WMI and determines vendor
+        /// Detects all GPU hardware via WMI
         /// </summary>
-        private void DetectGPU()
+        private void DetectAllGPUs()
         {
             try
             {
                 using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(
                     "SELECT Name, AdapterRAM, VideoProcessor, PNPDeviceID FROM Win32_VideoController"))
                 {
-                    bool foundDedicatedGPU = false;
-
+                    int gpuIndex = 0;
                     foreach (ManagementObject obj in searcher.Get())
                     {
                         string name = obj["Name"]?.ToString() ?? "Unknown";
                         string pnpId = obj["PNPDeviceID"]?.ToString() ?? "";
-                        object adapterRAM = obj["AdapterRAM"];
+                        object? adapterRAM = obj["AdapterRAM"];
 
                         Debug.WriteLine($"Found GPU: {name}");
                         Debug.WriteLine($"  PNP ID: {pnpId}");
@@ -101,79 +130,56 @@ namespace Memory_Monitor
                             vendor = GPUVendor.Intel;
                         }
 
-                        bool isDedicated = vendor != GPUVendor.Unknown;
-
-                        if (adapterRAM != null)
+                        var gpu = new GPUDevice
                         {
-                            if (ulong.TryParse(adapterRAM.ToString(), out ulong ram) && ram > 0)
-                            {
-                                if (!foundDedicatedGPU || isDedicated)
-                                {
-                                    GPUName = name;
-                                    TotalMemoryBytes = ram;
-                                    IsMemoryAvailable = true;
-                                    _vendor = vendor;
-                                    foundDedicatedGPU = isDedicated;
+                            Id = $"gpu_{gpuIndex}_{pnpId.GetHashCode():X8}",
+                            Name = name,
+                            Vendor = vendor
+                        };
 
-                                    Debug.WriteLine($"  Selected GPU: {GPUName}");
-                                    Debug.WriteLine($"  Vendor: {_vendor}");
-                                    Debug.WriteLine($"  Total Memory: {TotalMemoryGB:F2} GB");
-
-                                    if (isDedicated)
-                                        break; // Stop at first dedicated GPU
-                                }
-                            }
+                        if (adapterRAM != null && ulong.TryParse(adapterRAM.ToString(), out ulong ram) && ram > 0)
+                        {
+                            gpu.TotalMemoryBytes = ram;
+                            gpu.IsMemoryAvailable = true;
                         }
+
+                        _detectedGPUs.Add(gpu);
+                        Debug.WriteLine($"  Added GPU #{gpuIndex}: {name} ({vendor})");
+                        gpuIndex++;
                     }
                 }
 
-                if (!IsMemoryAvailable)
-                {
-                    Debug.WriteLine("GPU memory information not available via WMI");
-                }
+                Debug.WriteLine($"Total GPUs detected: {_detectedGPUs.Count}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to detect GPU: {ex.Message}");
-                IsMemoryAvailable = false;
+                Debug.WriteLine($"Failed to detect GPUs: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Initializes native GPU monitoring APIs (NVML for NVIDIA, ADL for AMD)
+        /// Initializes native APIs for all detected GPUs
         /// </summary>
-        private void InitializeNativeAPIs()
+        private void InitializeAllNativeAPIs()
         {
-            switch (_vendor)
+            // Initialize NVML for NVIDIA GPUs
+            InitializeNVMLForAll();
+            
+            // Initialize ADL for AMD GPUs
+            InitializeADLForAll();
+            
+            // Initialize performance counters for any GPU without native API
+            foreach (var gpu in _detectedGPUs.Where(g => !g.UseNativeAPI))
             {
-                case GPUVendor.NVIDIA:
-                    InitializeNVML();
-                    break;
-
-                case GPUVendor.AMD:
-                    InitializeADL();
-                    break;
-
-                case GPUVendor.Intel:
-                    // Intel doesn't expose a public monitoring API like NVML/ADL
-                    // Arc GPUs may work with performance counters, but temperature is not available
-                    Debug.WriteLine("Intel GPU detected - native monitoring not available");
-                    Debug.WriteLine("  Using Windows performance counters for usage/memory");
-                    Debug.WriteLine("  Temperature monitoring not supported for Intel GPUs");
-                    IsTemperatureAvailable = false;
-                    break;
-
-                default:
-                    Debug.WriteLine("Unknown GPU vendor - using performance counters");
-                    break;
+                InitializeUsageCounterForGPU(gpu);
             }
         }
 
-        /// <summary>
-        /// Initialize NVIDIA NVML
-        /// </summary>
-        private void InitializeNVML()
+        private void InitializeNVMLForAll()
         {
+            var nvidiaGPUs = _detectedGPUs.Where(g => g.Vendor == GPUVendor.NVIDIA).ToList();
+            if (nvidiaGPUs.Count == 0) return;
+
             try
             {
                 if (NVMLInterop.Initialize())
@@ -181,40 +187,34 @@ namespace Memory_Monitor
                     uint deviceCount = NVMLInterop.GetDeviceCount();
                     Debug.WriteLine($"NVML found {deviceCount} NVIDIA GPU(s)");
 
-                    if (deviceCount > 0)
+                    for (uint i = 0; i < deviceCount && i < nvidiaGPUs.Count; i++)
                     {
-                        // Use first device
-                        _nvmlDevice = NVMLInterop.GetDeviceByIndex(0);
-                        
-                        if (_nvmlDevice.HasValue)
+                        var gpu = nvidiaGPUs[(int)i];
+                        var nvmlDevice = NVMLInterop.GetDeviceByIndex(i);
+
+                        if (nvmlDevice.HasValue)
                         {
-                            string? nvmlName = NVMLInterop.GetDeviceName(_nvmlDevice.Value);
+                            gpu.NvmlDevice = nvmlDevice;
+
+                            string? nvmlName = NVMLInterop.GetDeviceName(nvmlDevice.Value);
                             if (nvmlName != null)
                             {
-                                GPUName = nvmlName;
-                                Debug.WriteLine($"NVML Device Name: {GPUName}");
+                                gpu.Name = nvmlName;
                             }
 
-                            // Get accurate memory size from NVML
-                            var memInfo = NVMLInterop.GetMemoryInfo(_nvmlDevice.Value);
+                            var memInfo = NVMLInterop.GetMemoryInfo(nvmlDevice.Value);
                             if (memInfo.HasValue)
                             {
-                                TotalMemoryBytes = memInfo.Value.total;
-                                Debug.WriteLine($"NVML Total Memory: {TotalMemoryGB:F2} GB");
+                                gpu.TotalMemoryBytes = memInfo.Value.total;
+                                gpu.IsMemoryAvailable = true;
                             }
 
-                            // Check if temperature is available
-                            var tempCheck = NVMLInterop.GetTemperature(_nvmlDevice.Value);
-                            IsTemperatureAvailable = tempCheck.HasValue;
-                            if (IsTemperatureAvailable && tempCheck.HasValue)
-                            {
-                                Debug.WriteLine($"NVML Temperature available: {tempCheck.Value}°C");
-                            }
+                            var tempCheck = NVMLInterop.GetTemperature(nvmlDevice.Value);
+                            gpu.IsTemperatureAvailable = tempCheck.HasValue;
 
-                            _useNativeAPI = true;
-                            IsUsageAvailable = true;
-                            IsMemoryAvailable = true;
-                            Debug.WriteLine("NVML monitoring enabled");
+                            gpu.UseNativeAPI = true;
+                            gpu.IsUsageAvailable = true;
+                            Debug.WriteLine($"NVML initialized for GPU: {gpu.Name}");
                         }
                     }
                 }
@@ -222,15 +222,14 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"NVML initialization failed: {ex.Message}");
-                _useNativeAPI = false;
             }
         }
 
-        /// <summary>
-        /// Initialize AMD ADL
-        /// </summary>
-        private void InitializeADL()
+        private void InitializeADLForAll()
         {
+            var amdGPUs = _detectedGPUs.Where(g => g.Vendor == GPUVendor.AMD).ToList();
+            if (amdGPUs.Count == 0) return;
+
             try
             {
                 if (ADLInterop.Initialize())
@@ -240,37 +239,29 @@ namespace Memory_Monitor
                     {
                         Debug.WriteLine($"ADL found {adapters.Length} AMD adapter(s)");
 
-                        // Find first active adapter
-                        for (int i = 0; i < adapters.Length; i++)
+                        int amdIndex = 0;
+                        for (int i = 0; i < adapters.Length && amdIndex < amdGPUs.Count; i++)
                         {
                             if (ADLInterop.IsAdapterActive(adapters[i].AdapterIndex))
                             {
-                                _adlAdapterIndex = adapters[i].AdapterIndex;
-                                GPUName = adapters[i].AdapterName;
-                                
-                                Debug.WriteLine($"ADL Active Adapter: {GPUName} (Index: {_adlAdapterIndex})");
+                                var gpu = amdGPUs[amdIndex];
+                                gpu.AdlAdapterIndex = adapters[i].AdapterIndex;
+                                gpu.Name = adapters[i].AdapterName;
 
-                                // Get memory info
-                                var memInfo = ADLInterop.GetMemoryInfo(_adlAdapterIndex);
+                                var memInfo = ADLInterop.GetMemoryInfo(gpu.AdlAdapterIndex);
                                 if (memInfo.HasValue && memInfo.Value.MemorySize > 0)
                                 {
-                                    TotalMemoryBytes = (ulong)memInfo.Value.MemorySize;
-                                    Debug.WriteLine($"ADL Total Memory: {TotalMemoryGB:F2} GB");
+                                    gpu.TotalMemoryBytes = (ulong)memInfo.Value.MemorySize;
+                                    gpu.IsMemoryAvailable = true;
                                 }
 
-                                // Check if temperature is available
-                                var tempCheck = ADLInterop.GetTemperature(_adlAdapterIndex);
-                                IsTemperatureAvailable = tempCheck.HasValue;
-                                if (IsTemperatureAvailable && tempCheck.HasValue)
-                                {
-                                    Debug.WriteLine($"ADL Temperature available: {tempCheck.Value}°C");
-                                }
+                                var tempCheck = ADLInterop.GetTemperature(gpu.AdlAdapterIndex);
+                                gpu.IsTemperatureAvailable = tempCheck.HasValue;
 
-                                _useNativeAPI = true;
-                                IsUsageAvailable = true;
-                                IsMemoryAvailable = true;
-                                Debug.WriteLine("ADL monitoring enabled");
-                                break;
+                                gpu.UseNativeAPI = true;
+                                gpu.IsUsageAvailable = true;
+                                Debug.WriteLine($"ADL initialized for GPU: {gpu.Name}");
+                                amdIndex++;
                             }
                         }
                     }
@@ -279,52 +270,71 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"ADL initialization failed: {ex.Message}");
-                _useNativeAPI = false;
             }
         }
 
-        /// <summary>
-        /// Initializes GPU usage performance counter (fallback method)
-        /// </summary>
-        private void InitializeUsageCounter()
+        private void InitializeUsageCounterForGPU(GPUDevice gpu)
         {
             try
             {
                 PerformanceCounterCategory category = new PerformanceCounterCategory("GPU Engine");
                 string[] instanceNames = category.GetInstanceNames();
 
-                Debug.WriteLine($"Found {instanceNames.Length} GPU Engine instances (fallback)");
-
                 var engine3DInstances = instanceNames.Where(i => i.Contains("engtype_3D")).ToArray();
-
-                string selectedInstance = "";
-
-                if (engine3DInstances.Length > 0)
-                {
-                    selectedInstance = engine3DInstances[0];
-                    Debug.WriteLine($"Selected GPU Engine instance: {selectedInstance}");
-                }
-                else if (instanceNames.Length > 0)
-                {
-                    selectedInstance = instanceNames[0];
-                    Debug.WriteLine($"Using fallback GPU Engine instance: {selectedInstance}");
-                }
+                string selectedInstance = engine3DInstances.FirstOrDefault() ?? instanceNames.FirstOrDefault() ?? "";
 
                 if (!string.IsNullOrEmpty(selectedInstance))
                 {
-                    _gpuEngineInstance = selectedInstance;
-                    _gpuUsageCounter = new PerformanceCounter("GPU Engine", "Utilization Percentage", selectedInstance);
-                    _gpuUsageCounter.NextValue();
-                    _usageCounterAvailable = true;
-                    IsUsageAvailable = true;
-                    Debug.WriteLine("GPU usage performance counter initialized (fallback)");
+                    gpu.GpuEngineInstance = selectedInstance;
+                    gpu.UsageCounter = new PerformanceCounter("GPU Engine", "Utilization Percentage", selectedInstance);
+                    gpu.UsageCounter.NextValue();
+                    gpu.UsageCounterAvailable = true;
+                    gpu.IsUsageAvailable = true;
+                    Debug.WriteLine($"Performance counter initialized for GPU: {gpu.Name}");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to initialize GPU usage counter: {ex.Message}");
-                _usageCounterAvailable = false;
+                Debug.WriteLine($"Failed to initialize usage counter for {gpu.Name}: {ex.Message}");
             }
+        }
+
+        private void BuildDeviceList()
+        {
+            _availableDevices.Clear();
+
+            foreach (var gpu in _detectedGPUs)
+            {
+                _availableDevices.Add(new DeviceInfo
+                {
+                    Id = gpu.Id,
+                    DisplayName = gpu.Name,
+                    ShortName = GetShortName(gpu.Name),
+                    Description = $"{gpu.Vendor} • {gpu.TotalMemoryBytes / Constants.BYTES_TO_GB:F0} GB",
+                    Type = DeviceType.GPU,
+                    IsActive = gpu.IsUsageAvailable || gpu.IsMemoryAvailable
+                });
+            }
+        }
+
+        public bool SelectDevice(string? deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                // Select first GPU if null/empty
+                _selectedGPU = _detectedGPUs.FirstOrDefault();
+                return _selectedGPU != null;
+            }
+
+            var gpu = _detectedGPUs.FirstOrDefault(g => g.Id == deviceId);
+            if (gpu != null)
+            {
+                _selectedGPU = gpu;
+                Debug.WriteLine($"Selected GPU: {gpu.Name}");
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -332,24 +342,24 @@ namespace Memory_Monitor
         /// </summary>
         public float UpdateUsage()
         {
+            if (_selectedGPU == null) return 0;
+
             try
             {
-                if (_useNativeAPI)
+                if (_selectedGPU.UseNativeAPI)
                 {
-                    switch (_vendor)
+                    switch (_selectedGPU.Vendor)
                     {
                         case GPUVendor.NVIDIA:
-                            return UpdateUsageNVML();
-
+                            return UpdateUsageNVML(_selectedGPU);
                         case GPUVendor.AMD:
-                            return UpdateUsageADL();
+                            return UpdateUsageADL(_selectedGPU);
                     }
                 }
 
-                // Fallback to performance counter
-                if (_usageCounterAvailable && _gpuUsageCounter != null)
+                if (_selectedGPU.UsageCounterAvailable && _selectedGPU.UsageCounter != null)
                 {
-                    CurrentUsagePercent = _gpuUsageCounter.NextValue();
+                    CurrentUsagePercent = _selectedGPU.UsageCounter.NextValue();
                     return CurrentUsagePercent;
                 }
             }
@@ -362,11 +372,11 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private float UpdateUsageNVML()
+        private float UpdateUsageNVML(GPUDevice gpu)
         {
-            if (_nvmlDevice.HasValue)
+            if (gpu.NvmlDevice.HasValue)
             {
-                var utilization = NVMLInterop.GetUtilization(_nvmlDevice.Value);
+                var utilization = NVMLInterop.GetUtilization(gpu.NvmlDevice.Value);
                 if (utilization.HasValue)
                 {
                     CurrentUsagePercent = utilization.Value.gpu;
@@ -376,11 +386,11 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private float UpdateUsageADL()
+        private float UpdateUsageADL(GPUDevice gpu)
         {
-            if (_adlAdapterIndex >= 0)
+            if (gpu.AdlAdapterIndex >= 0)
             {
-                var activity = ADLInterop.GetCurrentActivity(_adlAdapterIndex);
+                var activity = ADLInterop.GetCurrentActivity(gpu.AdlAdapterIndex);
                 if (activity.HasValue)
                 {
                     CurrentUsagePercent = activity.Value.ActivityPercent;
@@ -395,24 +405,24 @@ namespace Memory_Monitor
         /// </summary>
         public ulong UpdateMemory()
         {
+            if (_selectedGPU == null) return 0;
+
             try
             {
-                if (_useNativeAPI)
+                if (_selectedGPU.UseNativeAPI)
                 {
-                    switch (_vendor)
+                    switch (_selectedGPU.Vendor)
                     {
                         case GPUVendor.NVIDIA:
-                            return UpdateMemoryNVML();
-
+                            return UpdateMemoryNVML(_selectedGPU);
                         case GPUVendor.AMD:
-                            return UpdateMemoryADL();
+                            return UpdateMemoryADL(_selectedGPU);
                     }
                 }
 
-                // Fallback to performance counter method
-                if (IsMemoryAvailable && TotalMemoryBytes > 0)
+                if (_selectedGPU.IsMemoryAvailable && _selectedGPU.TotalMemoryBytes > 0)
                 {
-                    CurrentMemoryUsedBytes = GetGPUMemoryUsageFromPerfCounter();
+                    CurrentMemoryUsedBytes = GetGPUMemoryUsageFromPerfCounter(_selectedGPU);
                     return CurrentMemoryUsedBytes;
                 }
             }
@@ -425,11 +435,11 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private ulong UpdateMemoryNVML()
+        private ulong UpdateMemoryNVML(GPUDevice gpu)
         {
-            if (_nvmlDevice.HasValue)
+            if (gpu.NvmlDevice.HasValue)
             {
-                var memInfo = NVMLInterop.GetMemoryInfo(_nvmlDevice.Value);
+                var memInfo = NVMLInterop.GetMemoryInfo(gpu.NvmlDevice.Value);
                 if (memInfo.HasValue)
                 {
                     CurrentMemoryUsedBytes = memInfo.Value.used;
@@ -439,18 +449,15 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private ulong UpdateMemoryADL()
+        private ulong UpdateMemoryADL(GPUDevice gpu)
         {
-            // ADL doesn't provide real-time used memory information
-            // Fall back to performance counter for AMD memory usage
-            if (_adlAdapterIndex >= 0)
+            if (gpu.AdlAdapterIndex >= 0)
             {
-                CurrentMemoryUsedBytes = GetGPUMemoryUsageFromPerfCounter();
+                CurrentMemoryUsedBytes = GetGPUMemoryUsageFromPerfCounter(gpu);
                 if (CurrentMemoryUsedBytes > 0)
                 {
                     return CurrentMemoryUsedBytes;
                 }
-                Debug.WriteLine("ADL: Performance counter fallback returned no memory data");
             }
             return 0;
         }
@@ -460,17 +467,18 @@ namespace Memory_Monitor
         /// </summary>
         public int UpdateTemperature()
         {
+            if (_selectedGPU == null) return 0;
+
             try
             {
-                if (_useNativeAPI)
+                if (_selectedGPU.UseNativeAPI)
                 {
-                    switch (_vendor)
+                    switch (_selectedGPU.Vendor)
                     {
                         case GPUVendor.NVIDIA:
-                            return UpdateTemperatureNVML();
-
+                            return UpdateTemperatureNVML(_selectedGPU);
                         case GPUVendor.AMD:
-                            return UpdateTemperatureADL();
+                            return UpdateTemperatureADL(_selectedGPU);
                     }
                 }
             }
@@ -483,11 +491,11 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private int UpdateTemperatureNVML()
+        private int UpdateTemperatureNVML(GPUDevice gpu)
         {
-            if (_nvmlDevice.HasValue)
+            if (gpu.NvmlDevice.HasValue)
             {
-                var temp = NVMLInterop.GetTemperature(_nvmlDevice.Value);
+                var temp = NVMLInterop.GetTemperature(gpu.NvmlDevice.Value);
                 if (temp.HasValue)
                 {
                     CurrentTemperatureCelsius = (int)temp.Value;
@@ -497,11 +505,11 @@ namespace Memory_Monitor
             return 0;
         }
 
-        private int UpdateTemperatureADL()
+        private int UpdateTemperatureADL(GPUDevice gpu)
         {
-            if (_adlAdapterIndex >= 0)
+            if (gpu.AdlAdapterIndex >= 0)
             {
-                var temp = ADLInterop.GetTemperature(_adlAdapterIndex);
+                var temp = ADLInterop.GetTemperature(gpu.AdlAdapterIndex);
                 if (temp.HasValue)
                 {
                     CurrentTemperatureCelsius = temp.Value;
@@ -511,16 +519,13 @@ namespace Memory_Monitor
             return 0;
         }
 
-        /// <summary>
-        /// Fallback: Get GPU memory from performance counters
-        /// </summary>
-        private ulong GetGPUMemoryUsageFromPerfCounter()
+        private ulong GetGPUMemoryUsageFromPerfCounter(GPUDevice gpu)
         {
             try
             {
-                if (!string.IsNullOrEmpty(_gpuEngineInstance))
+                if (!string.IsNullOrEmpty(gpu.GpuEngineInstance))
                 {
-                    string adapterId = ExtractAdapterIdFromEngineInstance(_gpuEngineInstance);
+                    string adapterId = ExtractAdapterIdFromEngineInstance(gpu.GpuEngineInstance);
 
                     if (!string.IsNullOrEmpty(adapterId))
                     {
@@ -568,10 +573,12 @@ namespace Memory_Monitor
             return "";
         }
 
-        public string GetShortName()
+        public string GetShortName() => GetShortName(GPUName);
+
+        private string GetShortName(string gpuName)
         {
             string[] removeWords = { "NVIDIA", "GeForce", "AMD", "Radeon", "Intel", "Graphics", "(TM)", "\u2122", "\u00AE" };
-            string shortened = GPUName;
+            string shortened = gpuName;
 
             foreach (string word in removeWords)
             {
@@ -582,27 +589,31 @@ namespace Memory_Monitor
                 shortened = shortened.Replace("  ", " ");
 
             if (shortened.Length < 3)
-                return GPUName;
+                return gpuName;
 
             return shortened;
         }
 
         public void Dispose()
         {
-            _gpuUsageCounter?.Dispose();
-            _gpuUsageCounter = null;
+            // Store references before clearing
+            bool hasNvidia = _detectedGPUs.Any(g => g.Vendor == GPUVendor.NVIDIA && g.UseNativeAPI);
+            bool hasAmd = _detectedGPUs.Any(g => g.Vendor == GPUVendor.AMD && g.UseNativeAPI);
+
+            foreach (var gpu in _detectedGPUs)
+            {
+                gpu.UsageCounter?.Dispose();
+            }
+            _detectedGPUs.Clear();
 
             // Cleanup native APIs
-            if (_useNativeAPI)
+            if (hasNvidia)
             {
-                if (_vendor == GPUVendor.NVIDIA)
-                {
-                    NVMLInterop.Shutdown();
-                }
-                else if (_vendor == GPUVendor.AMD)
-                {
-                    ADLInterop.Shutdown();
-                }
+                NVMLInterop.Shutdown();
+            }
+            if (hasAmd)
+            {
+                ADLInterop.Shutdown();
             }
         }
     }

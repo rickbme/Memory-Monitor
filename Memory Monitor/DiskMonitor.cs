@@ -2,18 +2,22 @@ using System.Diagnostics;
 
 namespace Memory_Monitor
 {
-    public class DiskMonitor : IMonitor
+    public class DiskMonitor : ISelectableMonitor
     {
         private class DiskCounters
         {
+            public string Id { get; set; } = "";
             public string DiskName { get; set; } = "";
+            public string DisplayName { get; set; } = "";
             public PerformanceCounter? ReadCounter { get; set; }
             public PerformanceCounter? WriteCounter { get; set; }
             public float LastReadMbps { get; set; }
             public float LastWriteMbps { get; set; }
         }
 
-        private List<DiskCounters> _diskCounters = new List<DiskCounters>();
+        private List<DiskCounters> _allDisks = new List<DiskCounters>();
+        private string? _selectedDiskId = null; // null = aggregate all disks
+        private List<DeviceInfo> _availableDevices = new List<DeviceInfo>();
         private bool _isAvailable;
 
         public bool IsAvailable => _isAvailable;
@@ -21,9 +25,20 @@ namespace Memory_Monitor
         public float TotalWriteMbps { get; private set; }
         public float TotalThroughputMbps => TotalReadMbps + TotalWriteMbps;
 
+        // ISelectableMonitor implementation
+        public IReadOnlyList<DeviceInfo> AvailableDevices => _availableDevices;
+        public DeviceInfo? SelectedDevice => _selectedDiskId != null 
+            ? _availableDevices.FirstOrDefault(d => d.Id == _selectedDiskId) 
+            : _availableDevices.FirstOrDefault(d => d.Type == DeviceType.Aggregate);
+        public bool HasMultipleDevices => _allDisks.Count > 1;
+        public string CurrentDeviceDisplayName => _selectedDiskId != null
+            ? _allDisks.FirstOrDefault(d => d.Id == _selectedDiskId)?.DisplayName ?? "Unknown Disk"
+            : "All Disks";
+
         public DiskMonitor()
         {
             Initialize();
+            BuildDeviceList();
         }
 
         private void Initialize()
@@ -35,6 +50,7 @@ namespace Memory_Monitor
 
                 Debug.WriteLine($"Found {instanceNames.Length} PhysicalDisk instances");
 
+                int diskIndex = 0;
                 foreach (string instanceName in instanceNames)
                 {
                     if (instanceName == "_Total" || string.IsNullOrWhiteSpace(instanceName))
@@ -42,9 +58,14 @@ namespace Memory_Monitor
 
                     try
                     {
+                        // Parse disk name - format is usually "0 C: D:" or "1 E:"
+                        string displayName = ParseDiskDisplayName(instanceName);
+                        
                         var diskCounter = new DiskCounters
                         {
+                            Id = $"disk_{diskIndex}_{instanceName.GetHashCode():X8}",
                             DiskName = instanceName,
+                            DisplayName = displayName,
                             ReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", instanceName),
                             WriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", instanceName)
                         };
@@ -52,8 +73,9 @@ namespace Memory_Monitor
                         diskCounter.ReadCounter.NextValue();
                         diskCounter.WriteCounter.NextValue();
 
-                        _diskCounters.Add(diskCounter);
-                        Debug.WriteLine($"Initialized disk monitor for: {instanceName}");
+                        _allDisks.Add(diskCounter);
+                        Debug.WriteLine($"Initialized disk monitor for: {instanceName} -> {displayName}");
+                        diskIndex++;
                     }
                     catch (Exception ex)
                     {
@@ -61,11 +83,11 @@ namespace Memory_Monitor
                     }
                 }
 
-                _isAvailable = _diskCounters.Count > 0;
+                _isAvailable = _allDisks.Count > 0;
                 
                 if (_isAvailable)
                 {
-                    Debug.WriteLine($"Disk monitor initialized successfully with {_diskCounters.Count} disk(s)");
+                    Debug.WriteLine($"Disk monitor initialized successfully with {_allDisks.Count} disk(s)");
                 }
                 else
                 {
@@ -79,16 +101,93 @@ namespace Memory_Monitor
             }
         }
 
+        private string ParseDiskDisplayName(string instanceName)
+        {
+            // Instance name format: "0 C: D:" or "1 E:" etc.
+            // Extract drive letters if present
+            var parts = instanceName.Split(' ');
+            if (parts.Length > 1)
+            {
+                string driveLetters = string.Join(" ", parts.Skip(1));
+                return $"Disk {parts[0]} ({driveLetters.Trim()})";
+            }
+            return $"Disk {instanceName}";
+        }
+
+        private void BuildDeviceList()
+        {
+            _availableDevices.Clear();
+
+            // Add "All Disks" aggregate option if multiple disks
+            if (_allDisks.Count > 1)
+            {
+                _availableDevices.Add(new DeviceInfo
+                {
+                    Id = "",
+                    DisplayName = "All Disks",
+                    ShortName = "All",
+                    Description = $"Combined throughput from {_allDisks.Count} disks",
+                    Type = DeviceType.Aggregate,
+                    IsActive = true
+                });
+            }
+
+            // Add individual disks
+            foreach (var disk in _allDisks)
+            {
+                _availableDevices.Add(new DeviceInfo
+                {
+                    Id = disk.Id,
+                    DisplayName = disk.DisplayName,
+                    ShortName = GetShortDiskName(disk.DisplayName),
+                    Description = disk.DiskName,
+                    Type = DeviceType.Disk,
+                    IsActive = true
+                });
+            }
+        }
+
+        private string GetShortDiskName(string displayName)
+        {
+            // Extract just drive letters for short name
+            int parenStart = displayName.IndexOf('(');
+            int parenEnd = displayName.IndexOf(')');
+            if (parenStart >= 0 && parenEnd > parenStart)
+            {
+                return displayName.Substring(parenStart + 1, parenEnd - parenStart - 1).Trim();
+            }
+            return displayName;
+        }
+
+        public bool SelectDevice(string? deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                // Aggregate mode - use all disks
+                _selectedDiskId = null;
+                Debug.WriteLine("Selected: All Disks (aggregate)");
+                return true;
+            }
+
+            var disk = _allDisks.FirstOrDefault(d => d.Id == deviceId);
+            if (disk != null)
+            {
+                _selectedDiskId = deviceId;
+                Debug.WriteLine($"Selected disk: {disk.DisplayName}");
+                return true;
+            }
+
+            return false;
+        }
+
         public (float readMbps, float writeMbps, float totalMbps) Update()
         {
             try
             {
-                if (_isAvailable && _diskCounters.Count > 0)
+                if (_isAvailable && _allDisks.Count > 0)
                 {
-                    float totalRead = 0;
-                    float totalWrite = 0;
-
-                    foreach (var disk in _diskCounters)
+                    // Update all disk counters first
+                    foreach (var disk in _allDisks)
                     {
                         if (disk.ReadCounter != null && disk.WriteCounter != null)
                         {
@@ -97,14 +196,31 @@ namespace Memory_Monitor
 
                             disk.LastReadMbps = (float)(readBytes / Constants.BYTES_TO_MEGABITS);
                             disk.LastWriteMbps = (float)(writeBytes / Constants.BYTES_TO_MEGABITS);
-
-                            totalRead += disk.LastReadMbps;
-                            totalWrite += disk.LastWriteMbps;
                         }
                     }
 
-                    TotalReadMbps = totalRead;
-                    TotalWriteMbps = totalWrite;
+                    // Calculate totals based on selection
+                    if (_selectedDiskId == null)
+                    {
+                        // Aggregate mode - sum all disks
+                        TotalReadMbps = _allDisks.Sum(d => d.LastReadMbps);
+                        TotalWriteMbps = _allDisks.Sum(d => d.LastWriteMbps);
+                    }
+                    else
+                    {
+                        // Single disk mode
+                        var selectedDisk = _allDisks.FirstOrDefault(d => d.Id == _selectedDiskId);
+                        if (selectedDisk != null)
+                        {
+                            TotalReadMbps = selectedDisk.LastReadMbps;
+                            TotalWriteMbps = selectedDisk.LastWriteMbps;
+                        }
+                        else
+                        {
+                            TotalReadMbps = 0;
+                            TotalWriteMbps = 0;
+                        }
+                    }
 
                     return (TotalReadMbps, TotalWriteMbps, TotalThroughputMbps);
                 }
@@ -121,12 +237,12 @@ namespace Memory_Monitor
 
         public void Dispose()
         {
-            foreach (var disk in _diskCounters)
+            foreach (var disk in _allDisks)
             {
                 disk.ReadCounter?.Dispose();
                 disk.WriteCounter?.Dispose();
             }
-            _diskCounters.Clear();
+            _allDisks.Clear();
         }
     }
 }

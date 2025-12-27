@@ -11,5 +11,14 @@
     <Setting Name="ShowNetworkMonitor" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="SelectedGPUDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="SelectedDiskDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="SelectedNetworkDevice" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
   </Settings>
 </SettingsFile>

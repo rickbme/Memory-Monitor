@@ -58,5 +58,41 @@ namespace Memory_Monitor.Properties {
                 this["ShowNetworkMonitor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SelectedGPUDevice {
+            get {
+                return ((string)(this["SelectedGPUDevice"]));
+            }
+            set {
+                this["SelectedGPUDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SelectedDiskDevice {
+            get {
+                return ((string)(this["SelectedDiskDevice"]));
+            }
+            set {
+                this["SelectedDiskDevice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SelectedNetworkDevice {
+            get {
+                return ((string)(this["SelectedNetworkDevice"]));
+            }
+            set {
+                this["SelectedNetworkDevice"] = value;
+            }
+        }
     }
 }

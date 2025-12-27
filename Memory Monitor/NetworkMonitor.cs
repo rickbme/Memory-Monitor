@@ -3,12 +3,15 @@ using System.Net.NetworkInformation;
 
 namespace Memory_Monitor
 {
-    public class NetworkMonitor : IMonitor
+    public class NetworkMonitor : ISelectableMonitor
     {
         private class NetworkAdapterInfo
         {
+            public string Id { get; set; } = "";
             public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
             public string InstanceName { get; set; } = "";
+            public NetworkInterfaceType InterfaceType { get; set; }
             public PerformanceCounter? BytesSentCounter { get; set; }
             public PerformanceCounter? BytesReceivedCounter { get; set; }
             public long LastBytesSent { get; set; }
@@ -18,7 +21,9 @@ namespace Memory_Monitor
             public float DownloadMbps { get; set; }
         }
 
-        private List<NetworkAdapterInfo> _adapters = new List<NetworkAdapterInfo>();
+        private List<NetworkAdapterInfo> _allAdapters = new List<NetworkAdapterInfo>();
+        private string? _selectedAdapterId = null; // null = aggregate all adapters
+        private List<DeviceInfo> _availableDevices = new List<DeviceInfo>();
         private bool _isAvailable;
 
         public bool IsAvailable => _isAvailable;
@@ -26,9 +31,20 @@ namespace Memory_Monitor
         public float TotalDownloadMbps { get; private set; }
         public float TotalThroughputMbps => TotalUploadMbps + TotalDownloadMbps;
 
+        // ISelectableMonitor implementation
+        public IReadOnlyList<DeviceInfo> AvailableDevices => _availableDevices;
+        public DeviceInfo? SelectedDevice => _selectedAdapterId != null 
+            ? _availableDevices.FirstOrDefault(d => d.Id == _selectedAdapterId) 
+            : _availableDevices.FirstOrDefault(d => d.Type == DeviceType.Aggregate);
+        public bool HasMultipleDevices => _allAdapters.Count > 1;
+        public string CurrentDeviceDisplayName => _selectedAdapterId != null
+            ? _allAdapters.FirstOrDefault(a => a.Id == _selectedAdapterId)?.Name ?? "Unknown Adapter"
+            : "All Networks";
+
         public NetworkMonitor()
         {
             Initialize();
+            BuildDeviceList();
         }
 
         private void Initialize()
@@ -39,6 +55,7 @@ namespace Memory_Monitor
                 
                 Debug.WriteLine($"Found {interfaces.Length} network interfaces");
 
+                int adapterIndex = 0;
                 foreach (NetworkInterface ni in interfaces)
                 {
                     if (ni.OperationalStatus != OperationalStatus.Up)
@@ -69,8 +86,11 @@ namespace Memory_Monitor
                         {
                             var adapter = new NetworkAdapterInfo
                             {
+                                Id = $"net_{adapterIndex}_{ni.Id.GetHashCode():X8}",
                                 Name = ni.Name,
+                                Description = ni.Description,
                                 InstanceName = instanceName,
+                                InterfaceType = type,
                                 BytesSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", instanceName),
                                 BytesReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", instanceName)
                             };
@@ -79,8 +99,9 @@ namespace Memory_Monitor
                             adapter.BytesSentCounter.NextValue();
                             adapter.BytesReceivedCounter.NextValue();
 
-                            _adapters.Add(adapter);
+                            _allAdapters.Add(adapter);
                             Debug.WriteLine($"Initialized network monitor for: {ni.Name} ({type})");
+                            adapterIndex++;
                         }
                     }
                     catch (Exception ex)
@@ -89,11 +110,11 @@ namespace Memory_Monitor
                     }
                 }
 
-                _isAvailable = _adapters.Count > 0;
+                _isAvailable = _allAdapters.Count > 0;
                 
                 if (_isAvailable)
                 {
-                    Debug.WriteLine($"Network monitor initialized successfully with {_adapters.Count} adapter(s)");
+                    Debug.WriteLine($"Network monitor initialized successfully with {_allAdapters.Count} adapter(s)");
                 }
                 else
                 {
@@ -105,6 +126,84 @@ namespace Memory_Monitor
                 Debug.WriteLine($"Failed to initialize network monitor: {ex.Message}");
                 _isAvailable = false;
             }
+        }
+
+        private void BuildDeviceList()
+        {
+            _availableDevices.Clear();
+
+            // Add "All Networks" aggregate option if multiple adapters
+            if (_allAdapters.Count > 1)
+            {
+                _availableDevices.Add(new DeviceInfo
+                {
+                    Id = "",
+                    DisplayName = "All Networks",
+                    ShortName = "All",
+                    Description = $"Combined throughput from {_allAdapters.Count} adapters",
+                    Type = DeviceType.Aggregate,
+                    IsActive = true
+                });
+            }
+
+            // Add individual adapters
+            foreach (var adapter in _allAdapters)
+            {
+                string typeLabel = adapter.InterfaceType switch
+                {
+                    NetworkInterfaceType.Wireless80211 => "WiFi",
+                    NetworkInterfaceType.Ethernet => "Ethernet",
+                    NetworkInterfaceType.GigabitEthernet => "Gigabit",
+                    _ => "Network"
+                };
+
+                _availableDevices.Add(new DeviceInfo
+                {
+                    Id = adapter.Id,
+                    DisplayName = adapter.Name,
+                    ShortName = GetShortAdapterName(adapter.Name, typeLabel),
+                    Description = $"{typeLabel} • {adapter.Description}",
+                    Type = DeviceType.NetworkAdapter,
+                    IsActive = true
+                });
+            }
+        }
+
+        private string GetShortAdapterName(string name, string typeLabel)
+        {
+            // Try to create a short meaningful name
+            if (name.Length <= 12)
+                return name;
+
+            // Check for common patterns
+            if (name.Contains("Ethernet"))
+                return typeLabel;
+            if (name.Contains("Wi-Fi") || name.Contains("WiFi") || name.Contains("Wireless"))
+                return "WiFi";
+            
+            // Truncate if needed
+            return name.Length > 15 ? name.Substring(0, 12) + "..." : name;
+        }
+
+        public bool SelectDevice(string? deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                // Aggregate mode - use all adapters
+                _selectedAdapterId = null;
+                Debug.WriteLine("Selected: All Networks (aggregate)");
+                return true;
+            }
+
+            var adapter = _allAdapters.FirstOrDefault(a => a.Id == deviceId);
+            if (adapter != null)
+            {
+                _selectedAdapterId = deviceId;
+                Debug.WriteLine($"Selected network adapter: {adapter.Name}");
+                return true;
+            }
+
+            return false;
         }
 
         private string FindPerformanceCounterInstance(NetworkInterface ni)
@@ -154,12 +253,10 @@ namespace Memory_Monitor
         {
             try
             {
-                if (_isAvailable && _adapters.Count > 0)
+                if (_isAvailable && _allAdapters.Count > 0)
                 {
-                    float totalUpload = 0;
-                    float totalDownload = 0;
-
-                    foreach (var adapter in _adapters)
+                    // Update all adapter counters first
+                    foreach (var adapter in _allAdapters)
                     {
                         if (adapter.BytesSentCounter != null && adapter.BytesReceivedCounter != null)
                         {
@@ -168,14 +265,31 @@ namespace Memory_Monitor
 
                             adapter.UploadMbps = (float)(sentBytes / Constants.BYTES_TO_MEGABITS);
                             adapter.DownloadMbps = (float)(receivedBytes / Constants.BYTES_TO_MEGABITS);
-
-                            totalUpload += adapter.UploadMbps;
-                            totalDownload += adapter.DownloadMbps;
                         }
                     }
 
-                    TotalUploadMbps = totalUpload;
-                    TotalDownloadMbps = totalDownload;
+                    // Calculate totals based on selection
+                    if (_selectedAdapterId == null)
+                    {
+                        // Aggregate mode - sum all adapters
+                        TotalUploadMbps = _allAdapters.Sum(a => a.UploadMbps);
+                        TotalDownloadMbps = _allAdapters.Sum(a => a.DownloadMbps);
+                    }
+                    else
+                    {
+                        // Single adapter mode
+                        var selectedAdapter = _allAdapters.FirstOrDefault(a => a.Id == _selectedAdapterId);
+                        if (selectedAdapter != null)
+                        {
+                            TotalUploadMbps = selectedAdapter.UploadMbps;
+                            TotalDownloadMbps = selectedAdapter.DownloadMbps;
+                        }
+                        else
+                        {
+                            TotalUploadMbps = 0;
+                            TotalDownloadMbps = 0;
+                        }
+                    }
 
                     return (TotalUploadMbps, TotalDownloadMbps, TotalThroughputMbps);
                 }
@@ -192,12 +306,12 @@ namespace Memory_Monitor
 
         public void Dispose()
         {
-            foreach (var adapter in _adapters)
+            foreach (var adapter in _allAdapters)
             {
                 adapter.BytesSentCounter?.Dispose();
                 adapter.BytesReceivedCounter?.Dispose();
             }
-            _adapters.Clear();
+            _allAdapters.Clear();
         }
     }
 }

@@ -15,12 +15,18 @@ namespace Memory_Monitor
         private string _displayValue = "0";
         private string _secondaryValue = "";  // For temperature display
         private string _label = "";
+        private string _deviceName = "";  // Device name shown above label
         private string _unit = "%";
         private Color _gaugeColor = Color.FromArgb(58, 150, 221);
         private Color _needleColor = Color.FromArgb(255, 80, 80);
         private Color _textColor = Color.White;
         private Color _labelColor = Color.White;
         private Color _secondaryColor = Color.FromArgb(255, 100, 100); // Temperature color (warm red)
+        
+        // Device selection support
+        private bool _isSelectable = false;
+        private bool _hasMultipleDevices = false;
+        private bool _isHovered = false;
 
         public CompactGaugeControl()
         {
@@ -37,6 +43,15 @@ namespace Memory_Monitor
         {
             get => _label;
             set { _label = value; Invalidate(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the device name displayed above the label (e.g., "RTX 3060", "C: D:", "WiFi")
+        /// </summary>
+        public string DeviceName
+        {
+            get => _deviceName;
+            set { _deviceName = value; Invalidate(); }
         }
 
         public string Unit
@@ -83,6 +98,48 @@ namespace Memory_Monitor
 
         public float CurrentValue => _currentValue;
 
+        /// <summary>
+        /// Gets or sets whether this gauge supports device selection
+        /// </summary>
+        public bool IsSelectable
+        {
+            get => _isSelectable;
+            set 
+            { 
+                _isSelectable = value;
+                Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
+                Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether multiple devices are available for selection
+        /// </summary>
+        public bool HasMultipleDevices
+        {
+            get => _hasMultipleDevices;
+            set 
+            { 
+                _hasMultipleDevices = value;
+                Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
+                Invalidate();
+            }
+        }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Event raised when the gauge is clicked for device selection
+        /// </summary>
+        public event EventHandler? DeviceSelectionRequested;
+
+        protected virtual void OnDeviceSelectionRequested()
+        {
+            DeviceSelectionRequested?.Invoke(this, EventArgs.Empty);
+        }
+
         #endregion
 
         public void SetValue(float value, string displayText)
@@ -104,6 +161,35 @@ namespace Memory_Monitor
             Invalidate();
         }
 
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            if (_isSelectable && _hasMultipleDevices)
+            {
+                _isHovered = true;
+                Invalidate();
+            }
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            if (_isHovered)
+            {
+                _isHovered = false;
+                Invalidate();
+            }
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            base.OnClick(e);
+            if (_isSelectable && _hasMultipleDevices)
+            {
+                OnDeviceSelectionRequested();
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -112,17 +198,23 @@ namespace Memory_Monitor
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // Calculate size to fit both gauge and label
-            int labelHeight = 25;
-            int availableHeight = Height - labelHeight;
+            // Calculate size to fit gauge, device name, and label
+            int labelAreaHeight = string.IsNullOrEmpty(_deviceName) ? 25 : 45; // More space if device name shown
+            int availableHeight = Height - labelAreaHeight;
             int size = Math.Min(Width, availableHeight);
             
             // Center the gauge horizontally and vertically within available space
             int centerX = Width / 2;
             int centerY = availableHeight / 2;
-            int gaugeRadius = (int)(size * 0.42f); // Slightly larger radius
+            int gaugeRadius = (int)(size * 0.42f);
 
             if (gaugeRadius < 15) return;
+
+            // Draw hover highlight if selectable
+            if (_isHovered && _isSelectable && _hasMultipleDevices)
+            {
+                DrawHoverHighlight(g, centerX, centerY, gaugeRadius);
+            }
 
             DrawGaugeFace(g, centerX, centerY, gaugeRadius);
             DrawColoredArc(g, centerX, centerY, gaugeRadius);
@@ -138,6 +230,45 @@ namespace Memory_Monitor
             
             DrawDigitalValue(g, centerX, centerY, gaugeRadius);
             DrawLabel(g, centerX, availableHeight);
+
+            // Draw selection indicator if selectable with multiple devices
+            if (_isSelectable && _hasMultipleDevices)
+            {
+                DrawSelectionIndicator(g, centerX, centerY, gaugeRadius);
+            }
+        }
+
+        private void DrawHoverHighlight(Graphics g, int cx, int cy, int radius)
+        {
+            int highlightRadius = radius + 15;
+            using (var brush = new SolidBrush(Color.FromArgb(20, _gaugeColor)))
+            {
+                g.FillEllipse(brush, cx - highlightRadius, cy - highlightRadius, 
+                              highlightRadius * 2, highlightRadius * 2);
+            }
+        }
+
+        private void DrawSelectionIndicator(Graphics g, int cx, int cy, int radius)
+        {
+            // Draw a small dropdown arrow indicator at the bottom of the gauge
+            int indicatorY = cy + radius + 5;
+            int arrowSize = 6;
+            
+            Color indicatorColor = _isHovered 
+                ? Color.FromArgb(200, _gaugeColor) 
+                : Color.FromArgb(100, 150, 150, 150);
+
+            PointF[] arrow = new PointF[]
+            {
+                new PointF(cx - arrowSize, indicatorY),
+                new PointF(cx + arrowSize, indicatorY),
+                new PointF(cx, indicatorY + arrowSize)
+            };
+
+            using (var brush = new SolidBrush(indicatorColor))
+            {
+                g.FillPolygon(brush, arrow);
+            }
         }
 
         private void DrawGaugeFace(Graphics g, int cx, int cy, int radius)
@@ -344,15 +475,32 @@ namespace Memory_Monitor
 
         private void DrawLabel(Graphics g, int cx, int gaugeAreaHeight)
         {
-            if (string.IsNullOrEmpty(_label)) return;
-
-            int labelY = gaugeAreaHeight + 15;
-
-            using (var font = new Font("Segoe UI", 18f, FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-            using (var brush = new SolidBrush(_labelColor))
             {
-                g.DrawString(_label, font, brush, cx, labelY, sf);
+                // Draw device name above the label (smaller font, gauge color)
+                if (!string.IsNullOrEmpty(_deviceName))
+                {
+                    int deviceNameY = gaugeAreaHeight + 5;
+                    using (var deviceFont = new Font("Segoe UI", 10f, FontStyle.Regular))
+                    using (var deviceBrush = new SolidBrush(_gaugeColor))
+                    {
+                        g.DrawString(_deviceName, deviceFont, deviceBrush, cx, deviceNameY, sf);
+                    }
+                }
+
+                // Draw main label
+                if (!string.IsNullOrEmpty(_label))
+                {
+                    int labelY = string.IsNullOrEmpty(_deviceName) 
+                        ? gaugeAreaHeight + 15 
+                        : gaugeAreaHeight + 28;
+
+                    using (var font = new Font("Segoe UI", 18f, FontStyle.Bold))
+                    using (var brush = new SolidBrush(_labelColor))
+                    {
+                        g.DrawString(_label, font, brush, cx, labelY, sf);
+                    }
+                }
             }
         }
 

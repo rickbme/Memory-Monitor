@@ -69,7 +69,9 @@ namespace Memory_Monitor
             InitializeComponent();
             SetupBorderlessWindow();
             InitializeMonitors();
+            LoadDeviceSelections();  // Load saved device selections before UI init
             InitializeUI();
+            InitializeDeviceSelection();
             InitializeApplicationIcon();
             InitializeTrayIcon();
             ApplyTheme();
@@ -201,8 +203,249 @@ namespace Memory_Monitor
             else
                 gpuUsageGauge.MaxValue = 100f;
 
+            // Set initial device names on gauges
+            UpdateGaugeDeviceNames();
+
             updateTimer.Start();
             UpdateAllMetrics();
+        }
+
+        /// <summary>
+        /// Updates the device names displayed on GPU, Disk, and Network gauges
+        /// </summary>
+        private void UpdateGaugeDeviceNames()
+        {
+            // GPU gauges - show short GPU name (e.g., "RTX 3060")
+            if (_gpuMonitor != null)
+            {
+                string gpuShortName = _gpuMonitor.GetShortName();
+                gpuUsageGauge.DeviceName = gpuShortName;
+                gpuVramGauge.DeviceName = gpuShortName;
+            }
+
+            // Disk gauge - show selected disk or "All Disks"
+            if (_diskMonitor != null)
+            {
+                diskGauge.DeviceName = _diskMonitor.CurrentDeviceDisplayName;
+            }
+
+            // Network gauge - show selected adapter or "All Networks"
+            if (_networkMonitor != null)
+            {
+                networkGauge.DeviceName = _networkMonitor.CurrentDeviceDisplayName;
+            }
+        }
+
+        /// <summary>
+        /// Initialize device selection for selectable gauges
+        /// </summary>
+        private void InitializeDeviceSelection()
+        {
+            // GPU gauges - selectable if multiple GPUs
+            if (_gpuMonitor != null)
+            {
+                gpuUsageGauge.IsSelectable = true;
+                gpuUsageGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
+                gpuUsageGauge.DeviceSelectionRequested += GpuGauge_DeviceSelectionRequested;
+
+                gpuVramGauge.IsSelectable = true;
+                gpuVramGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
+                gpuVramGauge.DeviceSelectionRequested += GpuGauge_DeviceSelectionRequested;
+            }
+
+            // Disk gauge - selectable if multiple disks
+            if (_diskMonitor != null)
+            {
+                diskGauge.IsSelectable = true;
+                diskGauge.HasMultipleDevices = _diskMonitor.HasMultipleDevices;
+                diskGauge.DeviceSelectionRequested += DiskGauge_DeviceSelectionRequested;
+            }
+
+            // Network gauge - selectable if multiple adapters
+            if (_networkMonitor != null)
+            {
+                networkGauge.IsSelectable = true;
+                networkGauge.HasMultipleDevices = _networkMonitor.HasMultipleDevices;
+                networkGauge.DeviceSelectionRequested += NetworkGauge_DeviceSelectionRequested;
+            }
+        }
+
+        private void GpuGauge_DeviceSelectionRequested(object? sender, EventArgs e)
+        {
+            if (_gpuMonitor == null || !_gpuMonitor.HasMultipleDevices)
+                return;
+
+            var gauge = sender as CompactGaugeControl;
+            if (gauge == null) return;
+
+            var (selected, deviceId) = DeviceSelectionForm.ShowNear(
+                gauge,
+                _gpuMonitor.AvailableDevices,
+                _gpuMonitor.SelectedDevice?.Id,
+                "Select GPU"
+            );
+
+            if (selected)
+            {
+                _gpuMonitor.SelectDevice(deviceId);
+                
+                // Update VRAM gauge max value for new GPU
+                if (_gpuMonitor.IsMemoryAvailable)
+                {
+                    gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+                }
+
+                // Update device names on both GPU gauges
+                string gpuShortName = _gpuMonitor.GetShortName();
+                gpuUsageGauge.DeviceName = gpuShortName;
+                gpuVramGauge.DeviceName = gpuShortName;
+
+                // Force immediate update
+                UpdateGPUUsage();
+                UpdateGPUMemory();
+
+                // Save selection
+                SaveDeviceSelection("GPU", deviceId);
+
+                Debug.WriteLine($"GPU selected: {_gpuMonitor.CurrentDeviceDisplayName}");
+            }
+        }
+
+        private void DiskGauge_DeviceSelectionRequested(object? sender, EventArgs e)
+        {
+            if (_diskMonitor == null || !_diskMonitor.HasMultipleDevices)
+                return;
+
+            var gauge = sender as CompactGaugeControl;
+            if (gauge == null) return;
+
+            var (selected, deviceId) = DeviceSelectionForm.ShowNear(
+                gauge,
+                _diskMonitor.AvailableDevices,
+                _diskMonitor.SelectedDevice?.Id,
+                "Select Disk"
+            );
+
+            if (selected)
+            {
+                _diskMonitor.SelectDevice(deviceId);
+                
+                // Update device name on disk gauge
+                diskGauge.DeviceName = _diskMonitor.CurrentDeviceDisplayName;
+                
+                // Reset peak for new selection
+                _diskPeakMbps = 0;
+
+                // Force immediate update
+                UpdateDisk();
+
+                // Save selection
+                SaveDeviceSelection("Disk", deviceId);
+
+                Debug.WriteLine($"Disk selected: {_diskMonitor.CurrentDeviceDisplayName}");
+            }
+        }
+
+        private void NetworkGauge_DeviceSelectionRequested(object? sender, EventArgs e)
+        {
+            if (_networkMonitor == null || !_networkMonitor.HasMultipleDevices)
+                return;
+
+            var gauge = sender as CompactGaugeControl;
+            if (gauge == null) return;
+
+            var (selected, deviceId) = DeviceSelectionForm.ShowNear(
+                gauge,
+                _networkMonitor.AvailableDevices,
+                _networkMonitor.SelectedDevice?.Id,
+                "Select Network"
+            );
+
+            if (selected)
+            {
+                _networkMonitor.SelectDevice(deviceId);
+                
+                // Update device name on network gauge
+                networkGauge.DeviceName = _networkMonitor.CurrentDeviceDisplayName;
+                
+                // Reset peak for new selection
+                _networkPeakMbps = 0;
+
+                // Force immediate update
+                UpdateNetwork();
+
+                // Save selection
+                SaveDeviceSelection("Network", deviceId);
+
+                Debug.WriteLine($"Network selected: {_networkMonitor.CurrentDeviceDisplayName}");
+            }
+        }
+
+        private void SaveDeviceSelection(string monitorType, string? deviceId)
+        {
+            try
+            {
+                switch (monitorType)
+                {
+                    case "GPU":
+                        Properties.Settings.Default.SelectedGPUDevice = deviceId ?? "";
+                        break;
+                    case "Disk":
+                        Properties.Settings.Default.SelectedDiskDevice = deviceId ?? "";
+                        break;
+                    case "Network":
+                        Properties.Settings.Default.SelectedNetworkDevice = deviceId ?? "";
+                        break;
+                }
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to save {monitorType} selection: {ex.Message}");
+            }
+        }
+
+        private void LoadDeviceSelections()
+        {
+            try
+            {
+                // Load GPU selection
+                if (_gpuMonitor != null)
+                {
+                    string gpuId = Properties.Settings.Default.SelectedGPUDevice;
+                    if (!string.IsNullOrEmpty(gpuId))
+                    {
+                        _gpuMonitor.SelectDevice(gpuId);
+                        Debug.WriteLine($"Loaded GPU selection: {gpuId}");
+                    }
+                }
+
+                // Load Disk selection
+                if (_diskMonitor != null)
+                {
+                    string diskId = Properties.Settings.Default.SelectedDiskDevice;
+                    if (!string.IsNullOrEmpty(diskId))
+                    {
+                        _diskMonitor.SelectDevice(diskId);
+                        Debug.WriteLine($"Loaded Disk selection: {diskId}");
+                    }
+                }
+
+                // Load Network selection
+                if (_networkMonitor != null)
+                {
+                    string networkId = Properties.Settings.Default.SelectedNetworkDevice;
+                    if (!string.IsNullOrEmpty(networkId))
+                    {
+                        _networkMonitor.SelectDevice(networkId);
+                        Debug.WriteLine($"Loaded Network selection: {networkId}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to load device selections: {ex.Message}");
+            }
         }
 
         private void InitializeApplicationIcon()
