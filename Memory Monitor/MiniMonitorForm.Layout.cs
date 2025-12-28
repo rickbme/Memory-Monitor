@@ -1,0 +1,225 @@
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+
+namespace Memory_Monitor
+{
+    /// <summary>
+    /// Partial class containing UI layout, theming, and tray icon management
+    /// </summary>
+    public partial class MiniMonitorForm
+    {
+        private void InitializeUI()
+        {
+            ramGauge.MaxValue = 100f;
+            cpuGauge.MaxValue = 100f;
+            diskGauge.MaxValue = 100f;
+            networkGauge.MaxValue = 100f;
+
+            if (_gpuMonitor != null && _gpuMonitor.IsMemoryAvailable)
+                gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+            else
+                gpuVramGauge.MaxValue = 24f;
+
+            if (_gpuMonitor != null && _gpuMonitor.IsUsageAvailable)
+                gpuUsageGauge.MaxValue = 100f;
+            else
+                gpuUsageGauge.MaxValue = 100f;
+
+            UpdateGaugeDeviceNames();
+            updateTimer.Start();
+            UpdateAllMetrics();
+        }
+
+        private void InitializeApplicationIcon()
+        {
+            try
+            {
+                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "mmguage.ico");
+                if (File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
+                }
+                else
+                {
+                    this.Icon = SystemIcons.Application;
+                }
+            }
+            catch
+            {
+                this.Icon = SystemIcons.Application;
+            }
+        }
+
+        private void InitializeTrayIcon()
+        {
+            notifyIcon.Icon = this.Icon ?? SystemIcons.Application;
+            UpdateTrayIconText();
+            this.Resize += (s, e) =>
+            {
+                if (WindowState == FormWindowState.Minimized)
+                {
+                    Hide();
+                    ShowInTaskbar = false;
+                }
+            };
+        }
+
+        private void UpdateTrayIcon(int memoryPercentage)
+        {
+            if (memoryPercentage == _lastMemoryPercentage && _currentTrayIcon != null)
+                return;
+
+            _lastMemoryPercentage = memoryPercentage;
+            var oldIcon = _currentTrayIcon;
+
+            try
+            {
+                Color gaugeColor = GaugeIconGenerator.GetColorForPercentage(memoryPercentage);
+                _currentTrayIcon = GaugeIconGenerator.CreateDynamicTrayIcon(memoryPercentage, gaugeColor);
+                notifyIcon.Icon = _currentTrayIcon;
+            }
+            catch
+            {
+                // Keep current icon if creation fails
+            }
+
+            oldIcon?.Dispose();
+        }
+
+        private void UpdateTrayIconText()
+        {
+            string text = $"CPU: {_lastCpuUsage}% GPU: {_lastGpuUsage}%";
+            notifyIcon.Text = text.Length > 63 ? text.Substring(0, 63) : text;
+        }
+
+        private void ApplyTheme()
+        {
+            this.BackColor = Color.FromArgb(25, 28, 32);
+
+            Color labelColor = Color.FromArgb(200, 200, 200);
+            Color textColor = Color.White;
+
+            ramGauge.GaugeColor = Color.FromArgb(58, 150, 221);
+            ramGauge.LabelColor = labelColor;
+            ramGauge.TextColor = textColor;
+
+            cpuGauge.GaugeColor = Color.FromArgb(220, 50, 50);
+            cpuGauge.LabelColor = labelColor;
+            cpuGauge.TextColor = textColor;
+
+            gpuUsageGauge.GaugeColor = Color.FromArgb(255, 140, 0);
+            gpuUsageGauge.LabelColor = labelColor;
+            gpuUsageGauge.TextColor = textColor;
+
+            gpuVramGauge.GaugeColor = Color.FromArgb(160, 90, 240);
+            gpuVramGauge.LabelColor = labelColor;
+            gpuVramGauge.TextColor = textColor;
+
+            diskGauge.GaugeColor = Color.FromArgb(50, 200, 80);
+            diskGauge.LabelColor = labelColor;
+            diskGauge.TextColor = textColor;
+
+            networkGauge.GaugeColor = Color.FromArgb(255, 200, 50);
+            networkGauge.LabelColor = labelColor;
+            networkGauge.TextColor = textColor;
+        }
+
+        private void MiniMonitorForm_Resize(object? sender, EventArgs e)
+        {
+            LayoutGauges();
+        }
+
+        private void LayoutGauges()
+        {
+            int formWidth = ClientSize.Width;
+            int formHeight = ClientSize.Height;
+
+            int gaugeCount = 6;
+            int marginX = 10;
+            int spacing = 5;
+
+            int availableWidth = formWidth - (marginX * 2) - (spacing * (gaugeCount - 1));
+            int gaugeWidth = availableWidth / gaugeCount;
+            int gaugeHeight = (int)(formHeight * 0.95f);
+
+            int startY = (formHeight - gaugeHeight) / 2;
+            int startX = marginX;
+
+            ramGauge.Location = new Point(startX, startY);
+            ramGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            cpuGauge.Location = new Point(startX + gaugeWidth + spacing, startY);
+            cpuGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            gpuUsageGauge.Location = new Point(startX + (gaugeWidth + spacing) * 2, startY);
+            gpuUsageGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            gpuVramGauge.Location = new Point(startX + (gaugeWidth + spacing) * 3, startY);
+            gpuVramGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            diskGauge.Location = new Point(startX + (gaugeWidth + spacing) * 4, startY);
+            diskGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            networkGauge.Location = new Point(startX + (gaugeWidth + spacing) * 5, startY);
+            networkGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            // Position FPS label centered between GPU and VRAM gauges
+            int gpuGaugeRight = gpuUsageGauge.Right;
+            int vramGaugeLeft = gpuVramGauge.Left;
+            int fpsCenterX = (gpuGaugeRight + vramGaugeLeft) / 2;
+            int fpsY = startY + (int)(gaugeHeight * 0.75f);
+
+            float fontSize = Math.Max(22f, formHeight * 0.055f);
+            lblFps.Font = new Font("Segoe UI", fontSize, FontStyle.Bold);
+
+            int fpsWidth = (int)(gaugeWidth * 1.0f);
+            int fpsHeight = (int)(fontSize * 2.5f);
+
+            lblFps.Location = new Point(fpsCenterX - fpsWidth / 2, fpsY);
+            lblFps.Size = new Size(fpsWidth, fpsHeight);
+            lblFps.BringToFront();
+        }
+
+        /// <summary>
+        /// Shows a brief toast-style notification on the form
+        /// </summary>
+        private void ShowToastNotification(string message)
+        {
+            var toast = new Label
+            {
+                Text = message,
+                AutoSize = false,
+                Size = new Size(300, 50),
+                TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = Color.FromArgb(200, 40, 44, 52),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                BorderStyle = BorderStyle.None
+            };
+
+            toast.Location = new Point(
+                (this.ClientSize.Width - toast.Width) / 2,
+                (this.ClientSize.Height - toast.Height) / 2
+            );
+
+            this.Controls.Add(toast);
+            toast.BringToFront();
+
+            var fadeTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            fadeTimer.Tick += (s, args) =>
+            {
+                fadeTimer.Stop();
+                fadeTimer.Dispose();
+                if (this.Controls.Contains(toast))
+                {
+                    this.Controls.Remove(toast);
+                    toast.Dispose();
+                }
+            };
+            fadeTimer.Start();
+        }
+    }
+}
