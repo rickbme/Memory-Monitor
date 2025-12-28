@@ -24,8 +24,15 @@ namespace Memory_Monitor
         private uint _cpuTempReadingIndex = uint.MaxValue;
         private string _cpuTempSensorName = "";
 
+        // Cached FPS sensor info
+        private uint _fpsSensorIndex = uint.MaxValue;
+        private uint _fpsReadingIndex = uint.MaxValue;
+        private string _fpsSensorName = "";
+
         public bool IsAvailable => _isAvailable;
         public string CpuTempSensorName => _cpuTempSensorName;
+        public bool IsFpsAvailable => _fpsReadingIndex != uint.MaxValue;
+        public string FpsSensorName => _fpsSensorName;
 
         #region HWiNFO Structures
 
@@ -74,6 +81,7 @@ namespace Memory_Monitor
         }
 
         private const uint READING_TYPE_TEMP = 1;
+        private const uint READING_TYPE_OTHER = 8;
 
         #endregion
 
@@ -104,8 +112,8 @@ namespace Memory_Monitor
 
                 _isAvailable = true;
 
-                // Find CPU temperature sensor
-                FindCpuTemperatureSensor(header);
+                // Find sensors
+                FindSensors(header);
             }
             catch (System.IO.FileNotFoundException)
             {
@@ -135,13 +143,13 @@ namespace Memory_Monitor
             }
         }
 
-        private void FindCpuTemperatureSensor(HWiNFO_SHARED_MEM header)
+        private void FindSensors(HWiNFO_SHARED_MEM header)
         {
             if (_accessor == null) return;
 
             try
             {
-                // Read all sensors to find CPU
+                // Read all sensors
                 var sensors = new HWiNFO_SENSOR[header.NumSensorElements];
                 int sensorSize = (int)header.SizeOfSensorElement;
 
@@ -168,7 +176,7 @@ namespace Memory_Monitor
                     }
                 }
 
-                // Read all readings to find CPU temperature
+                // Read all readings to find CPU temperature and FPS
                 int readingSize = (int)header.SizeOfReadingElement;
                 
                 for (int i = 0; i < header.NumReadingElements; i++)
@@ -182,13 +190,12 @@ namespace Memory_Monitor
                     {
                         var reading = Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
                         
-                        // Look for temperature readings
+                        // Look for temperature readings (CPU)
                         if (reading.ReadingType == READING_TYPE_TEMP)
                         {
                             string label = reading.LabelOrig?.ToLower() ?? "";
                             string sensorName = sensors[reading.SensorIndex].SensorNameOrig?.ToLower() ?? "";
 
-                            // Look for CPU package/die temperature
                             bool isCpuSensor = sensorName.Contains("cpu") || sensorName.Contains("core") || sensorName.Contains("processor");
                             bool isCpuTemp = label.Contains("package") || label.Contains("tctl") || label.Contains("tdie") || 
                                             label.Contains("cpu") || (label.Contains("core") && !label.Contains("distance"));
@@ -197,7 +204,6 @@ namespace Memory_Monitor
                             {
                                 Debug.WriteLine($"HWiNFO: Found CPU temp - {sensors[reading.SensorIndex].SensorNameOrig} / {reading.LabelOrig} = {reading.Value}°C");
                                 
-                                // Prefer Package temperature
                                 if (_cpuTempSensorIndex == uint.MaxValue || label.Contains("package"))
                                 {
                                     _cpuTempSensorIndex = reading.SensorIndex;
@@ -206,9 +212,34 @@ namespace Memory_Monitor
                                     
                                     if (label.Contains("package"))
                                     {
-                                        break; // Package is preferred, stop searching
+                                        // Package is preferred, but continue to find FPS
                                     }
                                 }
+                            }
+                        }
+
+                        // Look for FPS readings (typically in "Other" category)
+                        // FPS sensors come from RTSS, games, or overlay software reporting to HWiNFO
+                        string fpsLabel = reading.LabelOrig?.ToLower() ?? "";
+                        string fpsUnit = reading.Unit?.ToLower() ?? "";
+                        
+                        // Check for FPS indicators in label or unit
+                        bool isFpsReading = fpsLabel.Contains("fps") || 
+                                           fpsLabel.Contains("framerate") || 
+                                           fpsLabel.Contains("frame rate") ||
+                                           fpsLabel.Contains("frames") ||
+                                           fpsUnit.Contains("fps");
+
+                        if (isFpsReading && reading.Value >= 0 && reading.Value < 10000)
+                        {
+                            Debug.WriteLine($"HWiNFO: Found FPS sensor - {sensors[reading.SensorIndex].SensorNameOrig} / {reading.LabelOrig} = {reading.Value} {reading.Unit}");
+                            
+                            // Prefer sensors with higher values (more likely to be active)
+                            if (_fpsReadingIndex == uint.MaxValue || reading.Value > 0)
+                            {
+                                _fpsSensorIndex = reading.SensorIndex;
+                                _fpsReadingIndex = (uint)i;
+                                _fpsSensorName = $"{sensors[reading.SensorIndex].SensorNameOrig} - {reading.LabelOrig}";
                             }
                         }
                     }
@@ -226,10 +257,43 @@ namespace Memory_Monitor
                 {
                     Debug.WriteLine("HWiNFO: No CPU temperature sensor found");
                 }
+
+                if (_fpsReadingIndex != uint.MaxValue)
+                {
+                    Debug.WriteLine($"HWiNFO: Selected FPS sensor: {_fpsSensorName}");
+                }
+                else
+                {
+                    Debug.WriteLine("HWiNFO: No FPS sensor found (RTSS or game overlay may not be running)");
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"HWiNFO: Error finding CPU sensor - {ex.Message}");
+                Debug.WriteLine($"HWiNFO: Error finding sensors - {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Refresh sensor detection - useful if RTSS/game starts after HWiNFO
+        /// </summary>
+        public void RefreshSensors()
+        {
+            if (!_isAvailable || _accessor == null)
+                return;
+
+            try
+            {
+                var header = ReadHeader();
+                
+                // Only refresh FPS if not already found
+                if (_fpsReadingIndex == uint.MaxValue)
+                {
+                    FindSensors(header);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"HWiNFO: Error refreshing sensors - {ex.Message}");
             }
         }
 
@@ -268,6 +332,46 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"HWiNFO: Error reading temperature - {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get current FPS from HWiNFO (requires RTSS or game overlay reporting to HWiNFO)
+        /// </summary>
+        public int? GetFps()
+        {
+            if (!_isAvailable || _accessor == null || _fpsReadingIndex == uint.MaxValue)
+                return null;
+
+            try
+            {
+                var header = ReadHeader();
+                int readingSize = (int)header.SizeOfReadingElement;
+                long offset = header.OffsetOfReadingSection + (_fpsReadingIndex * readingSize);
+
+                byte[] buffer = new byte[readingSize];
+                _accessor.ReadArray(offset, buffer, 0, Math.Min(buffer.Length, Marshal.SizeOf<HWiNFO_READING>()));
+
+                GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                try
+                {
+                    var reading = Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
+                    
+                    if (reading.Value >= 0 && reading.Value < 10000)
+                    {
+                        return (int)Math.Round(reading.Value);
+                    }
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"HWiNFO: Error reading FPS - {ex.Message}");
             }
 
             return null;

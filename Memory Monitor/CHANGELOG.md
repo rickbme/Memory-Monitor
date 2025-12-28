@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tap on Gauge** - Open device selection popup (for GPU, Disk, Network gauges)
   - **Long Press** - Show context menu at touch location
   - **Two-Finger Tap** - Toggle "Always on Top" mode
+- **FPS Monitoring** - Display frames per second when HWiNFO with RTSS integration is running
+  - Shows FPS between GPU and VRAM gauges (e.g., "FPS - 89fps")
+  - Automatically hidden when FPS data is not available
+  - Requires HWiNFO with "Shared Memory Support" enabled and RTSS or game overlay reporting FPS
 - **TouchGestureHandler** - New component using Windows Touch API (`WM_TOUCH`, `WM_GESTURE`)
 - **Visual Feedback** - Toast notifications for gesture actions (monitor switching, always-on-top toggle)
 - **Graceful Degradation** - Application works normally on systems without touch support
@@ -26,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Keeps the taskbar clean while monitoring continues in background
 - **CompactGaugeControl** - Added `PerformClick()` method to support touch tap gestures
 - **MiniMonitorForm** - Added `WndProc` override for touch message processing
+- **HWiNFOReader** - Extended to detect and read FPS sensor data from RTSS/game overlays
 
 ### Technical Changes
 - Added `TouchGestureHandler.cs`:
@@ -39,18 +44,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LongPressEventArgs` with location and control
   - `PointEventArgs` for two-finger tap
   - `ZoomEventArgs` for pinch gestures
+- Updated `HWiNFOReader.cs`:
+  - Added FPS sensor detection (`IsFpsAvailable`, `FpsSensorName`)
+  - Added `GetFps()` method to read current FPS value
+  - Added `RefreshSensors()` method for dynamic sensor detection
 - Updated `MiniMonitorForm.cs`:
   - Added `InitializeTouchSupport()` method
+  - Added `UpdateFps()` method for FPS display
+  - Added `lblFps` label positioned between GPU and VRAM gauges
   - Touch gesture event handlers
   - `ShowToastNotification()` for visual feedback
-  - Touch handler disposal in `OnFormClosing()`
+  - Touch handler and HWiNFO reader disposal in `OnFormClosing()`
 - Updated `CompactGaugeControl.cs`:
   - Added `PerformClick()` method for programmatic click simulation
+- Updated `MiniMonitorForm.Designer.cs`:
+  - Added `lblFps` label control with cyan color styling
 
 ### Notes
 - Touch support requires the mini monitor to be connected via USB data cable (not power-only)
 - The monitor must have HID-compliant touch hardware recognized by Windows
-- All features continue to work with mouse/keyboard when touch is unavailable
+- FPS monitoring requires:
+  1. HWiNFO running with "Shared Memory Support" enabled
+  2. RTSS (RivaTuner Statistics Server) or a game reporting FPS to HWiNFO
+- All features continue to work with mouse/keyboard when touch/FPS is unavailable
 
 ## [2.2.0] - 2024-12-26
 
@@ -180,6 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Touch gestures for switching monitors, minimizing, opening device selection, and toggling always-on-top mode
 - Visual feedback for gesture actions via toast notifications
 - Application now starts minimized to the system tray by default
+- FPS monitoring feature to display frames per second from HWiNFO/RTSS
 
 ### Upgrading to 2.2.0
 - New gauge-style application icon and color-coded dynamic tray icon for RAM usage

@@ -33,6 +33,7 @@ namespace Memory_Monitor
             this.gpuVramGauge = new Memory_Monitor.CompactGaugeControl();
             this.diskGauge = new Memory_Monitor.CompactGaugeControl();
             this.networkGauge = new Memory_Monitor.CompactGaugeControl();
+            this.lblFps = new System.Windows.Forms.Label();
             this.trayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -178,12 +179,26 @@ namespace Memory_Monitor
             this.networkGauge.TabIndex = 5;
             this.networkGauge.Unit = "Mbps";
             // 
+            // lblFps
+            // 
+            this.lblFps.BackColor = System.Drawing.Color.Transparent;
+            this.lblFps.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblFps.ForeColor = System.Drawing.Color.FromArgb(0, 200, 150);
+            this.lblFps.Location = new System.Drawing.Point(770, 400);
+            this.lblFps.Name = "lblFps";
+            this.lblFps.Size = new System.Drawing.Size(150, 30);
+            this.lblFps.TabIndex = 6;
+            this.lblFps.Text = "";
+            this.lblFps.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblFps.Visible = false;
+            // 
             // MiniMonitorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(25, 28, 32);
             this.ClientSize = new System.Drawing.Size(1920, 480);
+            this.Controls.Add(this.lblFps);
             this.Controls.Add(this.networkGauge);
             this.Controls.Add(this.diskGauge);
             this.Controls.Add(this.gpuVramGauge);
@@ -220,5 +235,6 @@ namespace Memory_Monitor
         private CompactGaugeControl gpuVramGauge;
         private CompactGaugeControl diskGauge;
         private CompactGaugeControl networkGauge;
+        private System.Windows.Forms.Label lblFps;
     }
 }

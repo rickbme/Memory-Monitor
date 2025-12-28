@@ -43,6 +43,11 @@ namespace Memory_Monitor
         // Touch gesture support
         private TouchGestureHandler? _touchHandler;
 
+        // FPS monitoring via HWiNFO
+        private HWiNFOReader? _hwInfoReader;
+        private int _fpsRefreshCounter = 0;
+        private const int FPS_SENSOR_REFRESH_INTERVAL = 10; // Refresh sensor search every 10 seconds
+
         #region Windows API
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -206,6 +211,21 @@ namespace Memory_Monitor
             _gpuMonitor = new GPUMonitor();
             _diskMonitor = new DiskMonitor();
             _networkMonitor = new NetworkMonitor();
+            
+            // Initialize HWiNFO reader for FPS monitoring
+            try
+            {
+                _hwInfoReader = new HWiNFOReader();
+                if (_hwInfoReader.IsAvailable)
+                {
+                    Debug.WriteLine($"HWiNFO connected - FPS available: {_hwInfoReader.IsFpsAvailable}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to initialize HWiNFO reader: {ex.Message}");
+                _hwInfoReader = null;
+            }
         }
 
         private void InitializeUI()
@@ -767,6 +787,7 @@ namespace Memory_Monitor
             SafeUpdate(UpdateCPU);
             SafeUpdate(UpdateGPUUsage);
             SafeUpdate(UpdateGPUMemory);
+            SafeUpdate(UpdateFps);
             SafeUpdate(UpdateDisk);
             SafeUpdate(UpdateNetwork);
             UpdateTrayIconText();
@@ -905,6 +926,40 @@ namespace Memory_Monitor
             catch { gpuVramGauge.SetValue(0, "ERR"); }
         }
 
+        private void UpdateFps()
+        {
+            try
+            {
+                // Periodically refresh sensor detection in case RTSS/game started after HWiNFO
+                _fpsRefreshCounter++;
+                if (_fpsRefreshCounter >= FPS_SENSOR_REFRESH_INTERVAL)
+                {
+                    _fpsRefreshCounter = 0;
+                    _hwInfoReader?.RefreshSensors();
+                }
+
+                // Try to read FPS from HWiNFO
+                if (_hwInfoReader?.IsFpsAvailable == true)
+                {
+                    int? fps = _hwInfoReader.GetFps();
+                    if (fps.HasValue && fps.Value > 0)
+                    {
+                        lblFps.Text = $"FPS - {fps.Value}fps";
+                        lblFps.Visible = true;
+                        return;
+                    }
+                }
+
+                // Hide the FPS label if not available
+                lblFps.Visible = false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error updating FPS: {ex.Message}");
+                lblFps.Visible = false;
+            }
+        }
+
         private void UpdateDisk()
         {
             try
@@ -1001,6 +1056,9 @@ namespace Memory_Monitor
             _diskMonitor?.Dispose();
             _networkMonitor?.Dispose();
             
+            // Dispose HWiNFO reader
+            _hwInfoReader?.Dispose();
+            
             // Dispose touch handler
             _touchHandler?.Dispose();
             
@@ -1053,6 +1111,27 @@ namespace Memory_Monitor
 
             networkGauge.Location = new Point(startX + (gaugeWidth + spacing) * 5, startY);
             networkGauge.Size = new Size(gaugeWidth, gaugeHeight);
+
+            // Position FPS label centered between GPU and VRAM gauges, above their labels
+            // The label area is approximately the bottom 5% of the gauge height
+            int gpuGaugeRight = gpuUsageGauge.Right;
+            int vramGaugeLeft = gpuVramGauge.Left;
+            int fpsCenterX = (gpuGaugeRight + vramGaugeLeft) / 2;
+            
+            // Position above the gauge label area (labels are at approximately 90% of gauge height)
+            int fpsY = startY + (int)(gaugeHeight * 0.75f);
+            
+            // Scale font size based on form height (increased by ~12pt)
+            float fontSize = Math.Max(22f, formHeight * 0.055f);
+            lblFps.Font = new Font("Segoe UI", fontSize, FontStyle.Bold);
+            
+            // Size based on content
+            int fpsWidth = (int)(gaugeWidth * 1.0f);
+            int fpsHeight = (int)(fontSize * 2.5f);
+            
+            lblFps.Location = new Point(fpsCenterX - fpsWidth / 2, fpsY);
+            lblFps.Size = new Size(fpsWidth, fpsHeight);
+            lblFps.BringToFront();
         }
 
         #endregion
