@@ -11,8 +11,16 @@ namespace Memory_Monitor
     /// </summary>
     public partial class MiniMonitorForm
     {
+        // Intro logo display
+        private PictureBox? _introLogo;
+        private System.Windows.Forms.Timer? _introTimer;
+        private const int INTRO_DISPLAY_MS = 2000; // Show logo for 2 seconds
+
         private void InitializeUI()
         {
+            // Initially hide all gauges for intro
+            SetGaugesVisible(false);
+
             ramGauge.MaxValue = 100f;
             cpuGauge.MaxValue = 100f;
             diskGauge.MaxValue = 100f;
@@ -29,8 +37,106 @@ namespace Memory_Monitor
                 gpuUsageGauge.MaxValue = 100f;
 
             UpdateGaugeDeviceNames();
+
+            // Show intro logo first, then start the gauges
+            ShowIntroLogo();
+        }
+
+        private void SetGaugesVisible(bool visible)
+        {
+            ramGauge.Visible = visible;
+            cpuGauge.Visible = visible;
+            gpuUsageGauge.Visible = visible;
+            gpuVramGauge.Visible = visible;
+            diskGauge.Visible = visible;
+            networkGauge.Visible = visible;
+            lblFps.Visible = visible && _hwInfoReader?.IsFpsAvailable == true;
+        }
+
+        private void ShowIntroLogo()
+        {
+            try
+            {
+                string logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "dfs_logo_1920.png");
+
+                if (File.Exists(logoPath))
+                {
+                    using var image = Image.FromFile(logoPath);
+
+                    // Scale to fit the form while maintaining aspect ratio
+                    float scaleX = (float)(this.ClientSize.Width - 40) / image.Width;
+                    float scaleY = (float)(this.ClientSize.Height - 40) / image.Height;
+                    float scale = Math.Min(scaleX, scaleY);
+
+                    int newWidth = (int)(image.Width * scale);
+                    int newHeight = (int)(image.Height * scale);
+
+                    // Create a scaled bitmap
+                    var scaledImage = new Bitmap(newWidth, newHeight);
+                    using (var g = Graphics.FromImage(scaledImage))
+                    {
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                        g.DrawImage(image, 0, 0, newWidth, newHeight);
+                    }
+
+                    _introLogo = new PictureBox
+                    {
+                        Image = scaledImage,
+                        SizeMode = PictureBoxSizeMode.AutoSize,
+                        BackColor = Color.Transparent,
+                        Location = new Point(
+                            (this.ClientSize.Width - newWidth) / 2,
+                            (this.ClientSize.Height - newHeight) / 2
+                        )
+                    };
+
+                    this.Controls.Add(_introLogo);
+                    _introLogo.BringToFront();
+
+                    Debug.WriteLine("Intro logo displayed");
+                }
+
+                // Start timer to transition to gauges
+                _introTimer = new System.Windows.Forms.Timer { Interval = INTRO_DISPLAY_MS };
+                _introTimer.Tick += IntroTimer_Tick;
+                _introTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to show intro logo: {ex.Message}");
+                // If logo fails, just show gauges immediately
+                TransitionToGauges();
+            }
+        }
+
+        private void IntroTimer_Tick(object? sender, EventArgs e)
+        {
+            _introTimer?.Stop();
+            _introTimer?.Dispose();
+            _introTimer = null;
+
+            TransitionToGauges();
+        }
+
+        private void TransitionToGauges()
+        {
+            // Remove intro logo
+            if (_introLogo != null)
+            {
+                this.Controls.Remove(_introLogo);
+                _introLogo.Image?.Dispose();
+                _introLogo.Dispose();
+                _introLogo = null;
+            }
+
+            // Show gauges and start updates
+            SetGaugesVisible(true);
+            LayoutGauges();
             updateTimer.Start();
             UpdateAllMetrics();
+
+            Debug.WriteLine("Transitioned to gauge display");
         }
 
         private void InitializeApplicationIcon()

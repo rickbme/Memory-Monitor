@@ -11,6 +11,11 @@ namespace Memory_Monitor
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            
+            // Show splash screen with DFS logo
+            SplashScreen.ShowSplash();
+            
+            // Run the main application
             Application.Run(new MiniMonitorForm());
         }
     }

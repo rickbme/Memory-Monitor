@@ -31,8 +31,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Copy icon to output for runtime loading -->
+    <!-- Copy resources to output for runtime loading -->
     <Content Include="Resources\mmguage.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\dfs_logo_1920.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\dfslogo_round.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

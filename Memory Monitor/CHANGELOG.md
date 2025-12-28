@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0] - 2025-01-XX
 
 ### Added
+- **Splash Screen** - Application now displays a branded splash screen on startup
+  - Round DFS logo displayed centered on screen with fade in/out effect
+  - Displays for 1.5 seconds before transitioning
+  - Can be dismissed by clicking or pressing any key
+- **Mini Monitor Intro Logo** - Wide DFS logo displayed on the 1920x480 mini monitor
+  - Shows for 2 seconds before gauges appear
+  - Provides branded startup experience on the dedicated display
 - **Touch Gesture Support** - Full touch input support for mini monitors with touchscreen capability
   - **Swipe Left/Right** - Switch between monitors
   - **Swipe Down** - Minimize to system tray
@@ -18,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows FPS between GPU and VRAM gauges (e.g., "FPS - 89fps")
   - Automatically hidden when FPS data is not available
   - Requires HWiNFO with "Shared Memory Support" enabled and RTSS or game overlay reporting FPS
+- **SystemMemoryMonitor** - New dedicated class for RAM monitoring with Windows API
 - **TouchGestureHandler** - New component using Windows Touch API (`WM_TOUCH`, `WM_GESTURE`)
 - **Visual Feedback** - Toast notifications for gesture actions (monitor switching, always-on-top toggle)
 - **Graceful Degradation** - Application works normally on systems without touch support
@@ -32,7 +40,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **MiniMonitorForm** - Added `WndProc` override for touch message processing
 - **HWiNFOReader** - Extended to detect and read FPS sensor data from RTSS/game overlays
 
+### Refactored
+- **MiniMonitorForm Split into Partial Classes** - Improved code organization and maintainability
+  - `MiniMonitorForm.cs` - Core initialization, window management, event handlers (~300 lines)
+  - `MiniMonitorForm.Monitors.cs` - Metric update methods and shared fields (~235 lines)
+  - `MiniMonitorForm.DeviceSelection.cs` - Device selection logic (~210 lines)
+  - `MiniMonitorForm.Layout.cs` - UI layout, theming, intro logo, toast notifications (~280 lines)
+- **Removed Legacy Code** - Deleted unused `Form1.cs` and `Form1.Designer.cs`
+
 ### Technical Changes
+- Added `SplashScreen.cs`:
+  - Displays `dfslogo_round.png` with fade in/out animation
+  - Modal dialog blocks until dismissed or timeout
+  - Dark theme background matching application
+- Added `SystemMemoryMonitor.cs`:
+  - Encapsulates Windows `GlobalMemoryStatusEx` API
+  - Provides `Update()`, `GetDisplayText()`, and memory properties
+  - Implements `IMonitor` interface
 - Added `TouchGestureHandler.cs`:
   - Windows Touch API P/Invoke declarations
   - Gesture detection (swipe, tap, long-press, two-finger tap, pinch/zoom)
@@ -48,17 +72,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added FPS sensor detection (`IsFpsAvailable`, `FpsSensorName`)
   - Added `GetFps()` method to read current FPS value
   - Added `RefreshSensors()` method for dynamic sensor detection
-- Updated `MiniMonitorForm.cs`:
-  - Added `InitializeTouchSupport()` method
-  - Added `UpdateFps()` method for FPS display
-  - Added `lblFps` label positioned between GPU and VRAM gauges
-  - Touch gesture event handlers
-  - `ShowToastNotification()` for visual feedback
-  - Touch handler and HWiNFO reader disposal in `OnFormClosing()`
-- Updated `CompactGaugeControl.cs`:
-  - Added `PerformClick()` method for programmatic click simulation
+- Updated `MiniMonitorForm.Layout.cs`:
+  - Added `ShowIntroLogo()` for mini monitor branding
+  - Added `TransitionToGauges()` for smooth startup sequence
+  - Added `SetGaugesVisible()` helper method
 - Updated `MiniMonitorForm.Designer.cs`:
   - Added `lblFps` label control with cyan color styling
+- Updated `Program.cs`:
+  - Added `SplashScreen.ShowSplash()` before main form
+- Updated `Memory Monitor.csproj`:
+  - Added `dfslogo_round.png` and `dfs_logo_1920.png` as content items
 
 ### Notes
 - Touch support requires the mini monitor to be connected via USB data cable (not power-only)
@@ -67,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1. HWiNFO running with "Shared Memory Support" enabled
   2. RTSS (RivaTuner Statistics Server) or a game reporting FPS to HWiNFO
 - All features continue to work with mouse/keyboard when touch/FPS is unavailable
+- Splash screen images should be placed in the `Resources` folder
 
 ## [2.2.0] - 2024-12-26
 
@@ -197,6 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Visual feedback for gesture actions via toast notifications
 - Application now starts minimized to the system tray by default
 - FPS monitoring feature to display frames per second from HWiNFO/RTSS
+- Branded splash screen and mini monitor intro logo for enhanced branding
 
 ### Upgrading to 2.2.0
 - New gauge-style application icon and color-coded dynamic tray icon for RAM usage
