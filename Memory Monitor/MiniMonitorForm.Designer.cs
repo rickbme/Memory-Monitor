@@ -25,6 +25,10 @@ namespace Memory_Monitor
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.moveToMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.topMostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsDisplayModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAutoDetectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAlwaysShowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAlwaysHideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ramGauge = new Memory_Monitor.CompactGaugeControl();
@@ -33,7 +37,9 @@ namespace Memory_Monitor
             this.gpuVramGauge = new Memory_Monitor.CompactGaugeControl();
             this.diskGauge = new Memory_Monitor.CompactGaugeControl();
             this.networkGauge = new Memory_Monitor.CompactGaugeControl();
-            this.lblFps = new System.Windows.Forms.Label();
+            this.fpsGauge = new Memory_Monitor.FpsGaugeControl();
+            this.lblDate = new System.Windows.Forms.Label();
+            this.lblTime = new System.Windows.Forms.Label();
             this.trayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -56,6 +62,7 @@ namespace Memory_Monitor
             this.toolStripSeparator1,
             this.moveToMonitorToolStripMenuItem,
             this.topMostToolStripMenuItem,
+            this.fpsDisplayModeToolStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.trayContextMenu.Name = "trayContextMenu";
@@ -88,6 +95,38 @@ namespace Memory_Monitor
             this.topMostToolStripMenuItem.Checked = true;
             this.topMostToolStripMenuItem.CheckOnClick = true;
             this.topMostToolStripMenuItem.Click += new System.EventHandler(this.TopMostToolStripMenuItem_Click);
+            // 
+            // fpsDisplayModeToolStripMenuItem
+            // 
+            this.fpsDisplayModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fpsAutoDetectToolStripMenuItem,
+            this.fpsAlwaysShowToolStripMenuItem,
+            this.fpsAlwaysHideToolStripMenuItem});
+            this.fpsDisplayModeToolStripMenuItem.Name = "fpsDisplayModeToolStripMenuItem";
+            this.fpsDisplayModeToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.fpsDisplayModeToolStripMenuItem.Text = "FPS Display";
+            // 
+            // fpsAutoDetectToolStripMenuItem
+            // 
+            this.fpsAutoDetectToolStripMenuItem.Name = "fpsAutoDetectToolStripMenuItem";
+            this.fpsAutoDetectToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAutoDetectToolStripMenuItem.Text = "Auto-detect";
+            this.fpsAutoDetectToolStripMenuItem.Checked = true;
+            this.fpsAutoDetectToolStripMenuItem.Click += new System.EventHandler(this.FpsAutoDetectToolStripMenuItem_Click);
+            // 
+            // fpsAlwaysShowToolStripMenuItem
+            // 
+            this.fpsAlwaysShowToolStripMenuItem.Name = "fpsAlwaysShowToolStripMenuItem";
+            this.fpsAlwaysShowToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAlwaysShowToolStripMenuItem.Text = "Always Show";
+            this.fpsAlwaysShowToolStripMenuItem.Click += new System.EventHandler(this.FpsAlwaysShowToolStripMenuItem_Click);
+            // 
+            // fpsAlwaysHideToolStripMenuItem
+            // 
+            this.fpsAlwaysHideToolStripMenuItem.Name = "fpsAlwaysHideToolStripMenuItem";
+            this.fpsAlwaysHideToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAlwaysHideToolStripMenuItem.Text = "Always Hide";
+            this.fpsAlwaysHideToolStripMenuItem.Click += new System.EventHandler(this.FpsAlwaysHideToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -179,18 +218,40 @@ namespace Memory_Monitor
             this.networkGauge.TabIndex = 5;
             this.networkGauge.Unit = "Mbps";
             // 
-            // lblFps
+            // fpsGauge
             // 
-            this.lblFps.BackColor = System.Drawing.Color.Transparent;
-            this.lblFps.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblFps.ForeColor = System.Drawing.Color.FromArgb(0, 200, 150);
-            this.lblFps.Location = new System.Drawing.Point(770, 400);
-            this.lblFps.Name = "lblFps";
-            this.lblFps.Size = new System.Drawing.Size(150, 30);
-            this.lblFps.TabIndex = 6;
-            this.lblFps.Text = "";
-            this.lblFps.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblFps.Visible = false;
+            this.fpsGauge.BackColor = System.Drawing.Color.Transparent;
+            this.fpsGauge.GaugeColor = System.Drawing.Color.FromArgb(0, 200, 150);
+            this.fpsGauge.Location = new System.Drawing.Point(820, 150);
+            this.fpsGauge.MinimumSize = new System.Drawing.Size(80, 80);
+            this.fpsGauge.Name = "fpsGauge";
+            this.fpsGauge.Size = new System.Drawing.Size(180, 180);
+            this.fpsGauge.TabIndex = 6;
+            this.fpsGauge.Visible = false;
+            // 
+            // lblDate
+            // 
+            this.lblDate.BackColor = System.Drawing.Color.Transparent;
+            this.lblDate.Font = new System.Drawing.Font("Segoe UI", 22F, System.Drawing.FontStyle.Bold);
+            this.lblDate.ForeColor = System.Drawing.Color.White;
+            this.lblDate.Location = new System.Drawing.Point(15, 15);
+            this.lblDate.Name = "lblDate";
+            this.lblDate.Size = new System.Drawing.Size(280, 40);
+            this.lblDate.TabIndex = 7;
+            this.lblDate.Text = "";
+            this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblTime
+            // 
+            this.lblTime.BackColor = System.Drawing.Color.Transparent;
+            this.lblTime.Font = new System.Drawing.Font("Segoe UI", 22F, System.Drawing.FontStyle.Bold);
+            this.lblTime.ForeColor = System.Drawing.Color.White;
+            this.lblTime.Location = new System.Drawing.Point(1625, 15);
+            this.lblTime.Name = "lblTime";
+            this.lblTime.Size = new System.Drawing.Size(280, 40);
+            this.lblTime.TabIndex = 8;
+            this.lblTime.Text = "";
+            this.lblTime.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // MiniMonitorForm
             // 
@@ -198,7 +259,9 @@ namespace Memory_Monitor
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(25, 28, 32);
             this.ClientSize = new System.Drawing.Size(1920, 480);
-            this.Controls.Add(this.lblFps);
+            this.Controls.Add(this.fpsGauge);
+            this.Controls.Add(this.lblTime);
+            this.Controls.Add(this.lblDate);
             this.Controls.Add(this.networkGauge);
             this.Controls.Add(this.diskGauge);
             this.Controls.Add(this.gpuVramGauge);
@@ -227,6 +290,10 @@ namespace Memory_Monitor
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem moveToMonitorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem topMostToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsDisplayModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAutoDetectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAlwaysShowToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAlwaysHideToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private CompactGaugeControl ramGauge;
@@ -235,6 +302,8 @@ namespace Memory_Monitor
         private CompactGaugeControl gpuVramGauge;
         private CompactGaugeControl diskGauge;
         private CompactGaugeControl networkGauge;
-        private System.Windows.Forms.Label lblFps;
+        private FpsGaugeControl fpsGauge;
+        private System.Windows.Forms.Label lblDate;
+        private System.Windows.Forms.Label lblTime;
     }
 }

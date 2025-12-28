@@ -23,6 +23,9 @@ namespace Memory_Monitor
         private NetworkMonitor? _networkMonitor;
         private HWiNFOReader? _hwInfoReader;
 
+        // Game activity detection for FPS display
+        private GameActivityDetector? _gameActivityDetector;
+
         // Touch gesture support
         private TouchGestureHandler? _touchHandler;
 
@@ -38,12 +41,14 @@ namespace Memory_Monitor
 
             SetupBorderlessWindow();
             InitializeMonitors();
+            InitializeGameDetection();
             LoadDeviceSelections();
             InitializeUI();
             InitializeDeviceSelection();
             InitializeApplicationIcon();
             InitializeTrayIcon();
             InitializeTouchSupport();
+            InitializeDateTimeDisplay();
             ApplyTheme();
         }
 
@@ -141,6 +146,12 @@ namespace Memory_Monitor
                 Debug.WriteLine($"Failed to initialize HWiNFO reader: {ex.Message}");
                 _hwInfoReader = null;
             }
+        }
+
+        private void InitializeGameDetection()
+        {
+            _gameActivityDetector = new GameActivityDetector(updateTimer.Interval);
+            Debug.WriteLine("Game activity detector initialized");
         }
 
         #endregion
@@ -321,6 +332,44 @@ namespace Memory_Monitor
             this.TopMost = topMostToolStripMenuItem.Checked;
         }
 
+        private void FpsAutoDetectToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AutoDetect);
+        }
+
+        private void FpsAlwaysShowToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AlwaysShow);
+        }
+
+        private void FpsAlwaysHideToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AlwaysHide);
+        }
+
+        private void SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode mode)
+        {
+            if (_gameActivityDetector != null)
+            {
+                _gameActivityDetector.DisplayMode = mode;
+            }
+
+            // Update menu checkmarks
+            fpsAutoDetectToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AutoDetect;
+            fpsAlwaysShowToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysShow;
+            fpsAlwaysHideToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysHide;
+
+            // Show feedback
+            string modeName = mode switch
+            {
+                GameActivityDetector.FpsDisplayMode.AutoDetect => "Auto-detect",
+                GameActivityDetector.FpsDisplayMode.AlwaysShow => "Always Show",
+                GameActivityDetector.FpsDisplayMode.AlwaysHide => "Always Hide",
+                _ => mode.ToString()
+            };
+            ShowToastNotification($"FPS Display: {modeName}");
+        }
+
         private void MoveToNextMonitor()
         {
             if (Screen.AllScreens.Length <= 1) return;
@@ -366,6 +415,7 @@ namespace Memory_Monitor
             _networkMonitor?.Dispose();
             _hwInfoReader?.Dispose();
             _touchHandler?.Dispose();
+            _gameActivityDetector?.Dispose();
 
             _currentTrayIcon?.Dispose();
             _currentTrayIcon = null;

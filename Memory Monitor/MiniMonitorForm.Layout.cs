@@ -50,7 +50,9 @@ namespace Memory_Monitor
             gpuVramGauge.Visible = visible;
             diskGauge.Visible = visible;
             networkGauge.Visible = visible;
-            lblFps.Visible = visible && _hwInfoReader?.IsFpsAvailable == true;
+            // FPS gauge visibility is controlled by UpdateFps based on game detection
+            lblDate.Visible = visible;
+            lblTime.Visible = visible;
         }
 
         private void ShowIntroLogo()
@@ -272,21 +274,24 @@ namespace Memory_Monitor
             networkGauge.Location = new Point(startX + (gaugeWidth + spacing) * 5, startY);
             networkGauge.Size = new Size(gaugeWidth, gaugeHeight);
 
-            // Position FPS label centered between GPU and VRAM gauges
+            // Position FPS gauge between GPU and VRAM gauges, at the bottom near the labels
             int gpuGaugeRight = gpuUsageGauge.Right;
             int vramGaugeLeft = gpuVramGauge.Left;
             int fpsCenterX = (gpuGaugeRight + vramGaugeLeft) / 2;
-            int fpsY = startY + (int)(gaugeHeight * 0.75f);
+            
+            // Size: 30% of the main gauge height
+            int fpsGaugeSize = (int)(gaugeHeight * 0.30f);
+            fpsGaugeSize = Math.Max(80, fpsGaugeSize); // Minimum size of 80px
+            
+            // Position at the bottom, adjusted for perfect placement
+            int fpsY = startY + gaugeHeight - fpsGaugeSize - 10;
+            
+            fpsGauge.Location = new Point(fpsCenterX - fpsGaugeSize / 2, fpsY);
+            fpsGauge.Size = new Size(fpsGaugeSize, fpsGaugeSize);
+            fpsGauge.BringToFront();
 
-            float fontSize = Math.Max(22f, formHeight * 0.055f);
-            lblFps.Font = new Font("Segoe UI", fontSize, FontStyle.Bold);
-
-            int fpsWidth = (int)(gaugeWidth * 1.0f);
-            int fpsHeight = (int)(fontSize * 2.5f);
-
-            lblFps.Location = new Point(fpsCenterX - fpsWidth / 2, fpsY);
-            lblFps.Size = new Size(fpsWidth, fpsHeight);
-            lblFps.BringToFront();
+            // Layout date/time labels
+            LayoutDateTimeLabels();
         }
 
         /// <summary>

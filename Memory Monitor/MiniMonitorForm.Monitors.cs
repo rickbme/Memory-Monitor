@@ -185,23 +185,29 @@ namespace Memory_Monitor
                     _hwInfoReader?.RefreshSensors();
                 }
 
-                if (_hwInfoReader?.IsFpsAvailable == true)
+                // Get FPS data from HWiNFO
+                bool hasFpsData = _hwInfoReader?.IsFpsAvailable == true;
+                int? fps = hasFpsData ? _hwInfoReader?.GetFps() : null;
+                
+                // Use game activity detector to determine if FPS should be shown
+                if (_gameActivityDetector != null)
                 {
-                    int? fps = _hwInfoReader.GetFps();
-                    if (fps.HasValue && fps.Value > 0)
+                    bool shouldShow = _gameActivityDetector.ShouldShowFps(hasFpsData, fps, _lastGpuUsage);
+                    
+                    if (shouldShow && fps.HasValue && fps.Value > 0)
                     {
-                        lblFps.Text = $"FPS - {fps.Value}fps";
-                        lblFps.Visible = true;
+                        fpsGauge.SetFps(fps.Value);
+                        fpsGauge.Visible = true;
                         return;
                     }
                 }
 
-                lblFps.Visible = false;
+                fpsGauge.Visible = false;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error updating FPS: {ex.Message}");
-                lblFps.Visible = false;
+                fpsGauge.Visible = false;
             }
         }
 
