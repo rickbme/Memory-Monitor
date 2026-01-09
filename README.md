@@ -56,7 +56,7 @@ The application uses multiple methods to obtain CPU temperature:
 
 ### HWiNFO Setup (For CPU Temperature)
 
-If CPU temperature shows 0°C or doesn't appear:
+If CPU temperature shows 0Â°C or doesn't appear:
 
 1. **Download HWiNFO** from [https://www.hwinfo.com/](https://www.hwinfo.com/)
 2. **Install and run HWiNFO** (Sensors-only mode is sufficient)
@@ -248,4 +248,4 @@ If you encounter issues or have feature requests:
 
 **Made with ?? by DFS - Dad's Fixit Shop**
 
-*Electronics • Software • Game Development*
+*Electronics â€¢ Software â€¢ Game Development*
