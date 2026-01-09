@@ -10,7 +10,7 @@
 
 ##  Overview
 
-System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU.
+System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU. Program will automatically detect a 1920x480 display and move itself over to it. No moving the display each time.
 
 ### Key Features
 
@@ -133,25 +133,25 @@ dotnet build MemoryMonitorSetup\MemoryMonitorSetup.wixproj --configuration Relea
 
 ---
 
-## ??? Project Structure
+##  Project Structure
 
 ```
 Memory Monitor/
-??? Memory Monitor/               # Main application
-?   ??? CompactGaugeControl.cs   # Circular gauge UI control
-?   ??? MiniMonitorForm.cs       # Main form (1920x480)
-?   ??? CPUMonitor.cs            # CPU usage & temp monitoring
-?   ??? GPUMonitor.cs            # GPU usage, VRAM & temp monitoring
-?   ??? DiskMonitor.cs           # Disk I/O monitoring
-?   ??? NetworkMonitor.cs        # Network throughput monitoring
-?   ??? HardwareMonitorService.cs # LibreHardwareMonitor wrapper
-?   ??? HWiNFOReader.cs          # HWiNFO shared memory reader
-?   ??? NVMLInterop.cs           # NVIDIA NVML interop
-?   ??? ADLInterop.cs            # AMD ADL interop
-?   ??? app.manifest             # UAC admin manifest
-??? MemoryMonitorSetup/          # WiX installer project
-??? README.md
-??? CHANGELOG.md
+ Memory Monitor/             # Main application
+ CompactGaugeControl.cs      # Circular gauge UI control
+ MiniMonitorForm.cs          # Main form (1920x480)
+ CPUMonitor.cs               # CPU usage & temp monitoring
+ GPUMonitor.cs               # GPU usage, VRAM & temp monitoring
+ DiskMonitor.cs              # Disk I/O monitoring
+ NetworkMonitor.cs           # Network throughput monitoring
+ HardwareMonitorService.cs   # LibreHardwareMonitor wrapper
+ HWiNFOReader.cs             # HWiNFO shared memory reader
+ NVMLInterop.cs              # NVIDIA NVML interop
+ ADLInterop.cs               # AMD ADL interop
+ app.manifest                # UAC admin manifest
+ MemoryMonitorSetup/         # WiX installer project
+ README.md
+ CHANGELOG.md
 ```
 
 ---
@@ -210,7 +210,7 @@ Memory Monitor/
 
 ---
 
-## ?? Contributing
+## Contributing
 
 Contributions are welcome! Please feel to submit a Pull Request.
 
