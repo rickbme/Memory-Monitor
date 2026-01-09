@@ -1,6 +1,6 @@
 # Quick Start: Building the Installer
 
-## ?? Super Quick (One Command)
+##  Super Quick (One Command)
 
 Just double-click:
 ```
@@ -19,7 +19,7 @@ MemoryMonitorSetup\bin\Release\en-US\MemoryMonitorSetup.msi
 
 ---
 
-## ?? What You Need
+## What You Need
 
 Before running, make sure you have:
 
@@ -28,7 +28,7 @@ Before running, make sure you have:
 
 ---
 
-## ?? Usage Options
+##  Usage Options
 
 ### Standard Build
 ```cmd
@@ -151,7 +151,7 @@ msiexec /x MemoryMonitorSetup.msi /quiet
 
 ---
 
-## ?? More Help
+##  More Help
 
 - **Detailed Guide**: `BUILD_INSTALLER_GUIDE.md`
 - **Installer Docs**: `MemoryMonitorSetup\INSTALLER_FIX_README.md`
@@ -159,7 +159,7 @@ msiexec /x MemoryMonitorSetup.msi /quiet
 
 ---
 
-## ?? That's It!
+##  That's It!
 
 Three steps to a working installer:
 
@@ -167,4 +167,4 @@ Three steps to a working installer:
 2. **Wait**: ~30 seconds for build
 3. **Done**: Find MSI in `MemoryMonitorSetup\bin\Release\en-US\`
 
-Simple as that! ??
+Simple as that!
