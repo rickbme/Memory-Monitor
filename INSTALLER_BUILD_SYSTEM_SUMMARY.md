@@ -1,21 +1,21 @@
 # Installer Build System - Complete Setup
 
-## ?? Overview
+## Overview
 
 Your Memory Monitor project now has a complete, easy-to-use installer build system!
 
-## ?? New Files Created
+##  New Files Created
 
 ### 1. **Build-Installer.bat** (Root Directory)
 The main builder - just double-click to build everything!
 
 **Features:**
-- ? Automatic prerequisite checking
-- ? Auto-installs WiX if missing
-- ? Color-coded output
-- ? Clear error messages
-- ? Multiple build modes
-- ? Test installation option
+-  Automatic prerequisite checking
+-  Auto-installs WiX if missing
+-  Color-coded output
+-  Clear error messages
+-  Multiple build modes
+-  Test installation option
 
 **Location:** `Memory-Monitor\Build-Installer.bat`
 
@@ -43,7 +43,7 @@ Quick reference for fast access.
 
 **Location:** `Memory-Monitor\INSTALLER_QUICKSTART.md`
 
-## ?? Quick Start
+##  Quick Start
 
 ### Build Installer (Easy Way)
 ```cmd
@@ -58,7 +58,7 @@ Build-Installer.bat rebuild  # Clean + Build
 Build-Installer.bat test     # Build + Test install
 ```
 
-## ?? File Structure
+##  File Structure
 
 ```
 Memory-Monitor\
@@ -82,32 +82,32 @@ Memory-Monitor\
     ??? ROOT_CAUSE_ANALYSIS.md
 ```
 
-## ? Features
+##  Features
 
 ### Automatic Checks
-- ? Verifies .NET 8 SDK installed
-- ? Verifies WiX Toolset installed
-- ? Checks project files exist
-- ? Validates build output
+-  Verifies .NET 8 SDK installed
+-  Verifies WiX Toolset installed
+-  Checks project files exist
+-  Validates build output
 
 ### Auto-Installation
-- ? Installs WiX if missing
-- ? No manual setup required
-- ? Just run and go!
+-  Installs WiX if missing
+-  No manual setup required
+-  Just run and go!
 
 ### Error Handling
-- ? Clear error messages
-- ? Helpful suggestions
-- ? Links to documentation
-- ? Build log information
+-  Clear error messages
+-  Helpful suggestions
+-  Links to documentation
+-  Build log information
 
 ### Output Information
-- ? Shows installer location
-- ? Displays file size
-- ? Shows creation timestamp
-- ? Lists install commands
+-  Shows installer location
+-  Displays file size
+-  Shows creation timestamp
+-  Lists install commands
 
-## ?? Prerequisites
+##  Prerequisites
 
 ### Required
 1. **.NET 8 SDK**
@@ -123,7 +123,7 @@ Memory-Monitor\
 - **Visual Studio 2022** (for development)
 - **Git** (for version control)
 
-## ?? Usage Examples
+##  Usage Examples
 
 ### Example 1: First Time Build
 ```cmd
@@ -367,11 +367,11 @@ To update the installer version:
 
 ### Distribution
 After building, distribute:
-- ? `MemoryMonitorSetup.msi` - The installer
-- ? Installation instructions
-- ? System requirements
+-  `MemoryMonitorSetup.msi` - The installer
+-  Installation instructions
+-  System requirements
 
-## ?? Summary
+##  Summary
 
 You now have:
 
@@ -387,4 +387,4 @@ Building your installer is now as simple as:
 Build-Installer.bat
 ```
 
-**Happy building!** ??
+**Happy building!**
