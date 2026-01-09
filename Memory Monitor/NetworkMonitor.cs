@@ -36,7 +36,7 @@ namespace Memory_Monitor
         public DeviceInfo? SelectedDevice => _selectedAdapterId != null 
             ? _availableDevices.FirstOrDefault(d => d.Id == _selectedAdapterId) 
             : _availableDevices.FirstOrDefault(d => d.Type == DeviceType.Aggregate);
-        public bool HasMultipleDevices => _allAdapters.Count > 1;
+        public bool HasMultipleDevices => _availableDevices.Count > 1; // True if we have choices (All + specific adapters)
         public string CurrentDeviceDisplayName => _selectedAdapterId != null
             ? _allAdapters.FirstOrDefault(a => a.Id == _selectedAdapterId)?.Name ?? "Unknown Adapter"
             : "All Networks";
@@ -132,19 +132,19 @@ namespace Memory_Monitor
         {
             _availableDevices.Clear();
 
-            // Add "All Networks" aggregate option if multiple adapters
-            if (_allAdapters.Count > 1)
+            // Always add "All Networks" aggregate option (even for single adapter)
+            // This allows users to switch back to aggregate mode after selecting a specific adapter
+            _availableDevices.Add(new DeviceInfo
             {
-                _availableDevices.Add(new DeviceInfo
-                {
-                    Id = "",
-                    DisplayName = "All Networks",
-                    ShortName = "All",
-                    Description = $"Combined throughput from {_allAdapters.Count} adapters",
-                    Type = DeviceType.Aggregate,
-                    IsActive = true
-                });
-            }
+                Id = "",
+                DisplayName = _allAdapters.Count > 1 ? "All Networks" : "All Networks",
+                ShortName = "All",
+                Description = _allAdapters.Count > 1 
+                    ? $"Combined throughput from {_allAdapters.Count} adapters" 
+                    : "Total network throughput",
+                Type = DeviceType.Aggregate,
+                IsActive = true
+            });
 
             // Add individual adapters
             foreach (var adapter in _allAdapters)

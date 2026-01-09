@@ -41,6 +41,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GameActivityDetector.cs** - New class for intelligent game activity detection
 - **FpsGaugeControl.cs** - New custom control for FPS visualization
 
+### Improved
+- **Device Selection - Aggregate Mode Always Available** - Disk and Network monitors now always show "All Disks" and "All Networks" options
+  - Previously only shown when multiple devices detected
+  - Users can now switch back to combined/total view after selecting a specific device
+  - Single-device systems still show the aggregate option for consistency
+  - Improves user experience by always providing access to total system throughput
+
+### Removed
+- **CPU Temperature Warning Popup** - Removed the notification that appeared when CPU temperature was unavailable
+  - Temperature monitoring still works when HWiNFO is running
+  - Setup instructions moved to README files to avoid repetitive popups
+  - Users can now run the application without HWiNFO without seeing warnings
+
 ### Technical Changes
 - Added `MiniMonitorForm.DateTime.cs`:
   - `InitializeDateTimeDisplay()` - Configures date/time labels
@@ -71,6 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `MiniMonitorForm.Monitors.cs`:
   - `UpdateFps()` now uses GameActivityDetector and FpsGaugeControl
   - Added `UpdateDateTime()` to timer update cycle
+  - Removed CPU temperature warning fields and `ShowCpuTempWarning()` method
+  - Simplified `UpdateCPU()` to display temperature when available without notifications
 
 ## [2.3.0] - 2025-01-XX
 
@@ -242,7 +257,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - NVIDIA GPUs via NVML (nvml.dll)
   - AMD GPUs via ADL (atiadlxx.dll)
 - **HWiNFO Integration** - Fallback temperature source when LibreHardwareMonitor cannot access sensors
-- **Temperature Warning Notification** - Popup message when CPU temperature is unavailable with setup instructions
 - **Administrator Manifest** - Application now requests admin privileges for hardware sensor access
 
 ### Changed

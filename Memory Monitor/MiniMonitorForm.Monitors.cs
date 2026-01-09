@@ -17,11 +17,6 @@ namespace Memory_Monitor
         private int _lastCpuUsage = 0;
         private int _lastGpuUsage = 0;
 
-        // CPU temperature warning
-        private bool _cpuTempWarningShown = false;
-        private int _cpuTempCheckCount = 0;
-        private const int CPU_TEMP_CHECK_THRESHOLD = 5;
-
         // FPS monitoring
         private int _fpsRefreshCounter = 0;
         private const int FPS_SENSOR_REFRESH_INTERVAL = 10;
@@ -93,16 +88,10 @@ namespace Memory_Monitor
                     if (temp > 0)
                     {
                         cpuGauge.SetValue(usage, $"{_lastCpuUsage}%", $"{temp}°C");
-                        _cpuTempCheckCount = 0;
                     }
                     else
                     {
                         cpuGauge.SetValue(usage, $"{_lastCpuUsage}%");
-                        _cpuTempCheckCount++;
-                        if (!_cpuTempWarningShown && _cpuTempCheckCount >= CPU_TEMP_CHECK_THRESHOLD)
-                        {
-                            ShowCpuTempWarning();
-                        }
                     }
                 }
                 else
@@ -111,21 +100,6 @@ namespace Memory_Monitor
                 }
             }
             catch { cpuGauge.SetValue(0, "ERR"); }
-        }
-
-        private void ShowCpuTempWarning()
-        {
-            _cpuTempWarningShown = true;
-
-            var warning = new WarningOverlay(
-                "? CPU Temperature Not Available",
-                "To enable CPU temperature monitoring:\n" +
-                "1. Run HWiNFO (download from hwinfo.com)\n" +
-                "2. Go to Settings ? Enable 'Shared Memory Support'\n" +
-                "3. Keep HWiNFO running in the background"
-            );
-
-            warning.ShowOn(this);
         }
 
         private void UpdateGPUUsage()

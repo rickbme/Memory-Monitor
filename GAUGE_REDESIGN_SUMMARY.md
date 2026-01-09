@@ -60,7 +60,7 @@ Gauges fully support both Light and Dark themes:
 
 ### 6. Responsive Design
 - Gauges automatically resize to fit available space
-- Maximum gauge size of 150×150 pixels for optimal visibility
+- Maximum gauge size of 150Ã—150 pixels for optimal visibility
 - Layout dynamically adjusts when monitors are toggled on/off
 - Form can be resized and gauges maintain proper proportions
 

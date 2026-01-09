@@ -12,10 +12,10 @@ The circular gauges have been completely redesigned to match a classic speedomet
 - **Rim Width**: 4% of gauge size with proper inner edge definition
 
 ### 2. **Tick Marks (NEW)**
-- **Major Ticks**: 11 positions around the 270° arc (bold, 2.5px width, 12% of radius)
+- **Major Ticks**: 11 positions around the 270Â° arc (bold, 2.5px width, 12% of radius)
 - **Minor Ticks**: 5 between each major tick (lighter, 1.5px width, 7% of radius)
 - **Color**: Dark gray (40, 40, 40 RGB) matching the reference image
-- **Coverage**: Full 270° sweep from 135° to 405° (7 o'clock to 5 o'clock position)
+- **Coverage**: Full 270Â° sweep from 135Â° to 405Â° (7 o'clock to 5 o'clock position)
 
 ### 3. **Scale Labels (IMPROVED)**
 - **Smart Positioning**: Labels placed at strategic points around the arc

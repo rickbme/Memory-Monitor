@@ -30,7 +30,7 @@ namespace Memory_Monitor
         public DeviceInfo? SelectedDevice => _selectedDiskId != null 
             ? _availableDevices.FirstOrDefault(d => d.Id == _selectedDiskId) 
             : _availableDevices.FirstOrDefault(d => d.Type == DeviceType.Aggregate);
-        public bool HasMultipleDevices => _allDisks.Count > 1;
+        public bool HasMultipleDevices => _availableDevices.Count > 1; // True if we have choices (All + specific devices)
         public string CurrentDeviceDisplayName => _selectedDiskId != null
             ? _allDisks.FirstOrDefault(d => d.Id == _selectedDiskId)?.DisplayName ?? "Unknown Disk"
             : "All Disks";
@@ -118,19 +118,19 @@ namespace Memory_Monitor
         {
             _availableDevices.Clear();
 
-            // Add "All Disks" aggregate option if multiple disks
-            if (_allDisks.Count > 1)
+            // Always add "All Disks" aggregate option (even for single disk)
+            // This allows users to switch back to aggregate mode after selecting a specific disk
+            _availableDevices.Add(new DeviceInfo
             {
-                _availableDevices.Add(new DeviceInfo
-                {
-                    Id = "",
-                    DisplayName = "All Disks",
-                    ShortName = "All",
-                    Description = $"Combined throughput from {_allDisks.Count} disks",
-                    Type = DeviceType.Aggregate,
-                    IsActive = true
-                });
-            }
+                Id = "",
+                DisplayName = _allDisks.Count > 1 ? "All Disks" : "All Disks",
+                ShortName = "All",
+                Description = _allDisks.Count > 1 
+                    ? $"Combined throughput from {_allDisks.Count} disks" 
+                    : "Total disk throughput",
+                Type = DeviceType.Aggregate,
+                IsActive = true
+            });
 
             // Add individual disks
             foreach (var disk in _allDisks)

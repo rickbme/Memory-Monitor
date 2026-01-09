@@ -130,7 +130,7 @@ if (showThirdColumn && gaugeBottomY > currentY)
 - Centered within third column
 
 ### Process List:
-- Width: Full window width minus margins (2 × 20px)
+- Width: Full window width minus margins (2 Ã— 20px)
 - Column proportions maintained:
   - Process Name: 45%
   - Memory (GB): 30%

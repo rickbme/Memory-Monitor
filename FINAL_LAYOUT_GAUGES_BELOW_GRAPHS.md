@@ -41,8 +41,8 @@ The form has been reorganized to place the disk and network gauges below their r
 - Size: Maximum 160px, centered in column
 
 ### 3. **Form Minimum Size**
-- **Previous**: 680 × 650 pixels
-- **New**: 520 × 700 pixels
+- **Previous**: 680 Ã— 650 pixels
+- **New**: 520 Ã— 700 pixels
 - Width reduced by 160px (no third column needed)
 - Height increased by 50px (gauges below graphs)
 
@@ -153,7 +153,7 @@ if (showGauges) {
 ## Size Specifications
 
 ### Minimum Dimensions:
-- **Width**: 520px (fits 2 × 240px columns + margins)
+- **Width**: 520px (fits 2 Ã— 240px columns + margins)
 - **Height**: 700px (all sections + process list minimum)
 
 ### Column Sizing:
@@ -162,8 +162,8 @@ if (showGauges) {
 - **Recommended Width**: 640-800px for comfortable viewing
 
 ### Gauge Sizing:
-- **Maximum Size**: 160px × 160px
-- **Minimum Size**: 120px × 120px (inherent control minimum)
+- **Maximum Size**: 160px Ã— 160px
+- **Minimum Size**: 120px Ã— 120px (inherent control minimum)
 - **Actual Size**: `Math.Min(columnWidth - 40, 160)`
 
 ## Accessibility
