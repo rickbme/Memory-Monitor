@@ -41,7 +41,7 @@ The application displays 6 gauges in a horizontal row, optimized for 1920x480 di
 
 ---
 
-## ??? Temperature Monitoring
+##  Temperature Monitoring
 
 ### GPU Temperature
 - **NVIDIA GPUs** - Native support via NVML (nvml.dll)
