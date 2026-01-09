@@ -1,4 +1,4 @@
-# ??? System Monitor
+# System Monitor
 
 **A modern, feature-rich Windows system monitoring application built with .NET 8**
 
@@ -8,11 +8,11 @@
 
 ---
 
-## ?? Overview
+##  Overview
 
 System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU.
 
-### ? Key Features
+### Key Features
 
 - **Real-Time CPU Monitoring** - Track CPU usage with temperature display
 - **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature
@@ -26,7 +26,7 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 
 ---
 
-## ?? Display Layout
+##  Display Layout
 
 The application displays 6 gauges in a horizontal row, optimized for 1920x480 displays:
 
@@ -222,13 +222,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## ?? License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## ?? Acknowledgments
+##  Acknowledgments
 
 - [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) - Hardware monitoring library
 - [HWiNFO](https://www.hwinfo.com/) - Hardware information and monitoring tool
@@ -237,7 +237,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## ?? Support
+##  Support
 
 If you encounter issues or have feature requests:
 - Open an [Issue](https://github.com/rickbme/Memory-Monitor/issues) on GitHub
@@ -246,6 +246,6 @@ If you encounter issues or have feature requests:
 
 ---
 
-**Made with ?? by DFS - Dad's Fixit Shop**
+**Made by DFS - Dad's Fixit Shop**
 
-*Electronics â€¢ Software â€¢ Game Development*
+*Electronics repair,  Software, & Game Development*
