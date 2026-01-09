@@ -8,6 +8,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     
+    <!-- Version information -->
+    <Version>2.4.0</Version>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
+    
     <!-- Application icon for exe file -->
     <ApplicationIcon>Resources\mmguage.ico</ApplicationIcon>
     
