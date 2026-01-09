@@ -71,7 +71,7 @@ If CPU temperature shows 0Â°C or doesn't appear:
 
 ---
 
-## ?? Requirements
+## Requirements
 
 ### System Requirements
 - **Operating System**: Windows 10/11 (x64)
@@ -84,7 +84,7 @@ If CPU temperature shows 0Â°C or doesn't appear:
 
 ---
 
-## ?? Getting Started
+## Getting Started
 
 ### Installation
 
@@ -104,7 +104,7 @@ If CPU temperature shows 0Â°C or doesn't appear:
 
 ---
 
-## ?? Building from Source
+## Building from Source
 
 ### Prerequisites
 - Visual Studio 2022 or later
@@ -156,7 +156,7 @@ Memory Monitor/
 
 ---
 
-## ?? Troubleshooting
+##  Troubleshooting
 
 ### CPU Temperature Not Showing
 1. Ensure application is running as **Administrator**
@@ -191,7 +191,7 @@ Memory Monitor/
 
 ---
 
-## ?? Version History
+##  Version History
 
 ### v2.0.0 (2024)
 - **New**: Mini monitor display support (1920x480)
@@ -212,7 +212,7 @@ Memory Monitor/
 
 ## ?? Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
