@@ -25,7 +25,7 @@ CPU: 45 GPU: 32
 ### 3. **Restore Window**
 Multiple ways to restore the window:
 - **Double-click** the tray icon
-- **Right-click** ? Select "Show"
+- **Right-click**  Select "Show"
 - Window restores to normal state
 - Re-appears in taskbar
 
