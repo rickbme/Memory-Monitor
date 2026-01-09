@@ -1,1 +1,32 @@
-<Project Sdk="WixToolset.Sdk/4.0.0"><PropertyGroup><OutputName>MemoryMonitorSetup</OutputName><OutputType>Package</OutputType><RuntimeIdentifier>win-x64</RuntimeIdentifier><Platform>x64</Platform></PropertyGroup><ItemGroup><ProjectReference Include="..\Memory Monitor\Memory Monitor.csproj"><SetPlatform>Platform=x64</SetPlatform><Properties>RuntimeIdentifier=win-x64</Properties></ProjectReference></ItemGroup></Project>
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <PropertyGroup>
+    <OutputName>MemoryMonitorSetup</OutputName>
+    <OutputType>Package</OutputType>
+    <Cultures>en-us</Cultures>
+    
+    <!-- Disable auto-discovery of .wxs files to prevent double-inclusion -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    
+    <!-- PublishDir points to where the application publish will be placed -->
+    <PublishDir>..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish</PublishDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Main package definition -->
+    <Compile Include="Package.wxs" />
+    
+    <!-- Auto-generated file list (must exist before build) -->
+    <Compile Include="PublishedFiles.wxs" />
+  </ItemGroup>
+
+  <!-- Validate that publish directory exists before building -->
+  <Target Name="ValidatePublishDirectory" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(PublishDir)')" 
+           Text="Publish directory '$(PublishDir)' not found. Please run: dotnet publish '..\Memory Monitor\Memory Monitor.csproj' -c Release -r win-x64 --self-contained true" />
+    
+    <Error Condition="!Exists('PublishedFiles.wxs')" 
+           Text="PublishedFiles.wxs not found. Please run: powershell -ExecutionPolicy Bypass -File Regenerate-PublishedFiles.ps1" />
+    
+    <Message Importance="high" Text="Building Memory Monitor Installer v2.4.0.0" />
+  </Target>
+</Project>

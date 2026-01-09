@@ -5,6 +5,73 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2025-01-XX
+
+### Added
+- **Date & Time Display** - Current date and time shown on the mini monitor
+  - Date displayed in top-left corner (e.g., "December 28")
+  - Time displayed in top-right corner in 12-hour format (e.g., "2:00 PM")
+  - 22pt Segoe UI Bold font for excellent readability
+  - Updates every second with the main timer
+- **FPS Gauge Control** - New dedicated circular gauge for FPS display
+  - Compact circular design positioned between GPU and VRAM gauges
+  - Color-coded ring based on FPS quality:
+    - Green (?60 FPS) - Excellent
+    - Yellow-Green (45-59 FPS) - Good
+    - Orange (30-44 FPS) - Acceptable
+    - Red (<30 FPS) - Poor
+  - Auto-scaling font for 1-4 digit FPS values
+  - "FPS" label below the number
+- **Game Activity Detection** - Smart detection system to show FPS only when gaming
+  - Weighted scoring system combining multiple signals:
+    - FPS data available (strongest signal)
+    - Fullscreen/borderless window detection
+    - Sustained high GPU usage (>70% for 5+ seconds)
+    - Known game process detection (~60+ popular games)
+  - Uses Win32 APIs for fullscreen and process detection
+- **FPS Display Mode Menu** - Tray menu option to control FPS visibility
+  - **Auto-detect** (default) - Shows FPS only when game activity detected
+  - **Always Show** - Manual override to always display FPS when available
+  - **Always Hide** - Never show FPS gauge
+  - Visual toast notification when mode changes
+
+### Changed
+- **FPS Display** - Replaced simple text label with dedicated FPS gauge control
+- **MiniMonitorForm.DateTime.cs** - New partial class for date/time display functionality
+- **GameActivityDetector.cs** - New class for intelligent game activity detection
+- **FpsGaugeControl.cs** - New custom control for FPS visualization
+
+### Technical Changes
+- Added `MiniMonitorForm.DateTime.cs`:
+  - `InitializeDateTimeDisplay()` - Configures date/time labels
+  - `UpdateDateTime()` - Updates time (12-hour) and date (Month Day)
+  - `LayoutDateTimeLabels()` - Positions labels in corners
+- Added `GameActivityDetector.cs`:
+  - Win32 API integration for window and process detection
+  - `FpsDisplayMode` enum (AutoDetect, AlwaysShow, AlwaysHide)
+  - GPU usage history tracking for sustained usage detection
+  - Known game process list with partial matching
+- Added `FpsGaugeControl.cs`:
+  - Custom circular gauge with color-coded ring
+  - Dynamic font scaling based on digit count
+  - `SetFps()` method for updating display
+- Updated `MiniMonitorForm.Designer.cs`:
+  - Added `lblDate` and `lblTime` label controls
+  - Added `fpsGauge` FPS gauge control
+  - Added FPS Display submenu with mode options
+- Updated `MiniMonitorForm.cs`:
+  - Added `_gameActivityDetector` field
+  - Added `InitializeGameDetection()` method
+  - Added FPS menu click handlers
+  - Added `SetFpsDisplayMode()` helper method
+- Updated `MiniMonitorForm.Layout.cs`:
+  - Added `LayoutDateTimeLabels()` for corner positioning
+  - Updated `LayoutGauges()` for FPS gauge placement (30% of main gauge size)
+  - Updated `SetGaugesVisible()` for date/time labels
+- Updated `MiniMonitorForm.Monitors.cs`:
+  - `UpdateFps()` now uses GameActivityDetector and FpsGaugeControl
+  - Added `UpdateDateTime()` to timer update cycle
+
 ## [2.3.0] - 2025-01-XX
 
 ### Added
@@ -214,6 +281,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Notes
+
+### Upgrading to 2.4.0
+- Date and time are now displayed on the mini monitor, updating every second
+- New FPS gauge control shows real-time frames per second with color-coded quality indicators
+- Game activity detection intelligently shows or hides the FPS gauge based on current activity
+- FPS display mode menu allows manual control over FPS visibility settings
 
 ### Upgrading to 2.3.0
 - Full touch gesture support for mini monitors with touchscreen capability

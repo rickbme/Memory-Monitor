@@ -33,15 +33,21 @@ REM Navigate to solution directory
 cd /d "%~dp0.."
 
 REM Step 1: Clean previous builds
-echo [1/4] Cleaning previous builds...
+echo [1/5] Cleaning previous builds...
 if exist "Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish" (
     rmdir /s /q "Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish"
+)
+if exist "MemoryMonitorSetup\bin" (
+    rmdir /s /q "MemoryMonitorSetup\bin"
+)
+if exist "MemoryMonitorSetup\obj" (
+    rmdir /s /q "MemoryMonitorSetup\obj"
 )
 echo       Done.
 echo.
 
 REM Step 2: Build the application
-echo [2/4] Building Memory Monitor application...
+echo [2/5] Building Memory Monitor application...
 dotnet build "Memory Monitor\Memory Monitor.csproj" -c %CONFIG% -r win-x64
 if errorlevel 1 (
     echo.
@@ -53,7 +59,7 @@ echo       Done.
 echo.
 
 REM Step 3: Publish the application (self-contained)
-echo [3/4] Publishing self-contained application...
+echo [3/5] Publishing self-contained application...
 dotnet publish "Memory Monitor\Memory Monitor.csproj" -c %CONFIG% -r win-x64 --self-contained true -o "Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish"
 if errorlevel 1 (
     echo.
@@ -64,19 +70,33 @@ if errorlevel 1 (
 echo       Done.
 echo.
 
-REM Step 4: Build the WiX installer
-echo [4/4] Building MSI installer...
+REM Step 4: Regenerate PublishedFiles.wxs
+echo [4/5] Regenerating PublishedFiles.wxs...
+cd MemoryMonitorSetup
+powershell -ExecutionPolicy Bypass -File "Regenerate-PublishedFiles.ps1" -PublishPath "..\Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish"
+if errorlevel 1 (
+    echo.
+    echo ERROR: Failed to regenerate PublishedFiles.wxs!
+    cd ..
+    pause
+    exit /b 1
+)
+cd ..
+echo       Done.
+echo.
+
+REM Step 5: Build the WiX installer
+echo [5/5] Building MSI installer...
 dotnet build "MemoryMonitorSetup\MemoryMonitorSetup.wixproj" -c %CONFIG%
 if errorlevel 1 (
     echo.
     echo ERROR: Installer build failed!
     echo.
-    echo If you see errors about missing files, make sure:
+    echo If you see errors about missing files, check:
     echo   1. The publish step completed successfully
-    echo   2. PublishedFiles.wxs matches the published files
+    echo   2. PublishedFiles.wxs was regenerated
+    echo   3. All referenced ComponentGroups exist in Package.wxs
     echo.
-    echo You may need to regenerate PublishedFiles.wxs if files changed.
-    echo See INSTALLER-README.md for instructions.
     pause
     exit /b 1
 )
@@ -89,10 +109,14 @@ echo   BUILD SUCCESSFUL!
 echo ============================================
 echo.
 echo Installer created at:
-echo   MemoryMonitorSetup\bin\%CONFIG%\MemoryMonitorSetup.msi
+echo   MemoryMonitorSetup\bin\%CONFIG%\en-us\MemoryMonitorSetup.msi
 echo.
 
 REM Open the output folder
-explorer "MemoryMonitorSetup\bin\%CONFIG%"
+if exist "MemoryMonitorSetup\bin\%CONFIG%\en-us" (
+    explorer "MemoryMonitorSetup\bin\%CONFIG%\en-us"
+) else (
+    explorer "MemoryMonitorSetup\bin\%CONFIG%"
+)
 
 pause
