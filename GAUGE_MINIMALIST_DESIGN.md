@@ -7,17 +7,17 @@ All text has been removed from the gauge faces to create a clean, minimalist app
 ## What Was Removed
 
 ### From Gauge Face:
-- ? Title text (e.g., "DISK SPEED")
-- ? Value display in center
-- ? Unit text (e.g., "Mbps")  
-- ? Scale labels around the perimeter (0, 100, 200, etc.)
+-  Title text (e.g., "DISK SPEED")
+-  Value display in center
+-  Unit text (e.g., "Mbps")  
+-  Scale labels around the perimeter (0, 100, 200, etc.)
 
 ### What Remains on Gauge:
-- ? Tick marks (major and minor)
-- ? 3D rim
-- ? Beige gauge face
-- ? Tapered red needle
-- ? Center hub
+-  Tick marks (major and minor)
+-  3D rim
+-  Beige gauge face
+-  Tapered red needle
+-  Center hub
 
 ## Readings Display Location
 
