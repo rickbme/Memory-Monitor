@@ -337,6 +337,27 @@ namespace Memory_Monitor
             return false;
         }
 
+        public DeviceInfo? CycleToNextDevice()
+        {
+            if (_detectedGPUs.Count <= 1)
+                return SelectedDevice;
+
+            // Find current GPU index
+            int currentIndex = _detectedGPUs.FindIndex(g => g.Id == _selectedGPU?.Id);
+            if (currentIndex < 0)
+                currentIndex = 0;
+
+            // Move to next GPU (wrap around)
+            int nextIndex = (currentIndex + 1) % _detectedGPUs.Count;
+            var nextGPU = _detectedGPUs[nextIndex];
+
+            // Select the next GPU
+            SelectDevice(nextGPU.Id);
+
+            Debug.WriteLine($"Cycled to GPU: {CurrentDeviceDisplayName}");
+            return SelectedDevice;
+        }
+
         /// <summary>
         /// Updates GPU usage percentage
         /// </summary>

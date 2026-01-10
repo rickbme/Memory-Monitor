@@ -180,6 +180,35 @@ namespace Memory_Monitor
             return false;
         }
 
+        public DeviceInfo? CycleToNextDevice()
+        {
+            if (_availableDevices.Count <= 1)
+                return SelectedDevice;
+
+            // Find current device index
+            int currentIndex = -1;
+            for (int i = 0; i < _availableDevices.Count; i++)
+            {
+                var device = _availableDevices[i];
+                if ((device.Type == DeviceType.Aggregate && _selectedDiskId == null) ||
+                    (device.Id == _selectedDiskId))
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            // Move to next device (wrap around)
+            int nextIndex = (currentIndex + 1) % _availableDevices.Count;
+            var nextDevice = _availableDevices[nextIndex];
+
+            // Select the next device
+            SelectDevice(nextDevice.Type == DeviceType.Aggregate ? null : nextDevice.Id);
+
+            Debug.WriteLine($"Cycled to disk: {CurrentDeviceDisplayName}");
+            return SelectedDevice;
+        }
+
         public (float readMbps, float writeMbps, float totalMbps) Update()
         {
             try

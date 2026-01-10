@@ -28,6 +28,13 @@ namespace Memory_Monitor
         bool SelectDevice(string? deviceId);
 
         /// <summary>
+        /// Cycles to the next available device in the list.
+        /// Used for touch-based navigation to avoid small popup menus.
+        /// </summary>
+        /// <returns>The newly selected device info, or null if cycling failed</returns>
+        DeviceInfo? CycleToNextDevice();
+
+        /// <summary>
         /// Gets the display name for the currently selected device or aggregate mode
         /// </summary>
         string CurrentDeviceDisplayName { get; }

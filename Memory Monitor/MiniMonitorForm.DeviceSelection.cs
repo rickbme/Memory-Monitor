@@ -41,10 +41,12 @@ namespace Memory_Monitor
                 gpuUsageGauge.IsSelectable = true;
                 gpuUsageGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
                 gpuUsageGauge.DeviceSelectionRequested += GpuGauge_DeviceSelectionRequested;
+                gpuUsageGauge.DeviceCycleRequested += GpuGauge_DeviceCycleRequested;
 
                 gpuVramGauge.IsSelectable = true;
                 gpuVramGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
                 gpuVramGauge.DeviceSelectionRequested += GpuGauge_DeviceSelectionRequested;
+                gpuVramGauge.DeviceCycleRequested += GpuGauge_DeviceCycleRequested;
             }
 
             if (_diskMonitor != null)
@@ -52,6 +54,7 @@ namespace Memory_Monitor
                 diskGauge.IsSelectable = true;
                 diskGauge.HasMultipleDevices = _diskMonitor.HasMultipleDevices;
                 diskGauge.DeviceSelectionRequested += DiskGauge_DeviceSelectionRequested;
+                diskGauge.DeviceCycleRequested += DiskGauge_DeviceCycleRequested;
             }
 
             if (_networkMonitor != null)
@@ -59,6 +62,7 @@ namespace Memory_Monitor
                 networkGauge.IsSelectable = true;
                 networkGauge.HasMultipleDevices = _networkMonitor.HasMultipleDevices;
                 networkGauge.DeviceSelectionRequested += NetworkGauge_DeviceSelectionRequested;
+                networkGauge.DeviceCycleRequested += NetworkGauge_DeviceCycleRequested;
             }
         }
 
@@ -212,6 +216,72 @@ namespace Memory_Monitor
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to load device selections: {ex.Message}");
+            }
+        }
+
+        private void GpuGauge_DeviceCycleRequested(object? sender, EventArgs e)
+        {
+            if (_gpuMonitor == null || !_gpuMonitor.HasMultipleDevices)
+                return;
+
+            var newDevice = _gpuMonitor.CycleToNextDevice();
+            
+            if (newDevice != null)
+            {
+                if (_gpuMonitor.IsMemoryAvailable)
+                {
+                    gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+                }
+
+                string gpuShortName = _gpuMonitor.GetShortName();
+                gpuUsageGauge.DeviceName = gpuShortName;
+                gpuVramGauge.DeviceName = gpuShortName;
+
+                UpdateGPUUsage();
+                UpdateGPUMemory();
+
+                SaveDeviceSelection("GPU", newDevice.Type == DeviceType.Aggregate ? null : newDevice.Id);
+
+                ShowToastNotification($"GPU: {_gpuMonitor.CurrentDeviceDisplayName}");
+                Debug.WriteLine($"Cycled to GPU: {_gpuMonitor.CurrentDeviceDisplayName}");
+            }
+        }
+
+        private void DiskGauge_DeviceCycleRequested(object? sender, EventArgs e)
+        {
+            if (_diskMonitor == null || !_diskMonitor.HasMultipleDevices)
+                return;
+
+            var newDevice = _diskMonitor.CycleToNextDevice();
+            
+            if (newDevice != null)
+            {
+                diskGauge.DeviceName = _diskMonitor.CurrentDeviceDisplayName;
+                _diskPeakMbps = 0;
+                UpdateDisk();
+                SaveDeviceSelection("Disk", newDevice.Type == DeviceType.Aggregate ? null : newDevice.Id);
+                
+                ShowToastNotification($"Disk: {_diskMonitor.CurrentDeviceDisplayName}");
+                Debug.WriteLine($"Cycled to disk: {_diskMonitor.CurrentDeviceDisplayName}");
+            }
+        }
+
+        private void NetworkGauge_DeviceCycleRequested(object? sender, EventArgs e)
+        {
+            if (_networkMonitor == null || !_networkMonitor.HasMultipleDevices)
+                return;
+
+            var newDevice = _networkMonitor.CycleToNextDevice();
+            
+            if (newDevice != null)
+            {
+                networkGauge.DeviceName = _networkMonitor.CurrentDeviceDisplayName;
+                _networkPeakMbps = 0;
+                UpdateNetwork();
+                SaveDeviceSelection("Network", newDevice.Type == DeviceType.Aggregate ? null : newDevice.Id);
+                
+                ShowToastNotification($"Network: {_networkMonitor.CurrentDeviceDisplayName}");
+                Debug.WriteLine($"Cycled to network: {_networkMonitor.CurrentDeviceDisplayName}");
             }
         }
     }

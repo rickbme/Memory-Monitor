@@ -27,6 +27,7 @@ namespace Memory_Monitor
         private bool _isSelectable = false;
         private bool _hasMultipleDevices = false;
         private bool _isHovered = false;
+        private bool _isTouchMode = false; // Track whether last interaction was touch
 
         public CompactGaugeControl()
         {
@@ -131,13 +132,23 @@ namespace Memory_Monitor
         #region Events
 
         /// <summary>
-        /// Event raised when the gauge is clicked for device selection
+        /// Event raised when the gauge is clicked for device selection (mouse)
         /// </summary>
         public event EventHandler? DeviceSelectionRequested;
+
+        /// <summary>
+        /// Event raised when the gauge is tapped for device cycling (touch)
+        /// </summary>
+        public event EventHandler? DeviceCycleRequested;
 
         protected virtual void OnDeviceSelectionRequested()
         {
             DeviceSelectionRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnDeviceCycleRequested()
+        {
+            DeviceCycleRequested?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion
@@ -184,21 +195,26 @@ namespace Memory_Monitor
         protected override void OnClick(EventArgs e)
         {
             base.OnClick(e);
-            if (_isSelectable && _hasMultipleDevices)
+            if (_isSelectable && _hasMultipleDevices && !_isTouchMode)
             {
+                // Mouse click - show popup menu
                 OnDeviceSelectionRequested();
             }
         }
 
         /// <summary>
         /// Simulates a click on the gauge, triggering device selection if applicable.
-        /// Used by touch gesture handler to trigger device selection on tap.
+        /// Used by touch gesture handler to trigger device cycling on tap.
         /// </summary>
         public void PerformClick()
         {
             if (_isSelectable && _hasMultipleDevices)
             {
-                OnDeviceSelectionRequested();
+                _isTouchMode = true;
+                // Touch tap - cycle to next device
+                OnDeviceCycleRequested();
+                // Reset touch mode after a short delay
+                System.Threading.Tasks.Task.Delay(500).ContinueWith(_ => _isTouchMode = false);
             }
         }
 
