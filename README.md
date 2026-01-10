@@ -10,7 +10,7 @@
 
 ## 📸 Screenshot
 
-![Memory Monitor Screenshot](Memory-Monitor/Resources/MemMonPic.png)
+![Memory Monitor Screenshot](MemMonPic.png)
 *Memory Monitor running on a 1920x480 mini display with real-time CPU, GPU, RAM, VRAM, Disk, and Network monitoring*
 
 ---
