@@ -8,6 +8,13 @@
 
 ---
 
+## 📸 Screenshot
+
+![Memory Monitor Screenshot](Resources/MemMonPic.png)
+*Memory Monitor running on a 1920x480 mini display with real-time CPU, GPU, RAM, VRAM, Disk, and Network monitoring*
+
+---
+
 ##  Overview
 
 System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU. Program will automatically detect a 1920x480 display and move itself over to it. No moving the display each time.
@@ -21,6 +28,9 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 - **Disk I/O Monitoring** - Read/write throughput with auto-scaling
 - **Network Monitoring** - Upload/download speed with auto-scaling
 - **Temperature Display** - CPU and GPU temperatures shown inside gauges
+- **FPS Monitoring** - Real-time frame rate display with smart game detection
+- **Date & Time Display** - Current date and time on mini monitor
+- **Touch Gesture Support** - Full touch input for mini monitors with touchscreen
 - **Mini Monitor Optimized** - Designed for 1920x480 secondary displays
 - **Circular Gauge Design** - Beautiful animated needle gauges with glow effects
 
@@ -35,9 +45,74 @@ The application displays 6 gauges in a horizontal row, optimized for 1920x480 di
 | **RAM** | Blue | Memory usage (GB used / total) |
 | **CPU** | Red | CPU usage (%) + Temperature |
 | **GPU** | Orange | GPU usage (%) + Temperature |
+| **FPS** | Color-coded | Frames per second (gaming) |
 | **VRAM** | Purple | Video memory (GB used / total) |
-| **DISK** | Green | Disk I/O throughput (MB/s) |
+| **DISK** | Green | Disk I/O throughput (Mbps) |
 | **NET** | Yellow | Network throughput (Mbps) |
+
+**Additional Display Elements:**
+- **Date** - Top-left corner (e.g., "January 10")
+- **Time** - Top-right corner, 12-hour format (e.g., "2:30 PM")
+
+---
+
+##  FPS Monitoring
+
+Memory Monitor displays real-time frames per second with intelligent game detection.
+
+### FPS Gauge Features
+- **Color-Coded Quality Indicator:**
+  - 🟢 Green (≥60 FPS) - Excellent, butter-smooth gaming
+  - 🟡 Yellow-Green (45-59 FPS) - Good, very playable
+  - 🟠 Orange (30-44 FPS) - Acceptable, playable with some stutter
+  - 🔴 Red (<30 FPS) - Poor, significant performance issues
+- **Auto-scaling font** for 1-4 digit FPS values
+- **Compact circular design** positioned between GPU and VRAM gauges
+
+### Smart Game Detection
+The FPS gauge automatically appears when you're gaming and hides when you're not:
+- Detects fullscreen and borderless window games
+- Monitors sustained high GPU usage (>70% for 5+ seconds)
+- Recognizes 60+ popular game processes
+- Combines multiple signals for accurate detection
+
+### Display Modes
+Right-click tray icon → **FPS Display** submenu:
+- **Auto-detect** (default) - Smart detection based on activity
+- **Always Show** - Force FPS display when available
+- **Always Hide** - Never show FPS gauge
+
+### Setup Requirements
+1. Download and install [HWiNFO](https://www.hwinfo.com/)
+2. Download and install [RTSS](https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html) (RivaTuner Statistics Server)
+3. Launch HWiNFO → Settings → Enable **"Shared Memory Support"**
+4. Launch your game with RTSS overlay enabled
+5. FPS gauge appears automatically when gaming is detected
+
+> **Note:** FPS monitoring requires HWiNFO with "Shared Memory Support" enabled and RTSS or a game overlay that reports FPS to HWiNFO.
+
+---
+
+##  Touch Gesture Support
+
+For mini monitors with touchscreen capability, Memory Monitor supports the following gestures:
+
+### Swipe Gestures
+- **Swipe Left/Right** - Switch between monitors
+- **Swipe Down** - Minimize to system tray
+
+### Tap Gestures
+- **Tap on GPU/Disk/Network Gauge** - Cycle through available devices
+  - Each tap advances to the next device (wraps around)
+  - Toast notification shows newly selected device
+  - Mouse clicks still show full popup menu for precise selection
+- **Long Press** - Show context menu at touch location
+- **Two-Finger Tap** - Toggle "Always on Top" mode
+
+### Requirements for Touch
+- Touchscreen-enabled mini monitor with HID-compliant touch hardware
+- USB data cable connection (not power-only)
+- Windows-recognized touch drivers
 
 ---
 
@@ -175,23 +250,58 @@ Memory Monitor/
 
 ---
 
-## ?? GPU Support
+##  GPU Support
 
-### NVIDIA GPUs ?
+### NVIDIA GPUs 
 - GeForce series (GTX, RTX)
 - Full utilization, memory, and temperature support
 
-### AMD GPUs ?
+### AMD GPUs 
 - Radeon RX series
 - Full utilization and temperature support
 
-### Intel GPUs ??
+### Intel GPUs 
 - Limited support via Performance Counters
 - No temperature reading available
 
 ---
 
 ##  Version History
+
+### v2.4.0 (2025-01-10)
+- **New**: Date and time display on mini monitor
+- **New**: FPS gauge with intelligent game activity detection
+- **New**: Color-coded FPS quality indicator (Green/Yellow/Orange/Red)
+- **New**: Touch cycling for device selection (GPU, Disk, Network)
+- **New**: FPS display mode menu (Auto-detect, Always Show, Always Hide)
+- **Improved**: Aggregate mode always available for Disk and Network
+- **Improved**: Touch UX optimized for small displays
+- **Removed**: CPU temperature warning popup (cleaner experience)
+
+### v2.3.0 (2025)
+- **New**: Splash screen with branded DFS logo
+- **New**: Mini monitor intro logo (1920x480)
+- **New**: Full touch gesture support (swipe, tap, long-press, two-finger tap)
+- **New**: Touch-enabled device selection for gauges
+- **New**: Toast notifications for visual feedback
+- **Changed**: Application minimizes to system tray instead of taskbar
+- **Refactored**: MiniMonitorForm split into partial classes for better organization
+
+### v2.2.0 (2024-12-26)
+- **New**: Custom gauge-style application icon
+- **New**: Dynamic tray icon with color-coded RAM usage (Green/Yellow/Red)
+- **New**: GaugeIconGenerator for programmatic icon creation
+- **Improved**: Code quality with SafeUpdate wrapper and proper resource disposal
+- **Fixed**: Icon format, build configuration, nullable warnings
+
+### v2.1.0 (2024)
+- **New**: Borderless full screen mode for clean display
+- **New**: Auto monitor detection (4:1 aspect ratio)
+- **New**: Move to Next Monitor tray menu option
+- **New**: Always on Top toggle (F11 keyboard shortcut)
+- **New**: Window dragging support
+- **Changed**: Larger gauges using 95% of vertical space
+- **Changed**: Increased label font size for better readability
 
 ### v2.0.0 (2024)
 - **New**: Mini monitor display support (1920x480)

@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FPS Gauge Control** - New dedicated circular gauge for FPS display
   - Compact circular design positioned between GPU and VRAM gauges
   - Color-coded ring based on FPS quality:
-    - Green (?60 FPS) - Excellent
+    - Green (60 FPS) - Excellent
     - Yellow-Green (45-59 FPS) - Good
     - Orange (30-44 FPS) - Acceptable
     - Red (<30 FPS) - Poor
@@ -34,12 +34,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Always Show** - Manual override to always display FPS when available
   - **Always Hide** - Never show FPS gauge
   - Visual toast notification when mode changes
+- **Touch Cycling for Device Selection** - Touch-friendly navigation for disk and network gauges
+  - Touch tap on disk/ethernet gauge cycles through available devices instead of showing popup menu
+  - Each tap advances to the next device (wraps around to beginning)
+  - Mouse clicks still show popup menu for precise selection
+  - Visual toast notification shows newly selected device name
+  - Popup menu automatically reflects current device when opened with mouse
+  - Works for GPU, disk, and network gauges on touch-enabled displays
 
 ### Changed
 - **FPS Display** - Replaced simple text label with dedicated FPS gauge control
 - **MiniMonitorForm.DateTime.cs** - New partial class for date/time display functionality
 - **GameActivityDetector.cs** - New class for intelligent game activity detection
 - **FpsGaugeControl.cs** - New custom control for FPS visualization
+- **Touch Gesture Behavior** - Tapping selectable gauges now cycles through options instead of showing menu
 
 ### Improved
 - **Device Selection - Aggregate Mode Always Available** - Disk and Network monitors now always show "All Disks" and "All Networks" options
@@ -47,6 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Users can now switch back to combined/total view after selecting a specific device
   - Single-device systems still show the aggregate option for consistency
   - Improves user experience by always providing access to total system throughput
+- **Touch UX for Mini Displays** - Device selection now optimized for touch on small screens
+  - Cycling avoids the need for small, hard-to-tap popup menus
+  - Better suited for 1920x480 mini monitor touch displays
+  - Mouse users still get full popup menu with all options visible
 
 ### Removed
 - **CPU Temperature Warning Popup** - Removed the notification that appeared when CPU temperature was unavailable
@@ -68,6 +80,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom circular gauge with color-coded ring
   - Dynamic font scaling based on digit count
   - `SetFps()` method for updating display
+- Updated `ISelectableMonitor.cs`:
+  - Added `CycleToNextDevice()` method for touch-based navigation
+- Updated `DiskMonitor.cs`, `NetworkMonitor.cs`, `GPUMonitor.cs`:
+  - Implemented `CycleToNextDevice()` to cycle through available devices
+- Updated `CompactGaugeControl.cs`:
+  - Added `DeviceCycleRequested` event for touch cycling
+  - Added `_isTouchMode` flag to distinguish touch taps from mouse clicks
+  - Updated `PerformClick()` to raise `DeviceCycleRequested` for touch
+  - Mouse clicks still raise `DeviceSelectionRequested` for popup menu
+- Updated `MiniMonitorForm.DeviceSelection.cs`:
+  - Added `GpuGauge_DeviceCycleRequested()` event handler
+  - Added `DiskGauge_DeviceCycleRequested()` event handler
+  - Added `NetworkGauge_DeviceCycleRequested()` event handler
+  - Each handler shows toast notification with device name
 - Updated `MiniMonitorForm.Designer.cs`:
   - Added `lblDate` and `lblTime` label controls
   - Added `fpsGauge` FPS gauge control
@@ -86,6 +112,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `UpdateDateTime()` to timer update cycle
   - Removed CPU temperature warning fields and `ShowCpuTempWarning()` method
   - Simplified `UpdateCPU()` to display temperature when available without notifications
+
+### Notes
+- Touch cycling is designed for small touch displays where popup menus are difficult to use
+- Mouse users still have access to the full popup menu for quick device selection
+- Each touch tap cycles forward through the device list (All ? Device 1 ? Device 2 ? etc. ? All)
+- Device selection is saved and restored between application sessions
 
 ## [2.3.0] - 2025-01-XX
 
@@ -301,6 +333,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New FPS gauge control shows real-time frames per second with color-coded quality indicators
 - Game activity detection intelligently shows or hides the FPS gauge based on current activity
 - FPS display mode menu allows manual control over FPS visibility settings
+- Touch cycling feature provides touch-friendly navigation for device selection on mini monitors
 
 ### Upgrading to 2.3.0
 - Full touch gesture support for mini monitors with touchscreen capability

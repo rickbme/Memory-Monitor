@@ -124,24 +124,24 @@ The installer will place files at:
 ### Program Files:
 ```
 C:\Program Files\Memory Monitor\
-??? Memory Monitor.exe
-??? Memory Monitor.dll
-??? Memory Monitor.deps.json
-??? Memory Monitor.runtimeconfig.json
-??? System.CodeDom.dll
-??? System.Management.dll
+ Memory Monitor.exe
+ Memory Monitor.dll
+ Memory Monitor.deps.json
+ Memory Monitor.runtimeconfig.json
+ System.CodeDom.dll
+ System.Management.dll
 ```
 
 ### Start Menu:
 ```
 Start Menu\Programs\Memory Monitor\
-??? Memory Monitor (shortcut)
+ Memory Monitor (shortcut)
 ```
 
 ### Registry:
 ```
 HKCU\Software\MemoryMonitor
-??? installed = 1
+ installed = 1
 ```
 
 ## Common Issues and Solutions
@@ -393,11 +393,7 @@ If you encounter issues:
 1. Review error messages carefully
 2. Check prerequisites are installed
 3. Verify project structure is correct
-4. See detailed documentation:
-   - `MemoryMonitorSetup\INSTALLER_FIX_README.md`
-   - `MemoryMonitorSetup\QUICK_REFERENCE.md`
-   - `MemoryMonitorSetup\ROOT_CAUSE_ANALYSIS.md`
-5. Check build logs for detailed errors
+4. Check build logs for detailed errors
 
 ## Summary
 

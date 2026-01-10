@@ -6,18 +6,18 @@
 
 ---
 
-## ?? What's New in 2.4.0
+##  What's New in 2.4.0
 
 ### Major Features
 
-#### ?? Date & Time Display
+####  Date & Time Display
 - Current date and time shown on the mini monitor
 - Date in top-left corner (e.g., "January 10")
 - Time in top-right corner in 12-hour format (e.g., "2:30 PM")
 - 22pt Segoe UI Bold font for excellent readability
 - Updates every second
 
-#### ?? FPS Gauge Control
+####  FPS Gauge Control
 - Dedicated circular gauge for frames per second
 - Positioned between GPU and VRAM gauges
 - Color-coded ring based on FPS quality:
@@ -27,7 +27,7 @@
   - **Red** (<30 FPS) - Poor
 - Auto-scaling font for 1-4 digit values
 
-#### ?? Game Activity Detection
+####  Game Activity Detection
 - Smart system to show FPS only during gaming
 - Weighted scoring using multiple signals:
   - FPS data availability
@@ -36,7 +36,7 @@
   - Known game process detection (~60+ popular games)
 - Uses Win32 APIs for accurate detection
 
-#### ?? FPS Display Mode Menu
+####  FPS Display Mode Menu
 - New tray menu option for FPS control
 - **Auto-detect** (default) - Shows FPS when gaming
 - **Always Show** - Manual override
@@ -45,7 +45,7 @@
 
 ### Improvements
 
-#### ?? Enhanced Device Selection
+####  Enhanced Device Selection
 - "All Disks" and "All Networks" options always available
 - Users can switch back to aggregate view anytime
 - Consistent experience for single and multiple device systems
@@ -53,7 +53,7 @@
 
 ### Quality of Life
 
-#### ?? Removed Annoying Popups
+####  Removed Annoying Popups
 - CPU temperature warning removed
 - No more popups when running without HWiNFO
 - Setup instructions moved to documentation
@@ -61,7 +61,7 @@
 
 ---
 
-## ?? Installation
+##  Installation
 
 ### System Requirements
 - **OS:** Windows 10 (64-bit) or Windows 11
@@ -96,7 +96,7 @@ msiexec /i MemoryMonitorSetup.msi /l*v install.log
 
 ---
 
-## ?? Upgrading from Previous Versions
+##  Upgrading from Previous Versions
 
 ### Automatic Upgrade
 The installer automatically detects and upgrades previous installations:
@@ -110,52 +110,52 @@ The installer automatically detects and upgrades previous installations:
 ```
 
 ### Supported Upgrade Paths
-- ? v2.3.0 ? v2.4.0
-- ? v2.2.0 ? v2.4.0  
-- ? v2.1.0 ? v2.4.0
-- ? v2.0.0 ? v2.4.0
-- ? v2.4.0 ? v2.3.0 (downgrade blocked)
+-  v2.3.0  v2.4.0
+-  v2.2.0  v2.4.0  
+-  v2.1.0  v2.4.0
+-  v2.0.0  v2.4.0
+-  v2.4.0  v2.3.0 (downgrade blocked)
 
 ---
 
-## ?? Key Features Summary
+##  Key Features Summary
 
 ### Real-Time Monitoring
-- ? CPU usage with temperature
-- ? GPU usage with temperature
-- ? System RAM usage
-- ? GPU VRAM usage
-- ? Disk I/O throughput
-- ? Network throughput
-- ? FPS (frames per second)
-- ? Date and time
+-  CPU usage with temperature
+-  GPU usage with temperature
+-  System RAM usage
+-  GPU VRAM usage
+-  Disk I/O throughput
+-  Network throughput
+-  FPS (frames per second)
+-  Date and time
 
 ### Display Features
-- ? Optimized for 1920x480 mini monitors
-- ? Circular gauges with needle indicators
-- ? Color-coded FPS quality indicator
-- ? Auto-scaling disk/network gauges
-- ? Temperature inside gauges
-- ? Date/time in corners
+-  Optimized for 1920x480 mini monitors
+-  Circular gauges with needle indicators
+-  Color-coded FPS quality indicator
+-  Auto-scaling disk/network gauges
+-  Temperature inside gauges
+-  Date/time in corners
 
 ### Hardware Support
-- ? NVIDIA GPUs (via NVML)
-- ? AMD GPUs (via ADL)
-- ? Intel CPUs (temperature via HWiNFO)
-- ? Multi-disk systems
-- ? Multi-network adapter systems
+-  NVIDIA GPUs (via NVML)
+-  AMD GPUs (via ADL)
+-  Intel CPUs (temperature via HWiNFO)
+-  Multi-disk systems
+-  Multi-network adapter systems
 
 ### User Experience
-- ? Touch gesture support (mini monitor with touch)
-- ? Device selection popups
-- ? System tray integration
-- ? Always-on-top mode
-- ? Borderless full-screen
-- ? Multi-monitor support
+-  Touch gesture support (mini monitor with touch)
+-  Device selection popups
+-  System tray integration
+-  Always-on-top mode
+-  Borderless full-screen
+-  Multi-monitor support
 
 ---
 
-## ?? Configuration
+##  Configuration
 
 ### FPS Monitoring
 Requires HWiNFO with RTSS integration:
@@ -189,7 +189,7 @@ Click on Disk, GPU, or Network gauges to select specific devices:
 
 ---
 
-## ?? Troubleshooting
+##  Troubleshooting
 
 ### Application Won't Start
 ```
@@ -229,7 +229,7 @@ Solution: Should not occur - installer is self-contained
 
 ---
 
-## ?? What's Changed Since v2.3.0
+##  What's Changed Since v2.3.0
 
 ### Added
 - Date & time display in corners
@@ -249,19 +249,17 @@ Solution: Should not occur - installer is self-contained
 
 ---
 
-## ?? Documentation
+##  Documentation
 
 - **README.md** - Main documentation
 - **CHANGELOG.md** - Complete version history
 - **BUILD_INSTALLER_GUIDE.md** - Build instructions
-- **INSTALLER-README.md** - Installer documentation
-- **PRE-RELEASE-CHECKLIST.md** - Testing guide
 
 ---
 
-## ?? Known Issues
+##  Known Issues
 
-None at this time! ??
+None at this time! 
 
 Report issues at: https://github.com/rickbme/Memory-Monitor/issues
 
@@ -280,7 +278,7 @@ Report issues at: https://github.com/rickbme/Memory-Monitor/issues
 
 ---
 
-## ?? Download
+##  Download
 
 **Installer:** MemoryMonitorSetup.msi (62.97 MB)  
 **SHA256:** (To be calculated after release)
@@ -293,10 +291,10 @@ Get-FileHash MemoryMonitorSetup.msi -Algorithm SHA256
 
 ---
 
-## ?? Next Steps After Installation
+##  Next Steps After Installation
 
 1. **Launch Application**
-   - Start Menu ? Memory Monitor
+   - Start Menu  Memory Monitor
    - Or Desktop shortcut
 
 2. **Position on Mini Monitor**
@@ -305,7 +303,7 @@ Get-FileHash MemoryMonitorSetup.msi -Algorithm SHA256
 
 3. **Configure FPS (Optional)**
    - Install HWiNFO + RTSS for FPS monitoring
-   - Right-click tray icon ? FPS Display ? Auto-detect
+   - Right-click tray icon FPS Display  Auto-detect
 
 4. **Select Devices (Optional)**
    - Click gauges to select specific disks/networks
@@ -318,4 +316,4 @@ Get-FileHash MemoryMonitorSetup.msi -Algorithm SHA256
 
 ---
 
-**Memory Monitor v2.4.0 - Making system monitoring beautiful! ??**
+**Memory Monitor v2.4.0 - Making system monitoring fun & beautiful! **

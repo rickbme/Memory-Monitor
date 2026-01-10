@@ -253,4 +253,4 @@ signtool sign /f certificate.pfx /p password MemoryMonitorSetup.msi
 ---
 
 **DFS - Dad's Fixit Shop**
-Making tech accessible, reliable, and fun since 2025
+Making tech accessible, reliable, and fun since 2020

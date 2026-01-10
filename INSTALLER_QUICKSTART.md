@@ -34,47 +34,47 @@ Before running, make sure you have:
 ```cmd
 Build-Installer.bat
 ```
-? Builds app + creates installer
+ Builds app + creates installer
 
 ### Clean Previous Builds
 ```cmd
 Build-Installer.bat clean
 ```
-? Removes old build files
+ Removes old build files
 
 ### Full Rebuild
 ```cmd
 Build-Installer.bat rebuild
 ```
-? Clean + Build from scratch
+ Clean + Build from scratch
 
 ### Build & Test Install
 ```cmd
 Build-Installer.bat test
 ```
-? Build + Option to install immediately
+ Build + Option to install immediately
 
 ---
 
-## ?? What Gets Built
+##  What Gets Built
 
 ### Application (Step 1)
 ```
 Memory Monitor\bin\Release\net8.0-windows\
-??? Memory Monitor.exe
-??? Memory Monitor.dll
-??? [dependencies]
+Memory Monitor.exe
+Memory Monitor.dll
+[dependencies]
 ```
 
 ### Installer (Step 3)
 ```
 MemoryMonitorSetup\bin\Release\en-US\
-??? MemoryMonitorSetup.msi  ? Your installer!
+MemoryMonitorSetup.msi  ? Your installer!
 ```
 
 ---
 
-## ? Success Looks Like This
+##  Success Looks Like This
 
 ```
 ============================================================================
@@ -93,7 +93,7 @@ To install:
 
 ---
 
-## ?? Installing the MSI
+##  Installing the MSI
 
 ### Interactive Install
 ```cmd
@@ -112,7 +112,7 @@ msiexec /i MemoryMonitorSetup.msi /l*v install.log
 
 ---
 
-## ??? Uninstalling
+##  Uninstalling
 
 ### Interactive
 ```cmd
@@ -126,7 +126,7 @@ msiexec /x MemoryMonitorSetup.msi /quiet
 
 ---
 
-## ? If Something Goes Wrong
+##  If Something Goes Wrong
 
 ### Missing .NET SDK
 ```
@@ -154,8 +154,7 @@ msiexec /x MemoryMonitorSetup.msi /quiet
 ##  More Help
 
 - **Detailed Guide**: `BUILD_INSTALLER_GUIDE.md`
-- **Installer Docs**: `MemoryMonitorSetup\INSTALLER_FIX_README.md`
-- **Quick Reference**: `MemoryMonitorSetup\QUICK_REFERENCE.md`
+
 
 ---
 
