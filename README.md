@@ -21,6 +21,7 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 
 ### Key Features
 
+- **Automatic move to any 1920x480 display!
 - **Real-Time CPU Monitoring** - Track CPU usage with temperature display
 - **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature
 - **System Memory Tracking** - Monitor RAM usage with detailed statistics
