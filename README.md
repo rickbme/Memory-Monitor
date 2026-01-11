@@ -1,3 +1,11 @@
+Initially I put one of these on my christmas list thinking I would use it for an information display.  Little did i know that this was just a display.  Ya I know, dummy lol.  Anyway, I saw that there was a program that would do what
+I wanted called AIDA64.  After looking at it and seeing how involved it was this was not for me.  I just wanted a simple display to show my usage. Plus I didn't want to pay for it :P.  So this was my vacation project!
+Feel free to use and modify it to suite your needs!  I may add some different displays with different looks if I get enough interest.  Let me know! And hope this is useful for you!
+I've tried to bug check it best I could, but if there is one you find, please let me know and i'll try and get it fixed.
+
+Rick
+DFS
+
 # System Monitor
 
 **A modern, feature-rich Windows system monitoring application built with .NET 8**
