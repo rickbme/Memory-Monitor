@@ -1,12 +1,12 @@
 # Memory Monitor - User Guide
 
-**Welcome to Memory Monitor!** ??
+**Welcome to Memory Monitor!** 
 
 Memory Monitor is your real-time system performance dashboard designed for mini displays (1920×480). Keep an eye on your PC's vital stats while you work, game, or browse.
 
 ---
 
-## ?? Quick Start
+##  Quick Start
 
 ### First Launch
 1. Find **"Memory Monitor"** in your Start Menu
@@ -20,13 +20,13 @@ Your mini monitor will display **6 circular gauges** showing:
 
 | Gauge | What It Shows |
 |-------|---------------|
-| ?? **RAM** (Blue) | How much memory your PC is using |
-| ?? **CPU** (Red) | Processor usage + temperature |
-| ?? **GPU** (Orange) | Graphics card usage + temperature |
-| ?? **FPS** (Color-coded) | Gaming frame rate (appears during games) |
-| ?? **VRAM** (Purple) | Graphics card memory usage |
-| ?? **DISK** (Green) | Hard drive/SSD read/write speed |
-| ?? **NETWORK** (Yellow) | Internet upload/download speed |
+|  **RAM** (Blue) | How much memory your PC is using |
+|  **CPU** (Red) | Processor usage + temperature |
+|  **GPU** (Orange) | Graphics card usage + temperature |
+|  **FPS** (Color-coded) | Gaming frame rate (appears during games) |
+|  **VRAM** (Purple) | Graphics card memory usage |
+|  **DISK** (Green) | Hard drive/SSD read/write speed |
+|  **NETWORK** (Yellow) | Internet upload/download speed |
 
 Plus:
 - **Date** in the top-left corner
@@ -34,14 +34,14 @@ Plus:
 
 ---
 
-## ?? Gaming Features
+##  Gaming Features
 
 ### FPS Display
 When you launch a game, Memory Monitor **automatically shows your frame rate** (FPS):
-- ?? **Green (60+ FPS)** - Excellent, smooth gameplay
-- ?? **Yellow (45-59 FPS)** - Good performance
-- ?? **Orange (30-44 FPS)** - Playable but may stutter
-- ?? **Red (Below 30 FPS)** - Performance issues
+-  **Green (60+ FPS)** - Excellent, smooth gameplay
+-  **Yellow (45-59 FPS)** - Good performance
+-  **Orange (30-44 FPS)** - Playable but may stutter
+-  **Red (Below 30 FPS)** - Performance issues
 
 ### Control FPS Display
 Right-click the **system tray icon** ? **FPS Display**:
@@ -51,7 +51,7 @@ Right-click the **system tray icon** ? **FPS Display**:
 
 ---
 
-## ?? Touchscreen Support
+##  Touchscreen Support
 
 If your mini monitor has a touchscreen, you can use gestures:
 
@@ -64,7 +64,7 @@ If your mini monitor has a touchscreen, you can use gestures:
 
 ---
 
-## ?? System Tray Controls
+##  System Tray Controls
 
 Click the **Memory Monitor icon** in your system tray (near the clock):
 
@@ -76,13 +76,13 @@ Click the **Memory Monitor icon** in your system tray (near the clock):
 
 ---
 
-## ??? Temperature Monitoring
+##  Temperature Monitoring
 
 ### GPU Temperature
 Your graphics card temperature appears **inside the GPU gauge** automatically:
-- ? **NVIDIA cards** - Works out of the box
-- ? **AMD cards** - Works out of the box
-- ?? **Intel integrated graphics** - Limited support
+-  **NVIDIA cards** - Works out of the box
+-  **AMD cards** - Works out of the box
+-  **Intel integrated graphics** - Limited support
 
 ### CPU Temperature
 For CPU temperature, you may need to install **HWiNFO** (free):
@@ -100,7 +100,7 @@ For CPU temperature, you may need to install **HWiNFO** (free):
 
 ---
 
-## ?? FPS Monitoring Setup (Optional)
+##  FPS Monitoring Setup (Optional)
 
 To see your gaming frame rate:
 
@@ -121,7 +121,7 @@ To see your gaming frame rate:
 
 ---
 
-## ??? Multiple GPUs, Disks, or Networks?
+##  Multiple GPUs, Disks, or Networks?
 
 If you have multiple graphics cards, hard drives, or network adapters:
 
@@ -140,7 +140,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 
 ---
 
-## ?? Keyboard Shortcuts
+##  Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
@@ -149,7 +149,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 
 ---
 
-## ??? Troubleshooting
+##  Troubleshooting
 
 ### "Application won't start"
 - Right-click **Memory Monitor** ? **Run as administrator**
@@ -165,7 +165,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 - Install both **HWiNFO** and **RTSS** (see FPS Monitoring Setup)
 - Make sure HWiNFO has "Shared Memory Support" enabled
 - Launch a game with RTSS overlay active
-- Check tray menu ? FPS Display is set to "Auto-detect" or "Always Show"
+- Check tray menu  FPS Display is set to "Auto-detect" or "Always Show"
 
 ### "Window is on the wrong monitor"
 - Right-click **system tray icon** ? **Move to Next Monitor**
@@ -177,7 +177,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 
 ---
 
-## ?? Updating Memory Monitor
+##  Updating Memory Monitor
 
 When a new version is released:
 1. Download the new **MemoryMonitorSetup.msi**
@@ -187,7 +187,7 @@ When a new version is released:
 
 ---
 
-## ?? What Each Gauge Means
+##  What Each Gauge Means
 
 ### RAM (Blue Gauge)
 - Shows how much memory your programs are using
@@ -226,7 +226,7 @@ When a new version is released:
 
 ---
 
-## ?? Tips & Tricks
+##  Tips & Tricks
 
 ### Best Placement
 - Position your mini monitor **below your main display**
@@ -234,7 +234,7 @@ When a new version is released:
 
 ### Multi-Monitor Setup
 - Memory Monitor auto-detects 1920×480 displays
-- Manual switching: Tray icon ? Move to Next Monitor
+- Manual switching: Tray icon Move to Next Monitor
 
 ### System Tray Only
 - Press **Escape** to minimize Memory Monitor
@@ -247,7 +247,7 @@ When a new version is released:
 
 ---
 
-## ?? Getting Help
+##  Getting Help
 
 ### Need Support?
 - Check the **Troubleshooting** section above
@@ -262,7 +262,7 @@ Please report it with:
 
 ---
 
-## ?? Requirements
+##  Requirements
 
 ### Minimum System Requirements
 - **Windows 10** or **Windows 11** (64-bit)
@@ -276,7 +276,7 @@ Please report it with:
 
 ---
 
-## ?? License & Credits
+##  License & Credits
 
 Memory Monitor is **free and open source** software.
 
@@ -291,7 +291,7 @@ Memory Monitor is **free and open source** software.
 
 ---
 
-## ?? Enjoy Monitoring!
+##  Enjoy Monitoring!
 
 Memory Monitor runs quietly in the background, giving you instant visibility into your PC's performance. Perfect for gamers, content creators, and power users who want to keep tabs on their system.
 
@@ -302,4 +302,4 @@ Visit our GitHub page or open an issue. We're here to help!
 
 **Version:** 2.4.0  
 **Release Date:** January 10, 2025  
-**Made with ?? by Dad's Fixit Shop**
+**Made by Dad's Fixit Shop**

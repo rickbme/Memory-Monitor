@@ -7,8 +7,7 @@
   - Version should be updated for each release (currently 2.4.0.0)
   - MajorUpgrade automatically removes older versions
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="Memory Monitor" 
            Manufacturer="DFS" 
            Version="2.4.0.0" 
@@ -22,33 +21,6 @@
     
     <!-- Embed CAB file inside MSI -->
     <MediaTemplate EmbedCab="yes" />
-    
-    <!-- Properties for finish dialog checkboxes -->
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Create a desktop shortcut" />
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
-    
-    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="View User Guide" />
-    <Property Id="LAUNCH_README" Value="1" />
-    
-    <!-- Custom action to launch README -->
-    <CustomAction Id="LaunchReadme" 
-                  Directory="INSTALLFOLDER" 
-                  ExeCommand="cmd.exe /c start &quot;&quot; &quot;[INSTALLFOLDER]USER_GUIDE.md&quot;" 
-                  Execute="immediate" 
-                  Return="asyncNoWait" />
-    
-    <!-- Only launch README if checkbox is checked -->
-    <InstallExecuteSequence>
-      <Custom Action="LaunchReadme" Before="InstallFinalize">
-        LAUNCH_README = 1 AND NOT Installed
-      </Custom>
-    </InstallExecuteSequence>
-    
-    <!-- UI configuration -->
-    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
-    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
-    <WixVariable Id="WixUIBannerBmp" Value="Banner.bmp" />
-    <WixVariable Id="WixUIDialogBmp" Value="Dialog.bmp" />
     
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles6432Folder">
@@ -84,16 +56,8 @@
       
       <!-- Shortcuts -->
       <ComponentGroupRef Id="StartMenuShortcuts" />
-      <ComponentGroupRef Id="UserGuide" />
-    </Feature>
-    
-    <!-- Conditional desktop shortcut feature -->
-    <Feature Id="DesktopShortcut" 
-             Title="Desktop Shortcut" 
-             Description="Creates a shortcut on your desktop" 
-             Level="1000">
       <ComponentGroupRef Id="DesktopShortcuts" />
-      <Condition Level="1">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1</Condition>
+      <ComponentGroupRef Id="UserGuide" />
     </Feature>
     
     <!-- Add/Remove Programs configuration -->

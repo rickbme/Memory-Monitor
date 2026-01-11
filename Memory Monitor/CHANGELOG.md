@@ -41,6 +41,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Visual toast notification shows newly selected device name
   - Popup menu automatically reflects current device when opened with mouse
   - Works for GPU, disk, and network gauges on touch-enabled displays
+- **First-Run Welcome Dialog** - Friendly introduction for new users
+  - Appears automatically on first launch after installation
+  - Highlights key features with visual icons
+  - "Open User Guide" button to launch USER_GUIDE.md
+  - "Get Started" button to begin using the application
+  - "Don't show this again" checkbox for experienced users
+  - Registry-based first-run detection
+  - Dark-themed design matching application style
+  - Shown only once by default, can be reopened from the Help menu
 
 ### Changed
 - **FPS Display** - Replaced simple text label with dedicated FPS gauge control
@@ -48,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GameActivityDetector.cs** - New class for intelligent game activity detection
 - **FpsGaugeControl.cs** - New custom control for FPS visualization
 - **Touch Gesture Behavior** - Tapping selectable gauges now cycles through options instead of showing menu
+- **FirstRunDialog** - New dialog class for the first-run welcome screen
 
 ### Improved
 - **Device Selection - Aggregate Mode Always Available** - Disk and Network monitors now always show "All Disks" and "All Networks" options
@@ -80,6 +90,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom circular gauge with color-coded ring
   - Dynamic font scaling based on digit count
   - `SetFps()` method for updating display
+- Added `WelcomeDialog.cs`:
+  - First-run welcome dialog for new users
+  - Registry-based first-run detection (`HKCU\Software\MemoryMonitor\FirstRunComplete`)
+  - Feature highlights with visual icons
+  - Opens USER_GUIDE.md from installation directory
+  - "Don't show again" checkbox option
+  - `ShowIfFirstRun()` static method for easy integration
+  - `ResetFirstRun()` utility method for testing
 - Updated `ISelectableMonitor.cs`:
   - Added `CycleToNextDevice()` method for touch-based navigation
 - Updated `DiskMonitor.cs`, `NetworkMonitor.cs`, `GPUMonitor.cs`:
@@ -94,15 +112,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `DiskGauge_DeviceCycleRequested()` event handler
   - Added `NetworkGauge_DeviceCycleRequested()` event handler
   - Each handler shows toast notification with device name
-- Updated `MiniMonitorForm.Designer.cs`:
-  - Added `lblDate` and `lblTime` label controls
-  - Added `fpsGauge` FPS gauge control
-  - Added FPS Display submenu with mode options
 - Updated `MiniMonitorForm.cs`:
   - Added `_gameActivityDetector` field
   - Added `InitializeGameDetection()` method
   - Added FPS menu click handlers
   - Added `SetFpsDisplayMode()` helper method
+  - Integrated `WelcomeDialog.ShowIfFirstRun()` in `OnLoad()` method
+- Updated `MiniMonitorForm.Designer.cs`:
+  - Added `lblDate` and `lblTime` label controls
+  - Added `fpsGauge` FPS gauge control
+  - Added FPS Display submenu with mode options
 - Updated `MiniMonitorForm.Layout.cs`:
   - Added `LayoutDateTimeLabels()` for corner positioning
   - Updated `LayoutGauges()` for FPS gauge placement (30% of main gauge size)
@@ -112,12 +131,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `UpdateDateTime()` to timer update cycle
   - Removed CPU temperature warning fields and `ShowCpuTempWarning()` method
   - Simplified `UpdateCPU()` to display temperature when available without notifications
+- Added `FirstRunDialog.cs`:
+  - New dialog class for displaying the first-run welcome screen
+  - Checkbox to suppress future displays
+  - Button to open the user guide
+  - Button to start using the application
 
 ### Notes
 - Touch cycling is designed for small touch displays where popup menus are difficult to use
 - Mouse users still have access to the full popup menu for quick device selection
 - Each touch tap cycles forward through the device list (All ? Device 1 ? Device 2 ? etc. ? All)
 - Device selection is saved and restored between application sessions
+- The first-run welcome dialog is shown only once by default and can be suppressed
+- New users are encouraged to explore the user guide for detailed information
 
 ## [2.3.0] - 2025-01-XX
 
@@ -334,6 +360,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Game activity detection intelligently shows or hides the FPS gauge based on current activity
 - FPS display mode menu allows manual control over FPS visibility settings
 - Touch cycling feature provides touch-friendly navigation for device selection on mini monitors
+- First-run welcome dialog introduced to guide new users through key features
 
 ### Upgrading to 2.3.0
 - Full touch gesture support for mini monitors with touchscreen capability

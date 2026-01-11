@@ -61,6 +61,12 @@ namespace Memory_Monitor
             this.Activate();
 
             Debug.WriteLine("Application started - window visible, tray icon active");
+
+            // Show welcome dialog on first run
+            this.BeginInvoke(new Action(() =>
+            {
+                WelcomeDialog.ShowIfFirstRun();
+            }));
         }
 
         #region Window Setup
