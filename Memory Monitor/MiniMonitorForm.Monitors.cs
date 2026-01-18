@@ -46,6 +46,7 @@ namespace Memory_Monitor
             SafeUpdate(UpdateFps);
             SafeUpdate(UpdateDisk);
             SafeUpdate(UpdateNetwork);
+            SafeUpdate(UpdateDateTime);
             UpdateTrayIconText();
         }
 
@@ -171,17 +172,28 @@ namespace Memory_Monitor
                     if (shouldShow && fps.HasValue && fps.Value > 0)
                     {
                         fpsGauge.SetFps(fps.Value);
-                        fpsGauge.Visible = true;
+                        // Only change visibility if needed (reduces flicker)
+                        if (!fpsGauge.Visible)
+                        {
+                            fpsGauge.Visible = true;
+                        }
                         return;
                     }
                 }
 
-                fpsGauge.Visible = false;
+                // Only change visibility if needed (reduces flicker)
+                if (fpsGauge.Visible)
+                {
+                    fpsGauge.Visible = false;
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error updating FPS: {ex.Message}");
-                fpsGauge.Visible = false;
+                if (fpsGauge.Visible)
+                {
+                    fpsGauge.Visible = false;
+                }
             }
         }
 

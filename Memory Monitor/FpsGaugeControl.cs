@@ -54,8 +54,13 @@ namespace Memory_Monitor
         /// </summary>
         public void SetFps(int fps)
         {
-            _fpsValue = Math.Max(0, fps);
-            Invalidate();
+            int newValue = Math.Max(0, fps);
+            // Only invalidate if value actually changed (reduces flicker)
+            if (_fpsValue != newValue)
+            {
+                _fpsValue = newValue;
+                Invalidate();
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)

@@ -4,13 +4,13 @@
   
   IMPORTANT VERSION NOTES:
   - UpgradeCode MUST remain stable across all versions (DO NOT CHANGE)
-  - Version should be updated for each release (currently 2.4.0.0)
+  - Version should be updated for each release (currently 2.4.1.0)
   - MajorUpgrade automatically removes older versions
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="Memory Monitor" 
            Manufacturer="DFS" 
-           Version="2.4.0.0" 
+           Version="2.4.1.0" 
            UpgradeCode="D9A1E6B2-1234-4F56-9A2B-ABCDEF012345"
            Compressed="yes"
            InstallerVersion="500">

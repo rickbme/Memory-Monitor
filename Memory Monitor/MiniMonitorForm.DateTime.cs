@@ -36,10 +36,21 @@ namespace Memory_Monitor
             DateTime now = DateTime.Now;
             
             // 12-hour format without seconds (e.g., "3:45 PM")
-            lblTime.Text = now.ToString("h:mm tt");
+            string newTime = now.ToString("h:mm tt");
             
             // Month and Day only (e.g., "January 15")
-            lblDate.Text = now.ToString("MMMM d");
+            string newDate = now.ToString("MMMM d");
+            
+            // Only update if text has changed (reduces flicker)
+            if (lblTime.Text != newTime)
+            {
+                lblTime.Text = newTime;
+            }
+            
+            if (lblDate.Text != newDate)
+            {
+                lblDate.Text = newDate;
+            }
         }
 
         private void LayoutDateTimeLabels()

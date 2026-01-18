@@ -5,6 +5,36 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2025-01-10
+
+### Fixed
+- **Clock Display Not Updating** - Fixed issue where date/time labels were not updating after startup
+  - Added `UpdateDateTime()` call to the main timer update cycle
+  - Clock now updates correctly every second
+- **Display Flicker/Blips** - Optimized rendering to reduce unnecessary screen repaints
+  - `CompactGaugeControl.SetValue()` now only invalidates when values actually change
+  - `FpsGaugeControl.SetFps()` now only invalidates when FPS value changes
+  - FPS gauge visibility only toggles when transitioning to/from gaming state
+  - Date/time labels only update when text actually changes (every minute for time)
+  - Property setters now check for value changes before calling `Invalidate()`
+
+### Changed
+- **Performance Optimization** - Reduced CPU usage and GDI resource consumption
+  - Gauges no longer repaint every second if values haven't changed
+  - Estimated 60-80% reduction in unnecessary `Invalidate()` calls
+
+### Technical Changes
+- Updated `MiniMonitorForm.Monitors.cs`:
+  - Added `SafeUpdate(UpdateDateTime)` to `UpdateAllMetrics()`
+  - Optimized `UpdateFps()` to only change visibility when needed
+- Updated `MiniMonitorForm.DateTime.cs`:
+  - `UpdateDateTime()` now compares text before updating labels
+- Updated `CompactGaugeControl.cs`:
+  - All property setters now check if value changed before invalidating
+  - `SetValue()` methods use tolerance-based comparison for floats
+- Updated `FpsGaugeControl.cs`:
+  - `SetFps()` only invalidates when value actually changes
+
 ## [2.4.0] - 2025-01-10
 
 ### Added

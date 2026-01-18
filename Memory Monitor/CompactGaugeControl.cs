@@ -29,6 +29,9 @@ namespace Memory_Monitor
         private bool _isHovered = false;
         private bool _isTouchMode = false; // Track whether last interaction was touch
 
+        // Track if we need to repaint (reduces unnecessary invalidations)
+        private bool _needsRepaint = false;
+
         public CompactGaugeControl()
         {
             this.DoubleBuffered = true;
@@ -43,7 +46,14 @@ namespace Memory_Monitor
         public string Label
         {
             get => _label;
-            set { _label = value; Invalidate(); }
+            set 
+            { 
+                if (_label != value)
+                {
+                    _label = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         /// <summary>
@@ -52,49 +62,107 @@ namespace Memory_Monitor
         public string DeviceName
         {
             get => _deviceName;
-            set { _deviceName = value; Invalidate(); }
+            set 
+            { 
+                if (_deviceName != value)
+                {
+                    _deviceName = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public string Unit
         {
             get => _unit;
-            set { _unit = value; Invalidate(); }
+            set 
+            { 
+                if (_unit != value)
+                {
+                    _unit = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public Color GaugeColor
         {
             get => _gaugeColor;
-            set { _gaugeColor = value; _needleColor = value; Invalidate(); }
+            set 
+            { 
+                if (_gaugeColor != value)
+                {
+                    _gaugeColor = value; 
+                    _needleColor = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public Color NeedleColor
         {
             get => _needleColor;
-            set { _needleColor = value; Invalidate(); }
+            set 
+            { 
+                if (_needleColor != value)
+                {
+                    _needleColor = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public Color TextColor
         {
             get => _textColor;
-            set { _textColor = value; Invalidate(); }
+            set 
+            { 
+                if (_textColor != value)
+                {
+                    _textColor = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public Color LabelColor
         {
             get => _labelColor;
-            set { _labelColor = value; Invalidate(); }
+            set 
+            { 
+                if (_labelColor != value)
+                {
+                    _labelColor = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public Color SecondaryColor
         {
             get => _secondaryColor;
-            set { _secondaryColor = value; Invalidate(); }
+            set 
+            { 
+                if (_secondaryColor != value)
+                {
+                    _secondaryColor = value; 
+                    Invalidate(); 
+                }
+            }
         }
 
         public float MaxValue
         {
             get => _maxValue;
-            set { _maxValue = Math.Max(0.001f, value); Invalidate(); } // Prevent zero/negative to avoid division errors
+            set 
+            { 
+                float newValue = Math.Max(0.001f, value);
+                if (Math.Abs(_maxValue - newValue) > 0.001f)
+                {
+                    _maxValue = newValue;
+                    Invalidate();
+                }
+            }
         }
 
         public float CurrentValue => _currentValue;
@@ -107,9 +175,12 @@ namespace Memory_Monitor
             get => _isSelectable;
             set 
             { 
-                _isSelectable = value;
-                Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
-                Invalidate();
+                if (_isSelectable != value)
+                {
+                    _isSelectable = value;
+                    Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
+                    Invalidate();
+                }
             }
         }
 
@@ -121,9 +192,12 @@ namespace Memory_Monitor
             get => _hasMultipleDevices;
             set 
             { 
-                _hasMultipleDevices = value;
-                Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
-                Invalidate();
+                if (_hasMultipleDevices != value)
+                {
+                    _hasMultipleDevices = value;
+                    Cursor = (_isSelectable && _hasMultipleDevices) ? Cursors.Hand : Cursors.Default;
+                    Invalidate();
+                }
             }
         }
 
@@ -155,10 +229,18 @@ namespace Memory_Monitor
 
         public void SetValue(float value, string displayText)
         {
-            _currentValue = Math.Max(0, Math.Min(value, _maxValue));
-            _displayValue = displayText;
-            _secondaryValue = "";
-            Invalidate();
+            float clampedValue = Math.Max(0, Math.Min(value, _maxValue));
+            
+            // Only invalidate if values actually changed (reduces flicker)
+            if (Math.Abs(_currentValue - clampedValue) > 0.01f || 
+                _displayValue != displayText || 
+                !string.IsNullOrEmpty(_secondaryValue))
+            {
+                _currentValue = clampedValue;
+                _displayValue = displayText;
+                _secondaryValue = "";
+                Invalidate();
+            }
         }
 
         /// <summary>
@@ -166,16 +248,24 @@ namespace Memory_Monitor
         /// </summary>
         public void SetValue(float value, string displayText, string secondaryText)
         {
-            _currentValue = Math.Max(0, Math.Min(value, _maxValue));
-            _displayValue = displayText;
-            _secondaryValue = secondaryText;
-            Invalidate();
+            float clampedValue = Math.Max(0, Math.Min(value, _maxValue));
+            
+            // Only invalidate if values actually changed (reduces flicker)
+            if (Math.Abs(_currentValue - clampedValue) > 0.01f || 
+                _displayValue != displayText || 
+                _secondaryValue != secondaryText)
+            {
+                _currentValue = clampedValue;
+                _displayValue = displayText;
+                _secondaryValue = secondaryText;
+                Invalidate();
+            }
         }
 
         protected override void OnMouseEnter(EventArgs e)
         {
             base.OnMouseEnter(e);
-            if (_isSelectable && _hasMultipleDevices)
+            if (_isSelectable && _hasMultipleDevices && !_isHovered)
             {
                 _isHovered = true;
                 Invalidate();
@@ -227,18 +317,16 @@ namespace Memory_Monitor
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
             // Calculate size to fit gauge, device name, and label
-            int labelAreaHeight = string.IsNullOrEmpty(_deviceName) ? 25 : 45; // More space if device name shown
+            int labelAreaHeight = string.IsNullOrEmpty(_deviceName) ? 25 : 45;
             int availableHeight = Height - labelAreaHeight;
             int size = Math.Min(Width, availableHeight);
             
-            // Center the gauge horizontally and vertically within available space
             int centerX = Width / 2;
             int centerY = availableHeight / 2;
             int gaugeRadius = (int)(size * 0.42f);
 
             if (gaugeRadius < 15) return;
 
-            // Draw hover highlight if selectable
             if (_isHovered && _isSelectable && _hasMultipleDevices)
             {
                 DrawHoverHighlight(g, centerX, centerY, gaugeRadius);
@@ -250,7 +338,6 @@ namespace Memory_Monitor
             DrawNeedle(g, centerX, centerY, gaugeRadius);
             DrawCenterHub(g, centerX, centerY);
             
-            // Draw secondary value (temperature) if present
             if (!string.IsNullOrEmpty(_secondaryValue))
             {
                 DrawSecondaryValue(g, centerX, centerY, gaugeRadius);
@@ -259,7 +346,6 @@ namespace Memory_Monitor
             DrawDigitalValue(g, centerX, centerY, gaugeRadius);
             DrawLabel(g, centerX, availableHeight);
 
-            // Draw selection indicator if selectable with multiple devices
             if (_isSelectable && _hasMultipleDevices)
             {
                 DrawSelectionIndicator(g, centerX, centerY, gaugeRadius);
@@ -278,7 +364,6 @@ namespace Memory_Monitor
 
         private void DrawSelectionIndicator(Graphics g, int cx, int cy, int radius)
         {
-            // Draw a small dropdown arrow indicator at the bottom of the gauge
             int indicatorY = cy + radius + 5;
             int arrowSize = 6;
             
@@ -301,7 +386,6 @@ namespace Memory_Monitor
 
         private void DrawGaugeFace(Graphics g, int cx, int cy, int radius)
         {
-            // Shadow
             using (var shadowPath = new GraphicsPath())
             {
                 int outerR = radius + 10;
@@ -314,7 +398,6 @@ namespace Memory_Monitor
                 }
             }
 
-            // Main face
             Rectangle faceRect = new Rectangle(cx - radius, cy - radius, radius * 2, radius * 2);
             using (var facePath = new GraphicsPath())
             {
@@ -327,7 +410,6 @@ namespace Memory_Monitor
                 }
             }
 
-            // Chrome rim
             using (var rimPen = new Pen(Color.FromArgb(100, 105, 110), 2))
                 g.DrawEllipse(rimPen, cx - radius - 4, cy - radius - 4, (radius + 4) * 2, (radius + 4) * 2);
         }
@@ -342,11 +424,8 @@ namespace Memory_Monitor
             int arcRadius = radius - 15;
             Rectangle arcRect = new Rectangle(cx - arcRadius, cy - arcRadius, arcRadius * 2, arcRadius * 2);
 
-            // Only draw the colored arc if it has a meaningful sweep angle
-            // Very small sweep angles cause GDI+ issues with LineCap.Round on thick pens
             if (currentSweep >= 1.0f)
             {
-                // Glow effect
                 using (var glowPath = new GraphicsPath())
                 {
                     glowPath.AddArc(arcRect, startAngle, currentSweep);
@@ -367,7 +446,6 @@ namespace Memory_Monitor
                 }
             }
 
-            // Background arc (draw full arc if currentSweep is too small)
             float bgStart = currentSweep >= 1.0f ? startAngle + currentSweep : startAngle;
             float bgSweep = currentSweep >= 1.0f ? sweepAngle - currentSweep : sweepAngle;
 
@@ -424,12 +502,10 @@ namespace Memory_Monitor
             PointF baseL = new PointF(cx + (float)(baseWidth * Math.Cos(perpLeft)), cy + (float)(baseWidth * Math.Sin(perpLeft)));
             PointF baseR = new PointF(cx + (float)(baseWidth * Math.Cos(perpRight)), cy + (float)(baseWidth * Math.Sin(perpRight)));
 
-            // Shadow
             PointF[] shadow = { new PointF(baseL.X + 1, baseL.Y + 1), new PointF(tip.X + 1, tip.Y + 1), new PointF(baseR.X + 1, baseR.Y + 1) };
             using (var shadowBrush = new SolidBrush(Color.FromArgb(60, 0, 0, 0)))
                 g.FillPolygon(shadowBrush, shadow);
 
-            // Needle
             PointF[] needle = { baseL, tip, baseR };
             using (var needleBrush = new LinearGradientBrush(new PointF(cx, cy), tip, _needleColor,
                 Color.FromArgb(Math.Min(255, _needleColor.R + 50), Math.Min(255, _needleColor.G + 50), Math.Min(255, _needleColor.B + 50))))
@@ -455,19 +531,16 @@ namespace Memory_Monitor
 
         private void DrawSecondaryValue(Graphics g, int cx, int cy, int radius)
         {
-            // Draw temperature below the center hub, scaled to gauge size
             int tempY = cy + (int)(radius * 0.35f);
 
             using (var font = new Font("Consolas", Math.Max(8f, radius * 0.12f), FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
             {
-                // Draw glow effect
                 using (var glowBrush = new SolidBrush(Color.FromArgb(40, _secondaryColor)))
                 {
                     g.DrawString(_secondaryValue, font, glowBrush, cx, tempY, sf);
                 }
                 
-                // Draw text
                 using (var textBrush = new SolidBrush(_secondaryColor))
                 {
                     g.DrawString(_secondaryValue, font, textBrush, cx, tempY, sf);
@@ -484,14 +557,12 @@ namespace Memory_Monitor
 
             Rectangle displayRect = new Rectangle(displayX, displayY, displayW, displayH);
 
-            // Background
             using (var bgBrush = new LinearGradientBrush(displayRect, Color.FromArgb(20, 25, 30), Color.FromArgb(30, 35, 40), LinearGradientMode.Vertical))
                 g.FillRectangle(bgBrush, displayRect);
 
             using (var borderPen = new Pen(Color.FromArgb(60, 65, 70), 1))
                 g.DrawRectangle(borderPen, displayRect);
 
-            // Value text - scale font with gauge size
             float fontSize = Math.Max(8f, radius * 0.1f);
             using (var font = new Font("Consolas", fontSize, FontStyle.Bold))
             using (var sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })

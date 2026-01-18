@@ -300,6 +300,6 @@ Visit our GitHub page or open an issue. We're here to help!
 
 ---
 
-**Version:** 2.4.0  
+**Version:** 2.4.1  
 **Release Date:** January 10, 2025  
 **Made by Dad's Fixit Shop**
