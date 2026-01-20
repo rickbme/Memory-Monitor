@@ -6,8 +6,15 @@
   - UpgradeCode MUST remain stable across all versions (DO NOT CHANGE)
   - Version should be updated for each release (currently 2.4.1.0)
   - MajorUpgrade automatically removes older versions
+  
+  UI FEATURES:
+  - WixUI_InstallDir provides standard installation dialogs
+  - Shows welcome, license, install directory, progress, and completion screens
+  - Maintenance mode allows repair/remove when product is already installed
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="Memory Monitor" 
            Manufacturer="DFS" 
            Version="2.4.1.0" 
@@ -17,7 +24,8 @@
     
     <!-- Automatically remove older installed major versions -->
     <MajorUpgrade 
-      DowngradeErrorMessage="A newer version of Memory Monitor is already installed. Please uninstall the newer version before installing this version." />
+      DowngradeErrorMessage="A newer version of Memory Monitor is already installed. Please uninstall the newer version before installing this version."
+      Schedule="afterInstallInitialize" />
     
     <!-- Embed CAB file inside MSI -->
     <MediaTemplate EmbedCab="yes" />
@@ -61,11 +69,29 @@
     </Feature>
     
     <!-- Add/Remove Programs configuration -->
-    <Icon Id="AppIcon.exe" SourceFile="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.exe" />
+    <Icon Id="AppIcon.exe" SourceFile="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.exe" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
     <Property Id="ARPHELPLINK" Value="https://github.com/rickbme/Memory-Monitor" />
-    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
-    <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+    
+    <!-- Allow repair and modify in Add/Remove Programs -->
+    <!-- Removed ARPNOREPAIR and ARPNOMODIFY to enable maintenance mode features -->
+    
+    <!-- Set default install directory property for WixUI_InstallDir -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <!-- Use WixUI_InstallDir dialog set - provides:
+         - Welcome dialog
+         - License agreement (optional - skipped if no license file)
+         - Installation directory selection
+         - Ready to install confirmation
+         - Progress bar during installation
+         - Completion dialog
+         - Maintenance mode (repair/remove) when already installed -->
+    <ui:WixUI Id="WixUI_InstallDir" />
+    
+    <!-- Customize the exit dialog to show completion message -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" 
+              Value="Memory Monitor v2.4.1 has been successfully installed.&#13;&#10;&#13;&#10;You can launch it from the Start Menu or Desktop shortcut.&#13;&#10;&#13;&#10;Note: The application requires Administrator privileges to access hardware sensors." />
     
   </Package>
   
@@ -76,7 +102,7 @@
         <Shortcut Id="ApplicationStartMenuShortcut"
                   Name="Memory Monitor"
                   Description="System Resource Monitor for Mini Displays"
-                  Target="[INSTALLFOLDER]Memory Monitor.exe"
+                  Target="[INSTALLFOLDER]MemoryMonitor.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIcon.exe" />
         
@@ -105,7 +131,7 @@
         <Shortcut Id="ApplicationDesktopShortcut"
                   Name="Memory Monitor"
                   Description="System Resource Monitor for Mini Displays"
-                  Target="[INSTALLFOLDER]Memory Monitor.exe"
+                  Target="[INSTALLFOLDER]MemoryMonitor.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIcon.exe" />
         <RegistryValue Root="HKCU" 

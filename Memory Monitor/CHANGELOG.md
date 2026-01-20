@@ -18,10 +18,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Date/time labels only update when text actually changes (every minute for time)
   - Property setters now check for value changes before calling `Invalidate()`
 
+### Added
+- **Installer UI Dialogs** - Full Windows Installer UI experience
+  - Welcome dialog with product information
+  - Installation directory selection
+  - Ready to install confirmation
+  - Progress bar during installation
+  - Completion dialog with success message and next steps
+- **Maintenance Mode** - When product is already installed, offers Repair/Remove options
+  - Accessible by running installer again or from Add/Remove Programs
+  - Repair reinstalls all files to fix corrupted installation
+  - Remove completely uninstalls the application
+
 ### Changed
 - **Performance Optimization** - Reduced CPU usage and GDI resource consumption
   - Gauges no longer repaint every second if values haven't changed
   - Estimated 60-80% reduction in unnecessary `Invalidate()` calls
+- **Installer Behavior** - Removed ARPNOREPAIR and ARPNOMODIFY restrictions
+  - Users can now Repair or Modify from Add/Remove Programs
 
 ### Technical Changes
 - Updated `MiniMonitorForm.Monitors.cs`:
@@ -34,6 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `SetValue()` methods use tolerance-based comparison for floats
 - Updated `FpsGaugeControl.cs`:
   - `SetFps()` only invalidates when value actually changes
+- Updated `MemoryMonitorSetup.wixproj`:
+  - Added `WixToolset.UI.wixext` package for standard dialogs
+  - Added `WixToolset.Util.wixext` package for utility functions
+- Updated `Package.wxs`:
+  - Added `ui:WixUI Id="WixUI_InstallDir"` for full dialog set
+  - Added `WIXUI_EXITDIALOGOPTIONALTEXT` for completion message
+  - Removed `ARPNOREPAIR` and `ARPNOMODIFY` to enable maintenance mode
 
 ## [2.4.0] - 2025-01-10
 

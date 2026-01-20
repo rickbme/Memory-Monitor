@@ -48,7 +48,7 @@ echo.
 
 REM Step 2: Build the application
 echo [2/5] Building Memory Monitor application...
-dotnet build "Memory Monitor\Memory Monitor.csproj" -c %CONFIG% -r win-x64
+dotnet build "Memory Monitor\MemoryMonitor.csproj" -c %CONFIG% -r win-x64
 if errorlevel 1 (
     echo.
     echo ERROR: Build failed!
@@ -60,7 +60,7 @@ echo.
 
 REM Step 3: Publish the application (self-contained)
 echo [3/5] Publishing self-contained application...
-dotnet publish "Memory Monitor\Memory Monitor.csproj" -c %CONFIG% -r win-x64 --self-contained true -o "Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish"
+dotnet publish "Memory Monitor\MemoryMonitor.csproj" -c %CONFIG% -r win-x64 --self-contained true -o "Memory Monitor\bin\%CONFIG%\net8.0-windows\win-x64\publish"
 if errorlevel 1 (
     echo.
     echo ERROR: Publish failed!

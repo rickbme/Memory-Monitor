@@ -52,21 +52,21 @@
       </Component>      <Component Id="Comp_17" Guid="82073982-1DAF-C7EB-1F8A-9054F3C83346">
         <File Id="File_17" 
               Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\LibreHardwareMonitorLib.xml" />
-      </Component>      <Component Id="Comp_18" Guid="16645721-2256-EC4D-BEA3-E51A8DEE5378">
+      </Component>      <Component Id="Comp_18" Guid="BD71EB19-97B8-9A37-A9C2-386B4E152879">
         <File Id="File_18" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.deps.json" />
-      </Component>      <Component Id="Comp_19" Guid="E0619518-92CF-7228-DDDC-A731A72AE19E">
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.deps.json" />
+      </Component>      <Component Id="Comp_19" Guid="0D23EC2F-C96B-4E5D-5810-C6E0DC01E39D">
         <File Id="File_19" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.dll" />
-      </Component>      <Component Id="Comp_20" Guid="0B27BA42-B6C5-2168-0A6E-C339355FF7EC">
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.dll" />
+      </Component>      <Component Id="Comp_20" Guid="0F75F7D9-E59E-338A-3EE2-EF368F1379E4">
         <File Id="File_20" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.exe" />
-      </Component>      <Component Id="Comp_21" Guid="C8820CD3-23E1-5227-A7E5-11889609C942">
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.exe" />
+      </Component>      <Component Id="Comp_21" Guid="0D223995-578A-CBFA-E475-384903C850E3">
         <File Id="File_21" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.pdb" />
-      </Component>      <Component Id="Comp_22" Guid="C62CA277-DB92-9E5D-9E70-A280EF1B4AE6">
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.pdb" />
+      </Component>      <Component Id="Comp_22" Guid="C8F71370-28F2-73D9-A8DC-37F1B9CEA26B">
         <File Id="File_22" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Memory Monitor.runtimeconfig.json" />
+              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\MemoryMonitor.runtimeconfig.json" />
       </Component>      <Component Id="Comp_23" Guid="8E31A07C-6811-B509-E6BB-DE5EE4F83B0D">
         <File Id="File_23" 
               Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\Microsoft.CSharp.dll" />

@@ -1,4 +1,4 @@
-<Project Sdk="WixToolset.Sdk/5.0.2">
+﻿<Project Sdk="WixToolset.Sdk/5.0.2">
   <PropertyGroup>
     <OutputName>MemoryMonitorSetup</OutputName>
     <OutputType>Package</OutputType>
@@ -16,12 +16,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="INSTALLER_ISSUES_FIXED.md" />
+    <None Include="INSTALLER_UI_IMPROVEMENTS.md" />
     <None Include="QUICK_FIX_SUMMARY.md" />
+  </ItemGroup>
+  <!-- WiX Extensions for UI dialogs and utilities -->
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
   </ItemGroup>
   <!-- Validate that publish directory exists before building -->
   <Target Name="ValidatePublishDirectory" BeforeTargets="BeforeBuild">
-    <Error Condition="!Exists('$(PublishDir)')" Text="Publish directory '$(PublishDir)' not found. Please run: dotnet publish '..\Memory Monitor\Memory Monitor.csproj' -c Release -r win-x64 --self-contained true" />
+    <Error Condition="!Exists('$(PublishDir)')" Text="Publish directory '$(PublishDir)' not found. Please run: dotnet publish '..\Memory Monitor\MemoryMonitor.csproj' -c Release -r win-x64 --self-contained true" />
     <Error Condition="!Exists('PublishedFiles.wxs')" Text="PublishedFiles.wxs not found. Please run: powershell -ExecutionPolicy Bypass -File Regenerate-PublishedFiles.ps1" />
-    <Message Importance="high" Text="Building Memory Monitor Installer v2.4.0.0" />
+    <Message Importance="high" Text="Building Memory Monitor Installer v2.4.1.0" />
   </Target>
 </Project>
