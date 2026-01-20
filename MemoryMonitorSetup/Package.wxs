@@ -81,13 +81,16 @@
     
     <!-- Use WixUI_InstallDir dialog set - provides:
          - Welcome dialog
-         - License agreement (optional - skipped if no license file)
+         - License agreement
          - Installation directory selection
          - Ready to install confirmation
          - Progress bar during installation
          - Completion dialog
          - Maintenance mode (repair/remove) when already installed -->
     <ui:WixUI Id="WixUI_InstallDir" />
+    
+    <!-- License agreement file (displayed during installation) -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     
     <!-- Customize the exit dialog to show completion message -->
     <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" 
