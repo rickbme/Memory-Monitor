@@ -5,6 +5,58 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.3] - 2025-01
+
+### Fixed
+- **Display Mode Switching** - Application no longer exits when switching between display modes
+  - Added `MonitorApplicationContext` to manage form lifecycle
+  - Seamless transition preserves form position and TopMost state
+- **Taskbar Visibility** - Application now correctly stays out of taskbar in Circular Gauges mode
+  - `TouchGestureHandler` now defers touch registration until `HandleCreated` event
+  - Prevents forcing early window handle creation which caused `ShowInTaskbar` to be ignored
+- **Welcome Dialog** - No longer appears when switching display modes
+  - Added `Program.WelcomeDialogShown` session flag
+  - Dialog now only shows once on first-ever run
+  - Added `ShowInTaskbar = false` to prevent taskbar appearance
+- **Intro Logo** - Bar Graph mode now shows intro logo on startup
+  - Intro logos only show once per session, not when switching modes
+  - Added `Program.IntroLogosShown` session flag
+
+### Added
+- **Bar Graph Tray Icon** - Distinct tray icon style for Bar Graph mode
+  - `GaugeIconGenerator.CreateBarGraphTrayIcon()` method
+  - Shows 4 vertical bars instead of circular arc gauge
+  - Color-coded based on RAM usage (green ? yellow ? red)
+- **MonitorApplicationContext** - Custom ApplicationContext for display mode switching
+  - Manages form lifecycle without exiting application
+  - Handles `DisplayModeChanged` events for seamless switching
+
+### Changed
+- **Program.cs** - Now uses `MonitorApplicationContext` instead of `Application.Run(form)`
+- **MiniMonitorForm.cs** - Removed redundant `Show()` call from `OnLoad`
+- **BarGraphDisplayForm.cs** - Added intro logo support, bar graph tray icon
+
+### Technical Changes
+- Updated `TouchGestureHandler.cs`:
+  - Checks `_form.IsHandleCreated` before registering touch
+  - Subscribes to `HandleCreated` event if handle doesn't exist yet
+  - Added `_registrationAttempted` flag to prevent double registration
+- Updated `WelcomeDialog.cs`:
+  - Added `ShowInTaskbar = false` in `InitializeComponent()`
+  - `ShowIfFirstRun()` checks `Program.WelcomeDialogShown` first
+  - Always calls `SetFirstRunComplete()` after showing dialog
+- Updated `MiniMonitorForm.Layout.cs`:
+  - `InitializeUI()` checks `Program.IntroLogosShown` before showing intro
+  - `TransitionToGauges()` sets `Program.IntroLogosShown = true`
+- Updated `BarGraphDisplayForm.cs`:
+  - Added `_introLogo`, `_introTimer`, `INTRO_DISPLAY_MS` fields
+  - Added `SetPanelsVisible()`, `ShowIntroLogo()`, `TransitionToPanels()` methods
+  - `InitializeTrayIcon()` uses `GaugeIconGenerator.CreateBarGraphTrayIcon()`
+  - `UpdateTrayIcon()` uses bar graph style icon
+- Updated Designer files:
+  - `MiniMonitorForm.Designer.cs` - Added `ShowInTaskbar = false`
+  - `BarGraphDisplayForm.Designer.cs` - Added `ShowInTaskbar = false`
+
 ## [2.4.2] - 2025-01
 
 ### Added

@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Include="INSTALLER_ISSUES_FIXED.md" />
     <None Include="INSTALLER_UI_IMPROVEMENTS.md" />
+    <None Include="NoLicense.rtf" />
     <None Include="QUICK_FIX_SUMMARY.md" />
   </ItemGroup>
   <!-- WiX Extensions for UI dialogs and utilities -->

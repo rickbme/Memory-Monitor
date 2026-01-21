@@ -4,20 +4,21 @@
   
   IMPORTANT VERSION NOTES:
   - UpgradeCode MUST remain stable across all versions (DO NOT CHANGE)
-  - Version should be updated for each release (currently 2.4.2.0)
+  - Version should be updated for each release (currently 2.4.3.0)
   - MajorUpgrade automatically removes older versions
   
   UI FEATURES:
   - WixUI_InstallDir provides standard installation dialogs
-  - Shows welcome, license, install directory, progress, and completion screens
+  - Shows welcome, install directory, progress, and completion screens
   - Maintenance mode allows repair/remove when product is already installed
+  - No license agreement required (freeware)
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="Memory Monitor" 
            Manufacturer="DFS" 
-           Version="2.4.2.0" 
+           Version="2.4.3.0" 
            UpgradeCode="D9A1E6B2-1234-4F56-9A2B-ABCDEF012345"
            Compressed="yes"
            InstallerVersion="500">
@@ -81,20 +82,20 @@
     
     <!-- Use WixUI_InstallDir dialog set - provides:
          - Welcome dialog
-         - License agreement
          - Installation directory selection
          - Ready to install confirmation
          - Progress bar during installation
          - Completion dialog
-         - Maintenance mode (repair/remove) when already installed -->
+         - Maintenance mode (repair/remove) when already installed
+         - No license agreement (freeware) -->
     <ui:WixUI Id="WixUI_InstallDir" />
     
-    <!-- License agreement file (displayed during installation) -->
-    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <!-- Skip the license agreement dialog by providing an empty/dummy license -->
+    <WixVariable Id="WixUILicenseRtf" Value="NoLicense.rtf" />
     
     <!-- Customize the exit dialog to show completion message -->
     <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" 
-              Value="Memory Monitor v2.4.2 has been successfully installed.&#13;&#10;&#13;&#10;You can launch it from the Start Menu or Desktop shortcut.&#13;&#10;&#13;&#10;Note: The application requires Administrator privileges to access hardware sensors." />
+              Value="Memory Monitor v2.4.3 has been successfully installed.&#13;&#10;&#13;&#10;You can launch it from the Start Menu or Desktop shortcut.&#13;&#10;&#13;&#10;Note: The application requires Administrator privileges to access hardware sensors." />
     
   </Package>
   

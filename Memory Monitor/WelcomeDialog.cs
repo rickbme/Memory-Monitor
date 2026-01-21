@@ -47,7 +47,7 @@ namespace Memory_Monitor
             // Title label
             var lblTitle = new Label
             {
-                Text = "?? Welcome to Memory Monitor!",
+                Text = "Welcome to Memory Monitor!",
                 Font = new Font("Segoe UI", 18F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(100, 180, 255),
                 Location = new Point(20, 20),
@@ -80,13 +80,13 @@ namespace Memory_Monitor
             // Feature items
             string[] features = new[]
             {
-                "?? Monitor CPU, GPU, RAM, VRAM, Disk, and Network",
-                "??? View CPU and GPU temperatures in real-time",
-                "?? Smart FPS display during gaming sessions",
-                "?? Touch gestures for mini monitor touchscreens",
-                "?? Date and time display in the corners",
-                "?? Device selection for multiple GPUs, disks, or networks",
-                "?? Runs quietly in system tray when minimized"
+                " Monitor CPU, GPU, RAM, VRAM, Disk, and Network",
+                " View CPU and GPU temperatures in real-time",
+                " Smart FPS display during gaming sessions",
+                " Touch gestures for mini monitor touchscreens",
+                " Date and time display in the corners",
+                " Device selection for multiple GPUs, disks, or networks",
+                " Runs quietly in system tray when minimized"
             };
 
             int yPos = 10;
@@ -110,7 +110,7 @@ namespace Memory_Monitor
             // Info label
             var lblInfo = new Label
             {
-                Text = "?? Tip: Right-click the system tray icon for quick access to settings.",
+                Text = "Tip: Right-click the system tray icon for quick access to settings.",
                 Font = new Font("Segoe UI", 9F, FontStyle.Italic),
                 ForeColor = Color.FromArgb(180, 180, 180),
                 Location = new Point(20, 390),
@@ -122,7 +122,7 @@ namespace Memory_Monitor
             // Open User Guide button
             btnOpenGuide = new Button
             {
-                Text = "?? Open User Guide",
+                Text = "Open User Guide",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 Location = new Point(20, 440),
                 Size = new Size(260, 40),
@@ -138,7 +138,7 @@ namespace Memory_Monitor
             // Get Started button
             var btnGetStarted = new Button
             {
-                Text = "? Get Started",
+                Text = "Get Started",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 Location = new Point(320, 440),
                 Size = new Size(260, 40),
@@ -177,7 +177,7 @@ namespace Memory_Monitor
                     MessageBox.Show(
                         "USER_GUIDE.md was not found in the installation directory.\n\n" +
                         "You can access the guide from the Start Menu:\n" +
-                        "Start ? Memory Monitor ? Memory Monitor User Guide",
+                        "Start  Memory Monitor  Memory Monitor User Guide",
                         "User Guide Not Found",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information
@@ -189,7 +189,7 @@ namespace Memory_Monitor
                 MessageBox.Show(
                     $"Failed to open User Guide:\n{ex.Message}\n\n" +
                     "You can access the guide from the Start Menu:\n" +
-                    "Start ? Memory Monitor ? Memory Monitor User Guide",
+                    "Start  Memory Monitor  Memory Monitor User Guide",
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
