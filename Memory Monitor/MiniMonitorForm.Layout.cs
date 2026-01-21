@@ -18,8 +18,11 @@ namespace Memory_Monitor
 
         private void InitializeUI()
         {
-            // Initially hide all gauges for intro
-            SetGaugesVisible(false);
+            // Initially hide all gauges for intro (only if logos haven't been shown yet)
+            if (!Program.IntroLogosShown)
+            {
+                SetGaugesVisible(false);
+            }
 
             ramGauge.MaxValue = 100f;
             cpuGauge.MaxValue = 100f;
@@ -38,8 +41,18 @@ namespace Memory_Monitor
 
             UpdateGaugeDeviceNames();
 
-            // Show intro logo first, then start the gauges
-            ShowIntroLogo();
+            // Show intro logo first, then start the gauges (only on first load)
+            if (!Program.IntroLogosShown)
+            {
+                ShowIntroLogo();
+            }
+            else
+            {
+                // Skip intro, go straight to gauges
+                SetGaugesVisible(true);
+                LayoutGauges();
+                updateTimer.Start();
+            }
         }
 
         private void SetGaugesVisible(bool visible)
@@ -131,6 +144,9 @@ namespace Memory_Monitor
                 _introLogo.Dispose();
                 _introLogo = null;
             }
+
+            // Mark that intro logos have been shown for this session
+            Program.IntroLogosShown = true;
 
             // Show gauges and start updates
             SetGaugesVisible(true);

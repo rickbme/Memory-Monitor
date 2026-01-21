@@ -38,6 +38,7 @@ namespace Memory_Monitor
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.ShowInTaskbar = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Welcome to Memory Monitor!";
             this.BackColor = Color.FromArgb(30, 33, 37);
@@ -151,25 +152,12 @@ namespace Memory_Monitor
             btnGetStarted.Click += (s, e) => this.Close();
             this.Controls.Add(btnGetStarted);
 
-            // Don't show again checkbox
-            chkDontShowAgain = new CheckBox
-            {
-                Text = "Don't show this again",
-                Font = new Font("Segoe UI", 9F),
-                ForeColor = Color.FromArgb(180, 180, 180),
-                Location = new Point(20, 410),
-                Size = new Size(200, 25),
-                Checked = false
-            };
-            this.Controls.Add(chkDontShowAgain);
-
             this.ResumeLayout(false);
         }
 
         private Button btnOpenGuide;
-        private CheckBox chkDontShowAgain;
 
-        public bool DontShowAgain => chkDontShowAgain.Checked;
+        public bool DontShowAgain => false;
 
         private void BtnOpenGuide_Click(object? sender, EventArgs e)
         {
@@ -215,21 +203,30 @@ namespace Memory_Monitor
         /// <returns>True if this was the first run, false otherwise</returns>
         public static bool ShowIfFirstRun()
         {
+            // Skip if already shown this session (e.g., when switching display modes)
+            if (Program.WelcomeDialogShown)
+            {
+                return false;
+            }
+
             // Check if this is the first run
             if (IsFirstRun())
             {
+                Program.WelcomeDialogShown = true;
+                
                 using (var dialog = new WelcomeDialog())
                 {
                     dialog.ShowDialog();
                     
-                    // Save the "don't show again" preference
-                    if (dialog.DontShowAgain)
-                    {
-                        SetFirstRunComplete();
-                    }
+                    // Always mark first run as complete after showing the dialog
+                    // The "Don't show again" checkbox is no longer needed since we only show once
+                    SetFirstRunComplete();
                 }
                 return true;
             }
+            
+            // Not first run, but mark as shown for this session anyway
+            Program.WelcomeDialogShown = true;
             return false;
         }
 

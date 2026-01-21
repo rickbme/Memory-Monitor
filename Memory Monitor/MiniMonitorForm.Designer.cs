@@ -25,6 +25,9 @@ namespace Memory_Monitor
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.moveToMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.topMostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.displayModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.circularGaugesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.barGraphToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fpsDisplayModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fpsAutoDetectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fpsAlwaysShowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,11 +65,12 @@ namespace Memory_Monitor
             this.toolStripSeparator1,
             this.moveToMonitorToolStripMenuItem,
             this.topMostToolStripMenuItem,
+            this.displayModeToolStripMenuItem,
             this.fpsDisplayModeToolStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.trayContextMenu.Name = "trayContextMenu";
-            this.trayContextMenu.Size = new System.Drawing.Size(180, 120);
+            this.trayContextMenu.Size = new System.Drawing.Size(180, 148);
             // 
             // showToolStripMenuItem
             // 
@@ -95,6 +99,30 @@ namespace Memory_Monitor
             this.topMostToolStripMenuItem.Checked = true;
             this.topMostToolStripMenuItem.CheckOnClick = true;
             this.topMostToolStripMenuItem.Click += new System.EventHandler(this.TopMostToolStripMenuItem_Click);
+            // 
+            // displayModeToolStripMenuItem
+            // 
+            this.displayModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.circularGaugesToolStripMenuItem,
+            this.barGraphToolStripMenuItem});
+            this.displayModeToolStripMenuItem.Name = "displayModeToolStripMenuItem";
+            this.displayModeToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.displayModeToolStripMenuItem.Text = "Display Mode";
+            // 
+            // circularGaugesToolStripMenuItem
+            // 
+            this.circularGaugesToolStripMenuItem.Name = "circularGaugesToolStripMenuItem";
+            this.circularGaugesToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.circularGaugesToolStripMenuItem.Text = "Circular Gauges";
+            this.circularGaugesToolStripMenuItem.Checked = true;
+            this.circularGaugesToolStripMenuItem.Click += new System.EventHandler(this.CircularGaugesToolStripMenuItem_Click);
+            // 
+            // barGraphToolStripMenuItem
+            // 
+            this.barGraphToolStripMenuItem.Name = "barGraphToolStripMenuItem";
+            this.barGraphToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.barGraphToolStripMenuItem.Text = "Bar Graph";
+            this.barGraphToolStripMenuItem.Click += new System.EventHandler(this.BarGraphToolStripMenuItem_Click);
             // 
             // fpsDisplayModeToolStripMenuItem
             // 
@@ -272,6 +300,7 @@ namespace Memory_Monitor
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MiniMonitorForm";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "System Monitor";
             this.TopMost = true;
@@ -290,6 +319,9 @@ namespace Memory_Monitor
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem moveToMonitorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem topMostToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem displayModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem circularGaugesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem barGraphToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fpsDisplayModeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fpsAutoDetectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fpsAlwaysShowToolStripMenuItem;

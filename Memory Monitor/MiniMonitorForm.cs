@@ -50,14 +50,15 @@ namespace Memory_Monitor
             InitializeTouchSupport();
             InitializeDateTimeDisplay();
             ApplyTheme();
+            UpdateDisplayModeMenuState();
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
+            // Ensure form is in normal state and active (no need to call Show() - already shown by ApplicationContext)
             this.WindowState = FormWindowState.Normal;
-            this.Show();
             this.Activate();
 
             Debug.WriteLine("Application started - window visible, tray icon active");
@@ -351,6 +352,29 @@ namespace Memory_Monitor
         private void FpsAlwaysHideToolStripMenuItem_Click(object? sender, EventArgs e)
         {
             SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AlwaysHide);
+        }
+
+        private void CircularGaugesToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            // Already in circular gauges mode
+            circularGaugesToolStripMenuItem.Checked = true;
+            barGraphToolStripMenuItem.Checked = false;
+        }
+
+        private void BarGraphToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SwitchToBarGraph();
+        }
+
+        private void SwitchToBarGraph()
+        {
+            DisplayModeManager.SetDisplayMode(DisplayMode.BarGraph);
+        }
+
+        private void UpdateDisplayModeMenuState()
+        {
+            circularGaugesToolStripMenuItem.Checked = DisplayModeManager.CurrentMode == DisplayMode.CircularGauges;
+            barGraphToolStripMenuItem.Checked = DisplayModeManager.CurrentMode == DisplayMode.BarGraph;
         }
 
         private void SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode mode)

@@ -9,9 +9,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     
     <!-- Version information -->
-    <Version>2.4.1</Version>
-    <AssemblyVersion>2.4.1.0</AssemblyVersion>
-    <FileVersion>2.4.1.0</FileVersion>
+    <Version>2.4.2</Version>
+    <AssemblyVersion>2.4.2.0</AssemblyVersion>
+    <FileVersion>2.4.2.0</FileVersion>
     
     <!-- Application icon for exe file -->
     <ApplicationIcon>Resources\mmguage.ico</ApplicationIcon>
@@ -50,6 +50,21 @@
 
   <ItemGroup>
     <Folder Include="Tools\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

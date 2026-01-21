@@ -4,7 +4,7 @@
   
   IMPORTANT VERSION NOTES:
   - UpgradeCode MUST remain stable across all versions (DO NOT CHANGE)
-  - Version should be updated for each release (currently 2.4.1.0)
+  - Version should be updated for each release (currently 2.4.2.0)
   - MajorUpgrade automatically removes older versions
   
   UI FEATURES:
@@ -17,7 +17,7 @@
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="Memory Monitor" 
            Manufacturer="DFS" 
-           Version="2.4.1.0" 
+           Version="2.4.2.0" 
            UpgradeCode="D9A1E6B2-1234-4F56-9A2B-ABCDEF012345"
            Compressed="yes"
            InstallerVersion="500">
@@ -94,7 +94,7 @@
     
     <!-- Customize the exit dialog to show completion message -->
     <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" 
-              Value="Memory Monitor v2.4.1 has been successfully installed.&#13;&#10;&#13;&#10;You can launch it from the Start Menu or Desktop shortcut.&#13;&#10;&#13;&#10;Note: The application requires Administrator privileges to access hardware sensors." />
+              Value="Memory Monitor v2.4.2 has been successfully installed.&#13;&#10;&#13;&#10;You can launch it from the Start Menu or Desktop shortcut.&#13;&#10;&#13;&#10;Note: The application requires Administrator privileges to access hardware sensors." />
     
   </Package>
   

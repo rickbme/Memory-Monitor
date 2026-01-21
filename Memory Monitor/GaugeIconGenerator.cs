@@ -88,6 +88,113 @@ namespace Memory_Monitor
         }
 
         /// <summary>
+        /// Creates a dynamic tray icon showing vertical bars (bar graph style).
+        /// Used when bar graph display mode is active.
+        /// </summary>
+        /// <param name="percentage">Value from 0 to 100</param>
+        /// <param name="barColor">Color of the filled bars (null for default cyan)</param>
+        /// <param name="size">Icon size in pixels (default 16 for tray)</param>
+        /// <returns>Icon that must be disposed by caller</returns>
+        public static Icon CreateBarGraphTrayIcon(float percentage, Color? barColor = null, int size = TrayIconSize)
+        {
+            percentage = Math.Max(0, Math.Min(100, percentage));
+            var color = barColor ?? Color.FromArgb(0, 200, 220); // Cyan for bar graph mode
+
+            using var bitmap = new Bitmap(size, size);
+            using var g = Graphics.FromImage(bitmap);
+
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.Transparent);
+
+            int padding = 1;
+            var rect = new Rectangle(padding, padding, size - padding * 2, size - padding * 2);
+
+            // Draw dark background rounded rectangle
+            using (var bgBrush = new SolidBrush(DefaultBackgroundColor))
+            {
+                using var path = CreateRoundedRectangle(rect, 2);
+                g.FillPath(bgBrush, path);
+            }
+
+            // Draw vertical bars (4 bars representing activity)
+            int barCount = 4;
+            int totalBarWidth = rect.Width - 4; // 2px margin on each side
+            int barSpacing = 1;
+            int barWidth = (totalBarWidth - (barSpacing * (barCount - 1))) / barCount;
+            int barMaxHeight = rect.Height - 4; // 2px margin top and bottom
+
+            int startX = rect.X + 2;
+            int bottomY = rect.Y + rect.Height - 2;
+
+            // Create varying bar heights based on percentage
+            // Simulate a bar graph with different heights
+            float[] barHeights = GetBarHeights(percentage);
+
+            for (int i = 0; i < barCount; i++)
+            {
+                int barX = startX + i * (barWidth + barSpacing);
+                int barHeight = Math.Max(1, (int)(barMaxHeight * barHeights[i]));
+                int barY = bottomY - barHeight;
+
+                Rectangle barRect = new Rectangle(barX, barY, barWidth, barHeight);
+
+                // Draw background bar (dim)
+                using (var dimBrush = new SolidBrush(DefaultArcBackgroundColor))
+                {
+                    Rectangle fullBarRect = new Rectangle(barX, rect.Y + 2, barWidth, barMaxHeight);
+                    g.FillRectangle(dimBrush, fullBarRect);
+                }
+
+                // Draw filled bar with gradient
+                if (barHeight > 0)
+                {
+                    using var barBrush = new LinearGradientBrush(
+                        new Rectangle(barX, bottomY - barMaxHeight, barWidth, barMaxHeight),
+                        color,
+                        Color.FromArgb(color.R / 2, color.G / 2, color.B / 2),
+                        LinearGradientMode.Vertical);
+                    g.FillRectangle(barBrush, barRect);
+                }
+            }
+
+            return CreateIconFromBitmap(bitmap);
+        }
+
+        /// <summary>
+        /// Generates varying bar heights based on percentage to create visual interest.
+        /// </summary>
+        private static float[] GetBarHeights(float percentage)
+        {
+            float basePct = percentage / 100f;
+            
+            // Create a wave-like pattern that still reflects the overall percentage
+            return new float[]
+            {
+                Math.Min(1f, basePct * 0.7f + 0.1f),
+                Math.Min(1f, basePct * 1.0f),
+                Math.Min(1f, basePct * 0.85f + 0.05f),
+                Math.Min(1f, basePct * 0.6f + 0.15f)
+            };
+        }
+
+        private static GraphicsPath CreateRoundedRectangle(Rectangle rect, int radius)
+        {
+            var path = new GraphicsPath();
+            int d = radius * 2;
+
+            if (d > rect.Width) d = rect.Width;
+            if (d > rect.Height) d = rect.Height;
+
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+
+            return path;
+        }
+
+        /// <summary>
         /// Gets a color based on the percentage value (green -> yellow -> red)
         /// </summary>
         public static Color GetColorForPercentage(float percentage)

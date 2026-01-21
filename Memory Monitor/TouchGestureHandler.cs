@@ -122,6 +122,7 @@ namespace Memory_Monitor
         private readonly int _touchInputSize;
         private bool _isTouchRegistered;
         private bool _disposed;
+        private bool _registrationAttempted;
 
         // Gesture tracking state
         private Point _touchStartPoint;
@@ -173,9 +174,27 @@ namespace Memory_Monitor
             };
             _longPressTimer.Tick += LongPressTimer_Tick;
 
-            // Attempt to register for touch - will fail gracefully if not available
+            // Don't register for touch here - wait until the handle is created
+            // This prevents forcing early handle creation which can cause ShowInTaskbar issues
+            if (_form.IsHandleCreated)
+            {
+                RegisterForTouch();
+                if (_isTouchRegistered)
+                {
+                    ConfigureGestures();
+                }
+            }
+            else
+            {
+                // Register when handle is created
+                _form.HandleCreated += Form_HandleCreated;
+            }
+        }
+
+        private void Form_HandleCreated(object? sender, EventArgs e)
+        {
+            _form.HandleCreated -= Form_HandleCreated;
             RegisterForTouch();
-            
             if (_isTouchRegistered)
             {
                 ConfigureGestures();
@@ -184,6 +203,11 @@ namespace Memory_Monitor
 
         private void RegisterForTouch()
         {
+            if (_registrationAttempted)
+                return;
+            
+            _registrationAttempted = true;
+
             try
             {
                 if (RegisterTouchWindow(_form.Handle, 0))

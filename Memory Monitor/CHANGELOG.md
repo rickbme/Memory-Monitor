@@ -5,6 +5,70 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2025-01
+
+### Added
+- **Bar Graph Display Mode** - New alternate display option with animated bar graph panels
+  - **BarGraphPanelControl** - Custom control for CPU/GPU/Drive panels with:
+    - 12-point rolling bar history animation
+    - Gradient-filled bars with glow effects
+    - Title, percentage, and secondary info (temperature/speed)
+    - Futuristic corner accents and accent lines
+  - **NetworkBarPanelControl** - Specialized network panel with:
+    - Dual horizontal progress bars for upload/download
+    - Speed labels positioned below each bar
+    - Segmented bar design for tech aesthetic
+    - Auto-scaling based on peak speeds
+  - **BarGraphDisplayForm** - Main form hosting the bar graph layout
+    - 4 panels: CPU, GPU, Drive, Network
+    - Full tray icon support with Display Mode menu
+    - Same hardware monitoring as circular gauge mode
+  - **DisplayModeManager** - Static manager for display mode state
+    - `DisplayMode` enum (CircularGauges, BarGraph)
+    - Persists user preference to application settings
+    - `DisplayModeChanged` event for runtime form switching
+    - `SetDisplayMode()` and `ToggleDisplayMode()` methods
+
+- **Display Mode Menu** - New tray menu option to switch between display modes
+  - Right-click tray icon ? **Display Mode** submenu
+  - **Circular Gauges** - Classic needle gauge display (default)
+  - **Bar Graph** - New animated bar graph display
+  - Preference saved and restored between sessions
+  - Instant switching with no restart required
+
+### Changed
+- **Program.cs** - Now handles display mode switching at startup and runtime
+  - Starts with saved display mode preference
+  - Subscribes to `DisplayModeChanged` event for runtime switching
+  - Creates appropriate form based on current mode
+
+### Technical Changes
+- Added `BarGraphPanelControl.cs`:
+  - `Queue<float>` for 12-point value history
+  - `SetValue()` adds to history and triggers repaint
+  - Custom painting with gradients, glows, and accents
+- Added `NetworkBarPanelControl.cs`:
+  - `SetSpeeds()` for upload/download values
+  - Dual horizontal bar rendering
+  - Speed text positioned below each bar (fixed overlap issue)
+- Added `BarGraphDisplayForm.cs` and `BarGraphDisplayForm.Designer.cs`:
+  - 4-panel layout (CPU, GPU, Drive, Network)
+  - Hardware monitor initialization
+  - Tray menu with Display Mode submenu
+- Added `DisplayModeManager.cs`:
+  - Static class for display mode state management
+  - Settings persistence via `Properties.Settings.Default.DisplayMode`
+  - Event-based notification for mode changes
+- Updated `MiniMonitorForm.Designer.cs`:
+  - Added `displayModeToolStripMenuItem` submenu
+  - Added `circularGaugesToolStripMenuItem` and `barGraphToolStripMenuItem`
+- Updated `MiniMonitorForm.cs`:
+  - Added `CircularGaugesToolStripMenuItem_Click` handler
+  - Added `BarGraphToolStripMenuItem_Click` handler
+  - Added `UpdateDisplayModeMenuState()` method
+- Updated `Properties\Settings.Designer.cs`:
+  - Added `DisplayMode` string setting (default: "CircularGauges")
+
 ## [2.4.1] - 2025-01-10
 
 ### Fixed
