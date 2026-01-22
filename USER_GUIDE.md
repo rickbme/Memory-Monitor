@@ -16,7 +16,7 @@ Memory Monitor is your real-time system performance dashboard designed for mini 
 
 ### What You'll See
 
-Your mini monitor will display **6 circular gauges** showing:
+Memory Monitor offers two display modes. By default, you'll see **Circular Gauges**:
 
 | Gauge | What It Shows |
 |-------|---------------|
@@ -34,6 +34,33 @@ Plus:
 
 ---
 
+## ?? Display Modes
+
+Memory Monitor offers two beautiful ways to view your system stats:
+
+### Circular Gauges Mode (Default)
+- Classic needle gauge visualization
+- 6 circular gauges in a horizontal row
+- FPS gauge appears between GPU and VRAM when gaming
+- Date and time displayed in corners
+- Animated needle movements with glow effects
+
+### Bar Graph Mode
+- Modern animated bar graph panels
+- 5 panels: CPU, GPU, VRAM, Drive, Network
+- Rolling history animation showing recent activity
+- FPS shown in the GPU panel when gaming
+- Gradient-filled bars with futuristic styling
+
+### Switching Between Modes
+1. Right-click the **Memory Monitor icon** in your system tray
+2. Click **Display Mode**
+3. Choose **Circular Gauges** or **Bar Graph**
+
+The transition uses a smooth fade animation for a polished experience.
+
+---
+
 ##  Gaming Features
 
 ### FPS Display
@@ -43,11 +70,17 @@ When you launch a game, Memory Monitor **automatically shows your frame rate** (
 -  **Orange (30-44 FPS)** - Playable but may stutter
 -  **Red (Below 30 FPS)** - Performance issues
 
+**Where FPS appears:**
+- **Circular Gauges mode**: Dedicated FPS gauge between GPU and VRAM
+- **Bar Graph mode**: FPS shown in the GPU panel
+
 ### Control FPS Display
 Right-click the **system tray icon** ? **FPS Display**:
 - **Auto-detect** - Shows FPS only when gaming (default)
 - **Always Show** - Display FPS all the time
 - **Always Hide** - Never show FPS
+
+> **Note**: FPS Display options are available in both Circular Gauges and Bar Graph modes.
 
 ---
 
@@ -71,7 +104,8 @@ Click the **Memory Monitor icon** in your system tray (near the clock):
 - **Show** - Restore window if minimized
 - **Move to Next Monitor** - Switch to another display
 - **Always on Top** - Keep window above other programs
-- **FPS Display** - Control when FPS gauge appears
+- **Display Mode** - Switch between Circular Gauges and Bar Graph
+- **FPS Display** - Control when FPS appears
 - **Exit** - Close Memory Monitor
 
 ---
@@ -149,7 +183,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 
 ---
 
-##  Troubleshooting
+## ?? Troubleshooting
 
 ### "Application won't start"
 - Right-click **Memory Monitor** ? **Run as administrator**
@@ -165,7 +199,7 @@ If you have multiple graphics cards, hard drives, or network adapters:
 - Install both **HWiNFO** and **RTSS** (see FPS Monitoring Setup)
 - Make sure HWiNFO has "Shared Memory Support" enabled
 - Launch a game with RTSS overlay active
-- Check tray menu  FPS Display is set to "Auto-detect" or "Always Show"
+- Check tray menu ? FPS Display is set to "Auto-detect" or "Always Show"
 
 ### "Window is on the wrong monitor"
 - Right-click **system tray icon** ? **Move to Next Monitor**
@@ -174,6 +208,10 @@ If you have multiple graphics cards, hard drives, or network adapters:
 ### "Gauges look too small/large"
 - The app automatically sizes for 1920×480 displays
 - Try maximizing the window or resizing manually
+
+### "Display mode switch is jarring"
+- Update to v2.4.4 or later for smooth fade transitions
+- The transition now fades out and fades in for a polished look
 
 ---
 
@@ -300,6 +338,6 @@ Visit our GitHub page or open an issue. We're here to help!
 
 ---
 
-**Version:** 2.4.3  
+**Version:** 2.4.4  
 **Release Date:** January 2025  
 **Made by Dad's Fixit Shop**

@@ -20,6 +20,8 @@ DFS
 
 ![Memory Monitor Screenshot](MemMonPic.png)
 *Memory Monitor running on a 1920x480 mini display with real-time CPU, GPU, RAM, VRAM, Disk, and Network monitoring*
+![Memory Monitor Screenshot](MemMongraph.png)
+*Graph Display mode*
 
 ---
 
@@ -30,6 +32,8 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 ### Key Features
 
 - **Automatic move to any 1920x480 display!
+- **Two Display Modes** - Switch between Circular Gauges and Bar Graph views
+- **Smooth Mode Transitions** - Fade animation when switching display modes
 - **Real-Time CPU Monitoring** - Track CPU usage with temperature display
 - **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature
 - **System Memory Tracking** - Monitor RAM usage with detailed statistics
@@ -41,12 +45,39 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 - **Date & Time Display** - Current date and time on mini monitor
 - **Touch Gesture Support** - Full touch input for mini monitors with touchscreen
 - **Mini Monitor Optimized** - Designed for 1920x480 secondary displays
-- **Circular Gauge Design** - Beautiful animated needle gauges with glow effects
+
+---
+
+## 🎨 Display Modes
+
+Memory Monitor offers two beautiful display modes:
+
+### Circular Gauges Mode (Default)
+- Classic needle gauge visualization
+- 6 circular gauges in a horizontal row
+- FPS gauge between GPU and VRAM gauges
+- Date/time display in corners
+- Animated needle movements with glow effects
+
+### Bar Graph Mode
+- Modern animated bar graph panels
+- 5 panels: CPU, GPU, VRAM, Drive, Network
+- Rolling 12-point history animation
+- Gradient-filled bars with glow effects
+- Futuristic corner accents
+
+### Switching Display Modes
+Right-click the **system tray icon** → **Display Mode**:
+- **Circular Gauges** - Classic needle gauge display
+- **Bar Graph** - Modern animated bar panels
+
+Smooth fade transition (300ms) provides a polished experience when switching.
 
 ---
 
 ##  Display Layout
 
+### Circular Gauges Mode
 The application displays 6 gauges in a horizontal row, optimized for 1920x480 displays:
 
 | Gauge | Color | Information |
@@ -60,8 +91,19 @@ The application displays 6 gauges in a horizontal row, optimized for 1920x480 di
 | **NET** | Yellow | Network throughput (Mbps) |
 
 **Additional Display Elements:**
-- **Date** - Top-left corner (e.g., "January 10")
-- **Time** - Top-right corner, 12-hour format (e.g., "2:30 PM")
+- **Date** in the top-left corner
+- **Time** in the top-right corner (12-hour format)
+
+### Bar Graph Mode
+5 panels displayed horizontally:
+
+| Panel | Color | Information |
+|-------|-------|-------------|
+| **CPU** | Cyan | CPU usage (%) + Temperature |
+| **GPU** | Green | GPU usage (%) + Temperature + FPS |
+| **VRAM** | Purple | Video memory usage |
+| **DRIVE** | Orange | Disk I/O activity |
+| **NETWORK** | Cyan | Upload/Download speeds |
 
 ---
 
@@ -71,22 +113,23 @@ Memory Monitor displays real-time frames per second with intelligent game detect
 
 ### FPS Gauge Features
 - **Color-Coded Quality Indicator:**
-  - 🟢 Green (≥60 FPS) - Excellent, butter-smooth gaming
+  - 🟢 Green (60+ FPS) - Excellent, butter-smooth gaming
   - 🟡 Yellow-Green (45-59 FPS) - Good, very playable
   - 🟠 Orange (30-44 FPS) - Acceptable, playable with some stutter
   - 🔴 Red (<30 FPS) - Poor, significant performance issues
 - **Auto-scaling font** for 1-4 digit FPS values
-- **Compact circular design** positioned between GPU and VRAM gauges
+- **Circular Gauges**: Dedicated FPS gauge between GPU and VRAM
+- **Bar Graph**: FPS shown in GPU panel
 
 ### Smart Game Detection
-The FPS gauge automatically appears when you're gaming and hides when you're not:
+The FPS display automatically appears when you're gaming and hides when you're not:
 - Detects fullscreen and borderless window games
 - Monitors sustained high GPU usage (>70% for 5+ seconds)
 - Recognizes 60+ popular game processes
 - Combines multiple signals for accurate detection
 
 ### Display Modes
-Right-click tray icon → **FPS Display** submenu:
+Right-click tray icon → **FPS Display** submenu (available in both display modes):
 - **Auto-detect** (default) - Smart detection based on activity
 - **Always Show** - Force FPS display when available
 - **Always Hide** - Never show FPS gauge
@@ -276,6 +319,22 @@ Memory Monitor/
 ---
 
 ##  Version History
+
+### v2.4.4 (2025-01)
+- **New**: FPS Display menu now available in Bar Graph mode
+- **New**: Smooth fade transitions when switching display modes
+- **Improved**: Both display modes now have feature parity for FPS options
+
+### v2.4.3 (2025-01)
+- **Fixed**: Display mode switching no longer exits the application
+- **Fixed**: Taskbar visibility issues in both display modes
+- **Fixed**: Welcome dialog and intro logos only show once per session
+- **New**: Bar Graph mode has distinct tray icon style
+
+### v2.4.2 (2025-01)
+- **New**: Bar Graph display mode with animated panels
+- **New**: Display Mode menu for switching between views
+- **New**: NetworkBarPanelControl for dual upload/download display
 
 ### v2.4.0 (2025-01-10)
 - **New**: Date and time display on mini monitor

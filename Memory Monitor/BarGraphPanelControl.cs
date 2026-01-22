@@ -264,8 +264,8 @@ namespace Memory_Monitor
 
         private void DrawPrimaryValue(Graphics g)
         {
-            // Large percentage display
-            float fontSize = Math.Max(24f, Height * 0.20f);
+            // Large percentage display - reduced for 5-panel layout
+            float fontSize = Math.Max(20f, Height * 0.16f);
             int valueY = (int)(Height * 0.52f);
 
             using (var font = new Font("Segoe UI Semibold", fontSize, FontStyle.Bold))
@@ -290,8 +290,9 @@ namespace Memory_Monitor
             if (string.IsNullOrEmpty(_secondaryText) && string.IsNullOrEmpty(_tertiaryText))
                 return;
 
-            float fontSize = Math.Max(9f, Height * 0.07f);
-            int infoY = (int)(Height * 0.82f);
+            // Smaller font for secondary info to fit longer text like "DISK: 772 GB / 953 GB"
+            float fontSize = Math.Max(7f, Height * 0.042f);
+            int infoY = (int)(Height * 0.84f);
 
             using (var font = new Font("Segoe UI", fontSize))
             using (var brush = new SolidBrush(_secondaryTextColor))
@@ -303,7 +304,7 @@ namespace Memory_Monitor
 
                 if (!string.IsNullOrEmpty(_tertiaryText))
                 {
-                    // Draw tertiary info on the right or below
+                    // Draw tertiary info on the right
                     var size = g.MeasureString(_tertiaryText, font);
                     g.DrawString(_tertiaryText, font, brush, Width - size.Width - 15, infoY);
                 }

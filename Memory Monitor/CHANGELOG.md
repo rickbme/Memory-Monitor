@@ -5,6 +5,38 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.4] - 2025-01
+
+### Added
+- **FPS Display Mode in Bar Graph** - FPS Display menu now available in Bar Graph mode
+  - Right-click tray icon ? FPS Display submenu (Auto-detect, Always Show, Always Hide)
+  - Matches functionality already available in Circular Gauges mode
+  - FPS shown in GPU panel when gaming activity is detected
+
+### Changed
+- **Smooth Display Mode Transition** - Added fade animation when switching between display modes
+  - Fade out (150ms) ? Fade in (150ms) for professional, polished look
+  - Total transition time ~300ms - quick but easy on the eyes
+  - Uses form Opacity property for smooth animation
+
+### Technical Changes
+- Updated `Program.cs`:
+  - Added `FADE_DURATION_MS`, `FADE_INTERVAL_MS`, `OPACITY_STEP` constants
+  - Added `FadeOutAndSwitch()` method for fade-out animation
+  - Added `FadeIn()` method for fade-in animation
+  - `OnDisplayModeChanged()` now uses fade transition instead of instant switch
+- Updated `BarGraphDisplayForm.cs`:
+  - Added `FpsAutoDetectToolStripMenuItem_Click()` handler
+  - Added `FpsAlwaysShowToolStripMenuItem_Click()` handler
+  - Added `FpsAlwaysHideToolStripMenuItem_Click()` handler
+  - Added `SetFpsDisplayMode()` method to update menu checkmarks
+- Updated `BarGraphDisplayForm.Designer.cs`:
+  - Added `fpsDisplayModeToolStripMenuItem` parent menu
+  - Added `fpsAutoDetectToolStripMenuItem` (checked by default)
+  - Added `fpsAlwaysShowToolStripMenuItem`
+  - Added `fpsAlwaysHideToolStripMenuItem`
+  - Added FPS Display menu to tray context menu
+
 ## [2.4.3] - 2025-01
 
 ### Fixed

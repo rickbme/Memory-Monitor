@@ -28,10 +28,15 @@ namespace Memory_Monitor
             this.displayModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.circularGaugesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.barGraphToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsDisplayModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAutoDetectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAlwaysShowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fpsAlwaysHideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cpuPanel = new Memory_Monitor.BarGraphPanelControl();
             this.gpuPanel = new Memory_Monitor.BarGraphPanelControl();
+            this.vramPanel = new Memory_Monitor.BarGraphPanelControl();
             this.drivePanel = new Memory_Monitor.BarGraphPanelControl();
             this.networkPanel = new Memory_Monitor.NetworkBarPanelControl();
             this.trayContextMenu.SuspendLayout();
@@ -57,10 +62,11 @@ namespace Memory_Monitor
             this.moveToMonitorToolStripMenuItem,
             this.topMostToolStripMenuItem,
             this.displayModeToolStripMenuItem,
+            this.fpsDisplayModeToolStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.trayContextMenu.Name = "trayContextMenu";
-            this.trayContextMenu.Size = new System.Drawing.Size(180, 120);
+            this.trayContextMenu.Size = new System.Drawing.Size(180, 148);
             // 
             // showToolStripMenuItem
             // 
@@ -114,6 +120,38 @@ namespace Memory_Monitor
             this.barGraphToolStripMenuItem.Checked = true;
             this.barGraphToolStripMenuItem.Click += new System.EventHandler(this.BarGraphToolStripMenuItem_Click);
             // 
+            // fpsDisplayModeToolStripMenuItem
+            // 
+            this.fpsDisplayModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fpsAutoDetectToolStripMenuItem,
+            this.fpsAlwaysShowToolStripMenuItem,
+            this.fpsAlwaysHideToolStripMenuItem});
+            this.fpsDisplayModeToolStripMenuItem.Name = "fpsDisplayModeToolStripMenuItem";
+            this.fpsDisplayModeToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.fpsDisplayModeToolStripMenuItem.Text = "FPS Display";
+            // 
+            // fpsAutoDetectToolStripMenuItem
+            // 
+            this.fpsAutoDetectToolStripMenuItem.Name = "fpsAutoDetectToolStripMenuItem";
+            this.fpsAutoDetectToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAutoDetectToolStripMenuItem.Text = "Auto-detect";
+            this.fpsAutoDetectToolStripMenuItem.Checked = true;
+            this.fpsAutoDetectToolStripMenuItem.Click += new System.EventHandler(this.FpsAutoDetectToolStripMenuItem_Click);
+            // 
+            // fpsAlwaysShowToolStripMenuItem
+            // 
+            this.fpsAlwaysShowToolStripMenuItem.Name = "fpsAlwaysShowToolStripMenuItem";
+            this.fpsAlwaysShowToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAlwaysShowToolStripMenuItem.Text = "Always Show";
+            this.fpsAlwaysShowToolStripMenuItem.Click += new System.EventHandler(this.FpsAlwaysShowToolStripMenuItem_Click);
+            // 
+            // fpsAlwaysHideToolStripMenuItem
+            // 
+            this.fpsAlwaysHideToolStripMenuItem.Name = "fpsAlwaysHideToolStripMenuItem";
+            this.fpsAlwaysHideToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fpsAlwaysHideToolStripMenuItem.Text = "Always Hide";
+            this.fpsAlwaysHideToolStripMenuItem.Click += new System.EventHandler(this.FpsAlwaysHideToolStripMenuItem_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -131,9 +169,9 @@ namespace Memory_Monitor
             this.cpuPanel.AccentColor = System.Drawing.Color.FromArgb(0, 180, 255);
             this.cpuPanel.BackColor = System.Drawing.Color.Transparent;
             this.cpuPanel.Location = new System.Drawing.Point(15, 10);
-            this.cpuPanel.MinimumSize = new System.Drawing.Size(200, 150);
+            this.cpuPanel.MinimumSize = new System.Drawing.Size(150, 150);
             this.cpuPanel.Name = "cpuPanel";
-            this.cpuPanel.Size = new System.Drawing.Size(460, 460);
+            this.cpuPanel.Size = new System.Drawing.Size(368, 460);
             this.cpuPanel.TabIndex = 0;
             this.cpuPanel.Title = "CPU USAGE";
             // 
@@ -141,33 +179,44 @@ namespace Memory_Monitor
             // 
             this.gpuPanel.AccentColor = System.Drawing.Color.FromArgb(100, 200, 80);
             this.gpuPanel.BackColor = System.Drawing.Color.Transparent;
-            this.gpuPanel.Location = new System.Drawing.Point(485, 10);
-            this.gpuPanel.MinimumSize = new System.Drawing.Size(200, 150);
+            this.gpuPanel.Location = new System.Drawing.Point(393, 10);
+            this.gpuPanel.MinimumSize = new System.Drawing.Size(150, 150);
             this.gpuPanel.Name = "gpuPanel";
-            this.gpuPanel.Size = new System.Drawing.Size(460, 460);
+            this.gpuPanel.Size = new System.Drawing.Size(368, 460);
             this.gpuPanel.TabIndex = 1;
             this.gpuPanel.Title = "GPU USAGE";
+            // 
+            // vramPanel
+            // 
+            this.vramPanel.AccentColor = System.Drawing.Color.FromArgb(160, 90, 240);
+            this.vramPanel.BackColor = System.Drawing.Color.Transparent;
+            this.vramPanel.Location = new System.Drawing.Point(771, 10);
+            this.vramPanel.MinimumSize = new System.Drawing.Size(150, 150);
+            this.vramPanel.Name = "vramPanel";
+            this.vramPanel.Size = new System.Drawing.Size(368, 460);
+            this.vramPanel.TabIndex = 2;
+            this.vramPanel.Title = "VRAM USAGE";
             // 
             // drivePanel
             // 
             this.drivePanel.AccentColor = System.Drawing.Color.FromArgb(255, 160, 50);
             this.drivePanel.BackColor = System.Drawing.Color.Transparent;
-            this.drivePanel.Location = new System.Drawing.Point(955, 10);
-            this.drivePanel.MinimumSize = new System.Drawing.Size(200, 150);
+            this.drivePanel.Location = new System.Drawing.Point(1149, 10);
+            this.drivePanel.MinimumSize = new System.Drawing.Size(150, 150);
             this.drivePanel.Name = "drivePanel";
-            this.drivePanel.Size = new System.Drawing.Size(460, 460);
-            this.drivePanel.TabIndex = 2;
+            this.drivePanel.Size = new System.Drawing.Size(368, 460);
+            this.drivePanel.TabIndex = 3;
             this.drivePanel.Title = "DRIVE USAGE";
             // 
             // networkPanel
             // 
             this.networkPanel.AccentColor = System.Drawing.Color.FromArgb(0, 200, 220);
             this.networkPanel.BackColor = System.Drawing.Color.Transparent;
-            this.networkPanel.Location = new System.Drawing.Point(1425, 10);
-            this.networkPanel.MinimumSize = new System.Drawing.Size(200, 150);
+            this.networkPanel.Location = new System.Drawing.Point(1527, 10);
+            this.networkPanel.MinimumSize = new System.Drawing.Size(150, 150);
             this.networkPanel.Name = "networkPanel";
-            this.networkPanel.Size = new System.Drawing.Size(480, 460);
-            this.networkPanel.TabIndex = 3;
+            this.networkPanel.Size = new System.Drawing.Size(378, 460);
+            this.networkPanel.TabIndex = 4;
             this.networkPanel.Title = "NETWORK";
             // 
             // BarGraphDisplayForm
@@ -178,6 +227,7 @@ namespace Memory_Monitor
             this.ClientSize = new System.Drawing.Size(1920, 480);
             this.Controls.Add(this.networkPanel);
             this.Controls.Add(this.drivePanel);
+            this.Controls.Add(this.vramPanel);
             this.Controls.Add(this.gpuPanel);
             this.Controls.Add(this.cpuPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -206,10 +256,15 @@ namespace Memory_Monitor
         private System.Windows.Forms.ToolStripMenuItem displayModeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem circularGaugesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem barGraphToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsDisplayModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAutoDetectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAlwaysShowToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fpsAlwaysHideToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private BarGraphPanelControl cpuPanel;
         private BarGraphPanelControl gpuPanel;
+        private BarGraphPanelControl vramPanel;
         private BarGraphPanelControl drivePanel;
         private NetworkBarPanelControl networkPanel;
     }

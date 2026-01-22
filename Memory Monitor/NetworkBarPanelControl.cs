@@ -192,8 +192,9 @@ namespace Memory_Monitor
             int barY = labelY + (int)(Height * 0.10f);
             int speedY = barY + barHeight + 4;
 
-            float labelFontSize = Math.Max(9f, Height * 0.06f);
-            float speedFontSize = Math.Max(14f, Height * 0.12f);
+            // Smaller font sizes for 5-panel layout
+            float labelFontSize = Math.Max(7f, Height * 0.042f);
+            float speedFontSize = Math.Max(10f, Height * 0.08f);
 
             // Draw "UPLOAD" label on the left
             using (var font = new Font("Segoe UI", labelFontSize))
@@ -275,8 +276,9 @@ namespace Memory_Monitor
             int barY = labelY + (int)(Height * 0.10f);
             int speedY = barY + barHeight + 4;
 
-            float labelFontSize = Math.Max(9f, Height * 0.06f);
-            float speedFontSize = Math.Max(14f, Height * 0.12f);
+            // Smaller font sizes for 5-panel layout
+            float labelFontSize = Math.Max(7f, Height * 0.042f);
+            float speedFontSize = Math.Max(10f, Height * 0.08f);
 
             // Draw "DOWNLOAD" label on the left
             using (var font = new Font("Segoe UI", labelFontSize))

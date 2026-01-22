@@ -42,6 +42,11 @@ namespace Memory_Monitor
         private Form? _currentForm;
         private bool _isSwitchingMode = false;
 
+        // Fade animation settings
+        private const int FADE_DURATION_MS = 150;
+        private const int FADE_INTERVAL_MS = 15;
+        private const double OPACITY_STEP = (double)FADE_INTERVAL_MS / FADE_DURATION_MS;
+
         public MonitorApplicationContext()
         {
             // Subscribe to display mode changes
@@ -69,42 +74,75 @@ namespace Memory_Monitor
 
             _isSwitchingMode = true;
 
-            try
+            // Get current screen position before transitioning
+            var currentScreen = Screen.FromControl(_currentForm);
+            bool wasTopMost = _currentForm.TopMost;
+
+            // Start the fade transition
+            FadeOutAndSwitch(currentScreen, wasTopMost, e);
+        }
+
+        private void FadeOutAndSwitch(Screen targetScreen, bool topMost, DisplayModeChangedEventArgs e)
+        {
+            Form oldForm = _currentForm!;
+            var fadeOutTimer = new System.Windows.Forms.Timer { Interval = FADE_INTERVAL_MS };
+
+            fadeOutTimer.Tick += (s, args) =>
             {
-                // Get current screen position before closing
-                var currentScreen = Screen.FromControl(_currentForm);
-                var currentLocation = _currentForm.Location;
-                var currentSize = _currentForm.Size;
-                bool wasTopMost = _currentForm.TopMost;
+                oldForm.Opacity -= OPACITY_STEP;
 
-                // Create the new form
-                Form newForm = CreateFormForMode(e.NewMode);
-                newForm.FormClosed += OnFormClosed;
+                if (oldForm.Opacity <= 0)
+                {
+                    fadeOutTimer.Stop();
+                    fadeOutTimer.Dispose();
 
-                // Position on same monitor
-                newForm.StartPosition = FormStartPosition.Manual;
-                newForm.Location = currentScreen.Bounds.Location;
-                newForm.Size = currentScreen.Bounds.Size;
-                newForm.TopMost = wasTopMost;
+                    // Create and show the new form
+                    Form newForm = CreateFormForMode(e.NewMode);
+                    newForm.FormClosed += OnFormClosed;
+                    newForm.StartPosition = FormStartPosition.Manual;
+                    newForm.Location = targetScreen.Bounds.Location;
+                    newForm.Size = targetScreen.Bounds.Size;
+                    newForm.TopMost = topMost;
+                    newForm.Opacity = 0;
 
-                // Hide and close the old form
-                Form oldForm = _currentForm;
-                _currentForm = newForm;
+                    // Close old form
+                    oldForm.FormClosed -= OnFormClosed;
+                    oldForm.Hide();
+                    oldForm.Close();
 
-                oldForm.FormClosed -= OnFormClosed;
-                oldForm.Hide();
-                oldForm.Close();
+                    _currentForm = newForm;
+                    newForm.Show();
 
-                // Show the new form
-                newForm.Show();
-                newForm.Activate();
+                    // Fade in the new form
+                    FadeIn(newForm, e);
+                }
+            };
 
-                Debug.WriteLine($"Switched display mode from {e.OldMode} to {e.NewMode}");
-            }
-            finally
+            fadeOutTimer.Start();
+        }
+
+        private void FadeIn(Form form, DisplayModeChangedEventArgs e)
+        {
+            var fadeInTimer = new System.Windows.Forms.Timer { Interval = FADE_INTERVAL_MS };
+
+            fadeInTimer.Tick += (s, args) =>
             {
-                _isSwitchingMode = false;
-            }
+                form.Opacity += OPACITY_STEP;
+
+                if (form.Opacity >= 1)
+                {
+                    form.Opacity = 1;
+                    fadeInTimer.Stop();
+                    fadeInTimer.Dispose();
+
+                    form.Activate();
+                    _isSwitchingMode = false;
+
+                    Debug.WriteLine($"Switched display mode from {e.OldMode} to {e.NewMode} with fade transition");
+                }
+            };
+
+            fadeInTimer.Start();
         }
 
         private void OnFormClosed(object? sender, FormClosedEventArgs e)

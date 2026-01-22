@@ -92,6 +92,7 @@ namespace Memory_Monitor
         {
             cpuPanel.Visible = visible;
             gpuPanel.Visible = visible;
+            vramPanel.Visible = visible;
             drivePanel.Visible = visible;
             networkPanel.Visible = visible;
         }
@@ -353,6 +354,10 @@ namespace Memory_Monitor
             gpuPanel.AccentColor = Color.FromArgb(100, 200, 80);
             gpuPanel.Title = "GPU USAGE";
 
+            // VRAM Panel - Purple theme (matches circular gauge mode)
+            vramPanel.AccentColor = Color.FromArgb(160, 90, 240);
+            vramPanel.Title = "VRAM USAGE";
+
             // Drive Panel - Orange theme
             drivePanel.AccentColor = Color.FromArgb(255, 160, 50);
             drivePanel.Title = "DRIVE USAGE";
@@ -367,7 +372,7 @@ namespace Memory_Monitor
             int formWidth = ClientSize.Width;
             int formHeight = ClientSize.Height;
 
-            int panelCount = 4;
+            int panelCount = 5;
             int marginX = 15;
             int marginY = 10;
             int spacing = 10;
@@ -382,10 +387,13 @@ namespace Memory_Monitor
             gpuPanel.Location = new Point(marginX + panelWidth + spacing, marginY);
             gpuPanel.Size = new Size(panelWidth, panelHeight);
 
-            drivePanel.Location = new Point(marginX + (panelWidth + spacing) * 2, marginY);
+            vramPanel.Location = new Point(marginX + (panelWidth + spacing) * 2, marginY);
+            vramPanel.Size = new Size(panelWidth, panelHeight);
+
+            drivePanel.Location = new Point(marginX + (panelWidth + spacing) * 3, marginY);
             drivePanel.Size = new Size(panelWidth, panelHeight);
 
-            networkPanel.Location = new Point(marginX + (panelWidth + spacing) * 3, marginY);
+            networkPanel.Location = new Point(marginX + (panelWidth + spacing) * 4, marginY);
             networkPanel.Size = new Size(panelWidth, panelHeight);
         }
 
@@ -400,6 +408,7 @@ namespace Memory_Monitor
             SafeUpdate(UpdateRAM);
             SafeUpdate(UpdateCPU);
             SafeUpdate(UpdateGPU);
+            SafeUpdate(UpdateVRAM);
             SafeUpdate(UpdateDrive);
             SafeUpdate(UpdateNetwork);
             SafeUpdate(UpdateTrayIconText);
@@ -475,6 +484,30 @@ namespace Memory_Monitor
             else
             {
                 gpuPanel.SetValue(0, "N/A");
+            }
+        }
+
+        private void UpdateVRAM()
+        {
+            if (_gpuMonitor?.IsMemoryAvailable == true)
+            {
+                _gpuMonitor.UpdateMemory();  // Update internal state (returns bytes, not GB)
+                double usedGB = _gpuMonitor.UsedMemoryGB;  // Read the GB property
+                double totalGB = _gpuMonitor.TotalMemoryGB;
+                
+                // Calculate percentage
+                float percentage = totalGB > 0 ? (float)(usedGB / totalGB * 100) : 0;
+                
+                // Format the display text
+                string valueText = $"{usedGB:F1} GB";
+                string capacityText = $"TOTAL: {totalGB:F1} GB";
+
+                vramPanel.MaxValue = 100;
+                vramPanel.SetValue(percentage, valueText, capacityText);
+            }
+            else
+            {
+                vramPanel.SetValue(0, "N/A");
             }
         }
 
@@ -639,6 +672,34 @@ namespace Memory_Monitor
             // Already in bar graph mode
             barGraphToolStripMenuItem.Checked = true;
             circularGaugesToolStripMenuItem.Checked = false;
+        }
+
+        private void FpsAutoDetectToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AutoDetect);
+        }
+
+        private void FpsAlwaysShowToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AlwaysShow);
+        }
+
+        private void FpsAlwaysHideToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode.AlwaysHide);
+        }
+
+        private void SetFpsDisplayMode(GameActivityDetector.FpsDisplayMode mode)
+        {
+            if (_gameActivityDetector != null)
+            {
+                _gameActivityDetector.DisplayMode = mode;
+            }
+
+            // Update menu checkmarks
+            fpsAutoDetectToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AutoDetect;
+            fpsAlwaysShowToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysShow;
+            fpsAlwaysHideToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysHide;
         }
 
         private void SwitchToCircularGauges()
