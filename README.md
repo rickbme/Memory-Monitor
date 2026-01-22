@@ -20,7 +20,7 @@ DFS
 
 ![Memory Monitor Screenshot](MemMonPic.png)
 *Memory Monitor running on a 1920x480 mini display with real-time CPU, GPU, RAM, VRAM, Disk, and Network monitoring*
-![Memory Monitor Screenshot](MemMongraph.png)
+![Memory Monitor Screenshot](MemMonGraph.png)
 *Graph Display mode*
 
 ---
