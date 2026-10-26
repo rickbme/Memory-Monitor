@@ -122,7 +122,7 @@ namespace Memory_Monitor
             {
                 _diskMonitor.SelectDevice(deviceId);
                 diskGauge.DeviceName = _diskMonitor.CurrentDeviceDisplayName;
-                _diskPeakMbps = 0;
+                _diskPeakMBps = 0;
                 UpdateDisk();
                 SaveDeviceSelection("Disk", deviceId);
                 Debug.WriteLine($"Disk selected: {_diskMonitor.CurrentDeviceDisplayName}");
@@ -257,7 +257,7 @@ namespace Memory_Monitor
             if (newDevice != null)
             {
                 diskGauge.DeviceName = _diskMonitor.CurrentDeviceDisplayName;
-                _diskPeakMbps = 0;
+                _diskPeakMBps = 0;
                 UpdateDisk();
                 SaveDeviceSelection("Disk", newDevice.Type == DeviceType.Aggregate ? null : newDevice.Id);
                 
