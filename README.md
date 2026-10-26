@@ -12,6 +12,7 @@ DFS
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows)
+![Platform](https://img.shields.io/badge/platform-Linux-FCC624?logo=linux&logoColor=black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -45,6 +46,19 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 - **Date & Time Display** - Current date and time on mini monitor
 - **Touch Gesture Support** - Full touch input for mini monitors with touchscreen
 - **Mini Monitor Optimized** - Designed for 1920x480 secondary displays
+
+---
+
+## 🐧 Linux Version
+
+A Linux version lives in [`MemoryMonitor.Linux/`](MemoryMonitor.Linux/README.md). It's a separate .NET 8
+project using the Avalonia UI framework, so it doesn't affect the Windows build or installer.
+
+It has the same circular gauge and bar graph displays, automatic placement on the 1920x480 display, a
+system tray icon, device selection, and game FPS through [MangoHud](https://github.com/flightlessmango/MangoHud)
+in place of HWiNFO/RTSS. Touch gestures and an installer aren't ported yet.
+
+See the [Linux README](MemoryMonitor.Linux/README.md) for requirements, building, and MangoHud setup.
 
 ---
 
@@ -87,7 +101,7 @@ The application displays 6 gauges in a horizontal row, optimized for 1920x480 di
 | **GPU** | Orange | GPU usage (%) + Temperature |
 | **FPS** | Color-coded | Frames per second (gaming) |
 | **VRAM** | Purple | Video memory (GB used / total) |
-| **DISK** | Green | Disk I/O throughput (Mbps) |
+| **DISK** | Green | Disk I/O throughput (MB/s) |
 | **NET** | Yellow | Network throughput (Mbps) |
 
 **Additional Display Elements:**
@@ -277,6 +291,7 @@ Memory Monitor/
  ADLInterop.cs               # AMD ADL interop
  app.manifest                # UAC admin manifest
  MemoryMonitorSetup/         # WiX installer project
+ MemoryMonitor.Linux/        # Linux version (Avalonia) - see its README
  README.md
  CHANGELOG.md
 ```
