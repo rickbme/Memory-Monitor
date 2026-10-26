@@ -12,7 +12,7 @@ namespace Memory_Monitor
         // Fields for metric updates are defined here (shared with other partial classes)
         private static readonly float[] SCALE_OPTIONS = { 10f, 25f, 50f, 100f, 250f, 500f, 1000f, 2500f, 5000f, 10000f };
 
-        private float _diskPeakMbps = 0;
+        private float _diskPeakMBps = 0;  // megabytes per second
         private float _networkPeakMbps = 0;
         private int _lastCpuUsage = 0;
         private int _lastGpuUsage = 0;
@@ -203,10 +203,12 @@ namespace Memory_Monitor
             {
                 if (_diskMonitor?.IsAvailable == true)
                 {
+                    // DiskMonitor reports megabits per second; the gauge shows megabytes per second
                     var (_, _, totalMbps) = _diskMonitor.Update();
-                    _diskPeakMbps = Math.Max(_diskPeakMbps, totalMbps);
-                    diskGauge.MaxValue = GetAutoScale(totalMbps, _diskPeakMbps);
-                    diskGauge.SetValue(totalMbps, $"{totalMbps:F0}MB/s");
+                    float totalMBps = totalMbps / 8f;
+                    _diskPeakMBps = Math.Max(_diskPeakMBps, totalMBps);
+                    diskGauge.MaxValue = GetAutoScale(totalMBps, _diskPeakMBps);
+                    diskGauge.SetValue(totalMBps, $"{totalMBps:F0}MB/s");
                 }
                 else
                 {

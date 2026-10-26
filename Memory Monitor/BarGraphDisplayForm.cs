@@ -559,8 +559,9 @@ namespace Memory_Monitor
                 _networkPeakMbps = Math.Max(_networkPeakMbps, Math.Max(uploadMbps, downloadMbps));
                 float maxSpeed = GetAutoScale(Math.Max(uploadMbps, downloadMbps), _networkPeakMbps);
 
-                string uploadText = FormatSpeed(uploadMbps);
-                string downloadText = FormatSpeed(downloadMbps);
+                // NetworkMonitor reports megabits per second; the panel text shows bytes per second
+                string uploadText = FormatSpeed(uploadMbps / 8);
+                string downloadText = FormatSpeed(downloadMbps / 8);
 
                 networkPanel.MaxSpeed = maxSpeed;
                 networkPanel.SetSpeeds(uploadMbps, downloadMbps, uploadText, downloadText);
@@ -571,14 +572,14 @@ namespace Memory_Monitor
             }
         }
 
-        private string FormatSpeed(float mbps)
+        private string FormatSpeed(float megabytesPerSecond)
         {
-            if (mbps >= 1000)
-                return $"{mbps / 1000:F1} GB/s";
-            else if (mbps >= 1)
-                return $"{mbps:F1} MB/s";
+            if (megabytesPerSecond >= 1000)
+                return $"{megabytesPerSecond / 1000:F1} GB/s";
+            else if (megabytesPerSecond >= 1)
+                return $"{megabytesPerSecond:F1} MB/s";
             else
-                return $"{mbps * 1000:F0} KB/s";
+                return $"{megabytesPerSecond * 1000:F0} KB/s";
         }
 
         private static readonly float[] SCALE_OPTIONS = { 10f, 25f, 50f, 100f, 250f, 500f, 1000f, 2500f, 5000f, 10000f };
