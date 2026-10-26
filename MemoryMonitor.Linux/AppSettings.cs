@@ -31,6 +31,9 @@ namespace Memory_Monitor
         public DisplayMode DisplayMode { get; set; } = DisplayMode.CircularGauges;
         public bool TopMost { get; set; } = true;
 
+        // Show game FPS from MangoHud's logs when a game is reporting it
+        public bool ShowFps { get; set; } = true;
+
         // Device IDs chosen from the gauge menus (null = monitor's default device)
         public string? SelectedGPUDevice { get; set; }
         public string? SelectedDiskDevice { get; set; }

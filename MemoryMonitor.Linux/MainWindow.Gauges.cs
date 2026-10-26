@@ -25,6 +25,14 @@ namespace Memory_Monitor
             diskGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(diskGauge, _diskMonitor);
             networkGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(networkGauge, _networkMonitor);
 
+            // FPS badge is 30% of the gauge height (minimum 80px), like the Windows layout
+            gaugeView.SizeChanged += (_, e) =>
+            {
+                double fpsGaugeSize = Math.Max(80, (e.NewSize.Height - 24) * 0.30);
+                fpsGauge.Width = fpsGaugeSize;
+                fpsGauge.Height = fpsGaugeSize;
+            };
+
             UpdateDeviceNames();
         }
 
@@ -121,6 +129,7 @@ namespace Memory_Monitor
             SafeUpdate(UpdateRAM);
             SafeUpdate(UpdateCPU);
             SafeUpdate(UpdateGPU);
+            SafeUpdate(UpdateFps);
             SafeUpdate(UpdateDisk);
             SafeUpdate(UpdateNetwork);
             SafeUpdate(UpdateDateTime);
@@ -186,6 +195,18 @@ namespace Memory_Monitor
             {
                 gpuVramGauge.SetValue(0, "N/A");
             }
+        }
+
+        private void UpdateFps()
+        {
+            int? fps = GetGameFps();
+            if (fps.HasValue)
+                fpsGauge.SetFps(fps.Value);
+
+            // Only change visibility if needed
+            bool visible = fps.HasValue;
+            if (fpsGauge.IsVisible != visible)
+                fpsGauge.IsVisible = visible;
         }
 
         private void UpdateDisk()

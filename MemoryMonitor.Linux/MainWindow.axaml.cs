@@ -28,6 +28,7 @@ namespace Memory_Monitor
         private LinuxGPUMonitor _gpuMonitor = null!;
         private LinuxDiskMonitor _diskMonitor = null!;
         private LinuxNetworkMonitor _networkMonitor = null!;
+        private MangoHudFpsReader _fpsReader = null!;
 
         private const int INTRO_DISPLAY_MS = 2000; // Show intro logo for 2 seconds
 
@@ -51,6 +52,8 @@ namespace Memory_Monitor
             _gpuMonitor = new LinuxGPUMonitor();
             _diskMonitor = new LinuxDiskMonitor();
             _networkMonitor = new LinuxNetworkMonitor();
+            _fpsReader = new MangoHudFpsReader(MangoHudFpsReader.DefaultLogFolder);
+            _fpsReader.DeleteOldLogs(TimeSpan.FromDays(7));
 
             PositionOnTargetMonitor();
             Topmost = _settings.TopMost;
@@ -80,6 +83,18 @@ namespace Memory_Monitor
                 UpdateBarGraphMetrics();
             else
                 UpdateGaugeMetrics();
+        }
+
+        /// <summary>
+        /// FPS of the game currently logging through MangoHud, or null if none is (or FPS display is off)
+        /// </summary>
+        private int? GetGameFps()
+        {
+            if (!_settings.ShowFps)
+                return null;
+
+            int? fps = _fpsReader.GetFps();
+            return fps > 0 ? fps : null;
         }
 
         private static void SafeUpdate(Action updateAction)
@@ -206,6 +221,14 @@ namespace Memory_Monitor
             MoveToScreen(screens[(currentIndex + 1) % screens.Count]);
         }
 
+        private void SetShowFps(bool showFps)
+        {
+            _settings.ShowFps = showFps;
+            _settings.Save();
+            UpdateTrayMenuState();
+            UpdateAllMetrics();
+        }
+
         private void SetTopMost(bool topMost)
         {
             Topmost = topMost;
@@ -253,6 +276,7 @@ namespace Memory_Monitor
             circularGaugesMenuItem.IsChecked = _settings.DisplayMode == DisplayMode.CircularGauges;
             barGraphMenuItem.IsChecked = _settings.DisplayMode == DisplayMode.BarGraph;
             topMostMenuItem.IsChecked = Topmost;
+            showFpsMenuItem.IsChecked = _settings.ShowFps;
         }
 
         private void CircularGaugesMenuItem_Click(object? sender, RoutedEventArgs e) => SetDisplayMode(DisplayMode.CircularGauges);
@@ -262,6 +286,8 @@ namespace Memory_Monitor
         private void TopMostMenuItem_Click(object? sender, RoutedEventArgs e) => SetTopMost(!Topmost);
 
         private void MoveToMonitorMenuItem_Click(object? sender, RoutedEventArgs e) => MoveToNextMonitor();
+
+        private void ShowFpsMenuItem_Click(object? sender, RoutedEventArgs e) => SetShowFps(!_settings.ShowFps);
 
         private void ExitMenuItem_Click(object? sender, RoutedEventArgs e) => Close();
 

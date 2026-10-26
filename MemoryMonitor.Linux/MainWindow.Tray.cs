@@ -18,6 +18,7 @@ namespace Memory_Monitor
         private NativeMenuItem? _trayCircularGaugesItem;
         private NativeMenuItem? _trayBarGraphItem;
         private NativeMenuItem? _trayTopMostItem;
+        private NativeMenuItem? _trayShowFpsItem;
 
         private void InitializeTrayIcon()
         {
@@ -46,6 +47,9 @@ namespace Memory_Monitor
             _trayTopMostItem = new NativeMenuItem("Always on Top") { ToggleType = NativeMenuItemToggleType.CheckBox };
             _trayTopMostItem.Click += (_, _) => SetTopMost(!Topmost);
 
+            _trayShowFpsItem = new NativeMenuItem("Show Game FPS (MangoHud)") { ToggleType = NativeMenuItemToggleType.CheckBox };
+            _trayShowFpsItem.Click += (_, _) => SetShowFps(!_settings.ShowFps);
+
             _trayCircularGaugesItem = new NativeMenuItem("Circular Gauges") { ToggleType = NativeMenuItemToggleType.Radio };
             _trayCircularGaugesItem.Click += (_, _) => SetDisplayMode(DisplayMode.CircularGauges);
 
@@ -67,6 +71,7 @@ namespace Memory_Monitor
                 moveToMonitorItem,
                 _trayTopMostItem,
                 displayModeItem,
+                _trayShowFpsItem,
                 new NativeMenuItemSeparator(),
                 exitItem
             };
@@ -82,6 +87,7 @@ namespace Memory_Monitor
             _trayCircularGaugesItem.IsChecked = _settings.DisplayMode == DisplayMode.CircularGauges;
             _trayBarGraphItem!.IsChecked = _settings.DisplayMode == DisplayMode.BarGraph;
             _trayTopMostItem!.IsChecked = Topmost;
+            _trayShowFpsItem!.IsChecked = _settings.ShowFps;
         }
 
         private void UpdateTrayIcon(int memoryPercentage)

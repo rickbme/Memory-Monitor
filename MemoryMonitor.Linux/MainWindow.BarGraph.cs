@@ -59,7 +59,9 @@ namespace Memory_Monitor
                 string tempText = _gpuMonitor.IsTemperatureAvailable
                     ? $"TEMP: {_gpuMonitor.CurrentTemperatureCelsius}°C"
                     : "";
-                gpuPanel.SetValue(usage, $"{Math.Round(usage)}%", tempText);
+                int? fps = GetGameFps();
+                string fpsText = fps.HasValue ? $"FPS: {fps.Value}" : "";
+                gpuPanel.SetValue(usage, $"{Math.Round(usage)}%", tempText, fpsText);
             }
             else
             {

@@ -22,6 +22,8 @@
             <MenuItem x:Name="topMostMenuItem" Header="Always on Top" ToggleType="CheckBox"
                       InputGesture="F11" Click="TopMostMenuItem_Click" />
             <MenuItem Header="Move to Next Monitor" Click="MoveToMonitorMenuItem_Click" />
+            <MenuItem x:Name="showFpsMenuItem" Header="Show Game FPS (MangoHud)" ToggleType="CheckBox"
+                      Click="ShowFpsMenuItem_Click" />
             <Separator />
             <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
         </ContextMenu>
@@ -45,6 +47,13 @@
                 <c:GaugeControl x:Name="diskGauge" Label="DISK" GaugeColor="#32C850" IsSelectable="True" />
                 <c:GaugeControl x:Name="networkGauge" Label="NET" GaugeColor="#FFC832" IsSelectable="True" />
             </UniformGrid>
+
+            <!-- FPS badge between the GPU and VRAM gauges, near the labels (shown while a game reports FPS) -->
+            <Grid ColumnDefinitions="*,*,*,*,*,*" Margin="10,12">
+                <c:FpsGaugeControl x:Name="fpsGauge" Grid.Column="2" Grid.ColumnSpan="2" IsVisible="False"
+                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"
+                                   Width="137" Height="137" />
+            </Grid>
 
             <!-- Date (top left) and time (top right) -->
             <Panel Margin="15" IsHitTestVisible="False">
