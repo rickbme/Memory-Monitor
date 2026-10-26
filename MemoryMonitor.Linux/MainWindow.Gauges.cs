@@ -96,6 +96,7 @@ namespace Memory_Monitor
                 _memoryMonitor.Update();
                 ramGauge.SetValue(_memoryMonitor.UsagePercent,
                     $"{_memoryMonitor.UsedMemoryGB:F1}/{_memoryMonitor.TotalMemoryGB:F0}GB");
+                UpdateTrayIcon(_memoryMonitor.UsagePercent);
             }
             else
             {

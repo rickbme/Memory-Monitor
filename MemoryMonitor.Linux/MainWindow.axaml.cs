@@ -16,6 +16,7 @@ namespace Memory_Monitor
     /// Additional functionality is split into:
     /// - MainWindow.Gauges.cs - Circular gauge updates and device selection
     /// - MainWindow.BarGraph.cs - Bar graph panel updates
+    /// - MainWindow.Tray.cs - System tray icon and menu
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -53,6 +54,9 @@ namespace Memory_Monitor
 
             InitializeGauges();
             ApplyDisplayMode(_settings.DisplayMode);
+
+            // Create the tray icon once the window is up and the app's message loop is running
+            Opened += (_, _) => InitializeTrayIcon();
 
             _updateTimer.Tick += (_, _) => UpdateAllMetrics();
             _updateTimer.Start();
@@ -97,6 +101,7 @@ namespace Memory_Monitor
             _settings.DisplayMode = mode;
             _settings.Save();
             ApplyDisplayMode(mode);
+            UpdateTrayMenuState();
         }
 
         private void ApplyDisplayMode(DisplayMode mode)
@@ -161,6 +166,7 @@ namespace Memory_Monitor
             Topmost = topMost;
             _settings.TopMost = topMost;
             _settings.Save();
+            UpdateTrayMenuState();
         }
 
         protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -181,8 +187,8 @@ namespace Memory_Monitor
             switch (e.Key)
             {
                 case Key.Escape:
-                    // Windows hides to the tray here; there's no tray icon on Linux yet, so exit instead
-                    Close();
+                    // Hide to the tray (exits instead when there is no tray to restore from)
+                    HideToTray();
                     e.Handled = true;
                     break;
                 case Key.F11:
@@ -219,6 +225,7 @@ namespace Memory_Monitor
         protected override void OnClosed(EventArgs e)
         {
             _updateTimer.Stop();
+            _trayIcon?.Dispose();
 
             _cpuMonitor?.Dispose();
             _memoryMonitor?.Dispose();

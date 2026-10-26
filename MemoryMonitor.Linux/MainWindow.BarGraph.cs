@@ -13,10 +13,23 @@ namespace Memory_Monitor
 
         private void UpdateBarGraphMetrics()
         {
+            SafeUpdate(UpdateMemoryTrayIcon);
             SafeUpdate(UpdateCPUPanel);
             SafeUpdate(UpdateGPUPanels);
             SafeUpdate(UpdateDrivePanel);
             SafeUpdate(UpdateNetworkPanel);
+        }
+
+        /// <summary>
+        /// The bar graph has no RAM panel; memory only drives the tray icon here
+        /// </summary>
+        private void UpdateMemoryTrayIcon()
+        {
+            if (_memoryMonitor.IsAvailable)
+            {
+                _memoryMonitor.Update();
+                UpdateTrayIcon(_memoryMonitor.UsagePercent);
+            }
         }
 
         private void UpdateCPUPanel()
