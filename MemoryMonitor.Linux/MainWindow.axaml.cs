@@ -29,8 +29,11 @@ namespace Memory_Monitor
         private LinuxDiskMonitor _diskMonitor = null!;
         private LinuxNetworkMonitor _networkMonitor = null!;
 
+        private const int INTRO_DISPLAY_MS = 2000; // Show intro logo for 2 seconds
+
         private readonly DispatcherTimer _updateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
         private AppSettings _settings = new();
+        private bool _isIntroShowing = false;
 
         public MainWindow()
         {
@@ -54,6 +57,7 @@ namespace Memory_Monitor
 
             InitializeGauges();
             ApplyDisplayMode(_settings.DisplayMode);
+            ShowIntroLogo();
 
             // Create the tray icon once the window is up and the app's message loop is running
             Opened += (_, _) => InitializeTrayIcon();
@@ -106,9 +110,50 @@ namespace Memory_Monitor
 
         private void ApplyDisplayMode(DisplayMode mode)
         {
-            gaugeView.IsVisible = mode == DisplayMode.CircularGauges;
-            barGraphView.IsVisible = mode == DisplayMode.BarGraph;
+            gaugeView.IsVisible = !_isIntroShowing && mode == DisplayMode.CircularGauges;
+            barGraphView.IsVisible = !_isIntroShowing && mode == DisplayMode.BarGraph;
             UpdateAllMetrics();
+        }
+
+        #endregion
+
+        #region Intro Logo
+
+        /// <summary>
+        /// Shows the wide DFS logo on the mini monitor for 2 seconds before the gauges or bars appear
+        /// </summary>
+        private void ShowIntroLogo()
+        {
+            try
+            {
+                string logoPath = Path.Combine(AppContext.BaseDirectory, "Resources", "dfs_logo_1920.png");
+                if (!File.Exists(logoPath))
+                    return;
+
+                introLogo.Source = new Avalonia.Media.Imaging.Bitmap(logoPath);
+                introLogo.IsVisible = true;
+                _isIntroShowing = true;
+                ApplyDisplayMode(_settings.DisplayMode);
+
+                DispatcherTimer.RunOnce(TransitionFromIntro, TimeSpan.FromMilliseconds(INTRO_DISPLAY_MS));
+                Debug.WriteLine("Intro logo displayed");
+            }
+            catch (Exception ex)
+            {
+                // If the logo fails, the gauges are simply shown straight away
+                Debug.WriteLine($"Failed to show intro logo: {ex.Message}");
+            }
+        }
+
+        private void TransitionFromIntro()
+        {
+            _isIntroShowing = false;
+            introLogo.IsVisible = false;
+            (introLogo.Source as IDisposable)?.Dispose();
+            introLogo.Source = null;
+
+            ApplyDisplayMode(_settings.DisplayMode);
+            Debug.WriteLine("Transitioned from intro logo");
         }
 
         #endregion

@@ -79,5 +79,8 @@
                 <c:NetworkBarPanelControl x:Name="networkPanel" Title="NETWORK" AccentColor="#00C8DC" />
             </UniformGrid>
         </Panel>
+
+        <!-- Wide DFS logo shown for 2 seconds on startup, before the gauges or bars -->
+        <Image x:Name="introLogo" IsVisible="False" Stretch="Uniform" Margin="20" />
     </Panel>
 </Window>
