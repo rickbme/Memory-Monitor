@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Linux build of Memory Monitor (Avalonia UI).
+    Kept separate from ..\Memory Monitor\MemoryMonitor.csproj so the Windows build is untouched.
+    Platform-neutral sources are linked from the Windows project rather than copied.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Memory_Monitor</RootNamespace>
+    <AssemblyName>Memory Monitor</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Self-contained deployment configuration -->
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <PublishSingleFile>false</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Avalonia UI Framework -->
+    <PackageReference Include="Avalonia" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Platform-neutral code shared with the Windows project -->
+    <Compile Include="..\Memory Monitor\IMonitor.cs" Link="Shared\IMonitor.cs" />
+    <Compile Include="..\Memory Monitor\ISelectableMonitor.cs" Link="Shared\ISelectableMonitor.cs" />
+    <Compile Include="..\Memory Monitor\DeviceInfo.cs" Link="Shared\DeviceInfo.cs" />
+    <Compile Include="..\Memory Monitor\Constants.cs" Link="Shared\Constants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy resources to output for runtime loading -->
+    <Content Include="..\Memory Monitor\Resources\mmguage.ico" Link="Resources\mmguage.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Memory Monitor\Resources\dfs_logo_1920.png" Link="Resources\dfs_logo_1920.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Memory Monitor\Resources\dfslogo_round.png" Link="Resources\dfslogo_round.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

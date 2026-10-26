@@ -1,0 +1,7 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Memory_Monitor.MainWindow"
+        Title="Memory Monitor - Linux"
+        Width="1920"
+        Height="480">
+</Window>
