@@ -10,36 +10,74 @@
         WindowStartupLocation="Manual"
         Background="#191C20">
 
+    <!-- Right-click menu (the Windows version has these in its tray icon menu) -->
+    <Window.ContextMenu>
+        <ContextMenu Opening="ContextMenu_Opening">
+            <MenuItem Header="Display Mode">
+                <MenuItem x:Name="circularGaugesMenuItem" Header="Circular Gauges" ToggleType="Radio"
+                          GroupName="DisplayMode" Click="CircularGaugesMenuItem_Click" />
+                <MenuItem x:Name="barGraphMenuItem" Header="Bar Graph" ToggleType="Radio"
+                          GroupName="DisplayMode" Click="BarGraphMenuItem_Click" />
+            </MenuItem>
+            <MenuItem x:Name="topMostMenuItem" Header="Always on Top" ToggleType="CheckBox"
+                      InputGesture="F11" Click="TopMostMenuItem_Click" />
+            <MenuItem Header="Move to Next Monitor" Click="MoveToMonitorMenuItem_Click" />
+            <Separator />
+            <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
+        </ContextMenu>
+    </Window.ContextMenu>
+
     <Panel>
-        <!-- Six gauges in a row, 95% of the window height (matches the Windows layout) -->
-        <UniformGrid Columns="6" Rows="1" Margin="10,12">
-            <UniformGrid.Styles>
-                <Style Selector="c|GaugeControl">
-                    <Setter Property="Margin" Value="2.5,0" />
-                </Style>
-            </UniformGrid.Styles>
+        <!-- ===================== Circular gauge view ===================== -->
+        <Panel x:Name="gaugeView">
+            <!-- Six gauges in a row, 95% of the window height (matches the Windows layout) -->
+            <UniformGrid Columns="6" Rows="1" Margin="10,12">
+                <UniformGrid.Styles>
+                    <Style Selector="c|GaugeControl">
+                        <Setter Property="Margin" Value="2.5,0" />
+                    </Style>
+                </UniformGrid.Styles>
 
-            <c:GaugeControl x:Name="ramGauge" Label="RAM" GaugeColor="#3A96DD" />
-            <c:GaugeControl x:Name="cpuGauge" Label="CPU" GaugeColor="#DC3232" />
-            <c:GaugeControl x:Name="gpuUsageGauge" Label="GPU" GaugeColor="#FF8C00" IsSelectable="True" />
-            <c:GaugeControl x:Name="gpuVramGauge" Label="VRAM" GaugeColor="#A05AF0" MaxValue="24" IsSelectable="True" />
-            <c:GaugeControl x:Name="diskGauge" Label="DISK" GaugeColor="#32C850" IsSelectable="True" />
-            <c:GaugeControl x:Name="networkGauge" Label="NET" GaugeColor="#FFC832" IsSelectable="True" />
-        </UniformGrid>
+                <c:GaugeControl x:Name="ramGauge" Label="RAM" GaugeColor="#3A96DD" />
+                <c:GaugeControl x:Name="cpuGauge" Label="CPU" GaugeColor="#DC3232" />
+                <c:GaugeControl x:Name="gpuUsageGauge" Label="GPU" GaugeColor="#FF8C00" IsSelectable="True" />
+                <c:GaugeControl x:Name="gpuVramGauge" Label="VRAM" GaugeColor="#A05AF0" MaxValue="24" IsSelectable="True" />
+                <c:GaugeControl x:Name="diskGauge" Label="DISK" GaugeColor="#32C850" IsSelectable="True" />
+                <c:GaugeControl x:Name="networkGauge" Label="NET" GaugeColor="#FFC832" IsSelectable="True" />
+            </UniformGrid>
 
-        <!-- Date (top left) and time (top right) -->
-        <Panel Margin="15" IsHitTestVisible="False">
-            <Panel.Styles>
-                <Style Selector="TextBlock">
-                    <Setter Property="FontFamily" Value="fonts:Inter#Inter" />
-                    <Setter Property="FontSize" Value="29.33" />
-                    <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="VerticalAlignment" Value="Top" />
-                </Style>
-            </Panel.Styles>
-            <TextBlock x:Name="lblDate" HorizontalAlignment="Left" />
-            <TextBlock x:Name="lblTime" HorizontalAlignment="Right" />
+            <!-- Date (top left) and time (top right) -->
+            <Panel Margin="15" IsHitTestVisible="False">
+                <Panel.Styles>
+                    <Style Selector="TextBlock">
+                        <Setter Property="FontFamily" Value="fonts:Inter#Inter" />
+                        <Setter Property="FontSize" Value="29.33" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="VerticalAlignment" Value="Top" />
+                    </Style>
+                </Panel.Styles>
+                <TextBlock x:Name="lblDate" HorizontalAlignment="Left" />
+                <TextBlock x:Name="lblTime" HorizontalAlignment="Right" />
+            </Panel>
+        </Panel>
+
+        <!-- ======================= Bar graph view ======================== -->
+        <Panel x:Name="barGraphView" IsVisible="False" Background="#0F1216">
+            <!-- Five panels in a row (matches the Windows BarGraphDisplayForm layout) -->
+            <UniformGrid Columns="5" Rows="1" Margin="10,10">
+                <UniformGrid.Styles>
+                    <Style Selector="UniformGrid > Control">
+                        <Setter Property="Margin" Value="5,0" />
+                    </Style>
+                </UniformGrid.Styles>
+
+                <c:BarGraphPanelControl x:Name="cpuPanel" Title="CPU USAGE" AccentColor="#00B4FF" />
+                <c:BarGraphPanelControl x:Name="gpuPanel" Title="GPU USAGE" AccentColor="#64C850" />
+                <c:BarGraphPanelControl x:Name="vramPanel" Title="VRAM USAGE" AccentColor="#A05AF0" />
+                <c:BarGraphPanelControl x:Name="drivePanel" Title="DRIVE USAGE" AccentColor="#FFA032" />
+                <c:NetworkBarPanelControl x:Name="networkPanel" Title="NETWORK" AccentColor="#00C8DC" />
+            </UniformGrid>
         </Panel>
     </Panel>
 </Window>
