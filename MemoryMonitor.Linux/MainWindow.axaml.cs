@@ -1,446 +1,317 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media;
+using Avalonia.Input;
+using Avalonia.Platform;
 using Avalonia.Threading;
-using System;
+using Memory_Monitor.Controls;
+using Memory_Monitor.Linux;
 using System.Diagnostics;
 
 namespace Memory_Monitor
 {
     public partial class MainWindow : Window
     {
-        // Hardware monitors
-        private IMonitor? _memoryMonitor;
-        private IMonitor? _cpuMonitor;
-        private ISelectableMonitor? _gpuMonitor;
-        private ISelectableMonitor? _diskMonitor;
-        private ISelectableMonitor? _networkMonitor;
+        private static readonly float[] SCALE_OPTIONS = { 10f, 25f, 50f, 100f, 250f, 500f, 1000f, 2500f, 5000f, 10000f };
 
-        // Update timer
-        private DispatcherTimer? _updateTimer;
+        // Hardware monitors (created in the constructor, except in the XAML previewer)
+        private LinuxMemoryMonitor _memoryMonitor = null!;
+        private LinuxCPUMonitor _cpuMonitor = null!;
+        private LinuxGPUMonitor _gpuMonitor = null!;
+        private LinuxDiskMonitor _diskMonitor = null!;
+        private LinuxNetworkMonitor _networkMonitor = null!;
 
-        // UI Controls
-        private TextBlock? _cpuUsageText;
-        private TextBlock? _cpuTempText;
-        private TextBlock? _memoryUsageText;
-        private TextBlock? _gpuUsageText;
-        private TextBlock? _gpuMemoryText;
-        private TextBlock? _gpuTempText;
-        private TextBlock? _diskText;
-        private TextBlock? _networkText;
+        private readonly DispatcherTimer _updateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+
+        private float _diskPeakMbps = 0;
+        private float _networkPeakMbps = 0;
 
         public MainWindow()
         {
             InitializeComponent();
-            InitializeMonitors();
-            InitializeUI();
-            StartMonitoring();
-        }
 
-        private void InitializeComponent()
-        {
-            Title = "Memory Monitor - Linux Edition";
-            Width = 1920;
-            Height = 480;
-            Background = new SolidColorBrush(Color.Parse("#1E1E1E"));
-            
-            // Set window to be borderless and always on top
-            SystemDecorations = SystemDecorations.BorderOnly;
-            CanResize = false;
-        }
+            // The VS Code / IDE previewer runs this constructor just to draw the layout;
+            // don't touch hardware, screens or timers there
+            if (Design.IsDesignMode)
+                return;
 
-        private void InitializeMonitors()
-        {
-            try
-            {
-                _cpuMonitor = MonitorFactory.CreateCPUMonitor();
-                Debug.WriteLine($"CPU Monitor initialized: {_cpuMonitor.IsAvailable}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to initialize CPU monitor: {ex.Message}");
-            }
+            _memoryMonitor = new LinuxMemoryMonitor();
+            _cpuMonitor = new LinuxCPUMonitor();
+            _gpuMonitor = new LinuxGPUMonitor();
+            _diskMonitor = new LinuxDiskMonitor();
+            _networkMonitor = new LinuxNetworkMonitor();
 
-            try
-            {
-                _memoryMonitor = MonitorFactory.CreateMemoryMonitor();
-                Debug.WriteLine($"Memory Monitor initialized: {_memoryMonitor.IsAvailable}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to initialize Memory monitor: {ex.Message}");
-            }
+            PositionOnTargetMonitor();
 
-            try
-            {
-                _gpuMonitor = MonitorFactory.CreateGPUMonitor();
-                Debug.WriteLine($"GPU Monitor initialized: {_gpuMonitor.IsAvailable}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to initialize GPU monitor: {ex.Message}");
-            }
+            gpuVramGauge.MaxValue = _gpuMonitor.IsMemoryAvailable
+                ? (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB)
+                : 24f;
 
-            try
-            {
-                _diskMonitor = MonitorFactory.CreateDiskMonitor();
-                Debug.WriteLine($"Disk Monitor initialized: {_diskMonitor.IsAvailable}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to initialize Disk monitor: {ex.Message}");
-            }
+            gpuUsageGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(gpuUsageGauge, _gpuMonitor);
+            gpuVramGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(gpuVramGauge, _gpuMonitor);
+            diskGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(diskGauge, _diskMonitor);
+            networkGauge.DeviceSelectionRequested += (_, _) => ShowDeviceMenu(networkGauge, _networkMonitor);
 
-            try
-            {
-                _networkMonitor = MonitorFactory.CreateNetworkMonitor();
-                Debug.WriteLine($"Network Monitor initialized: {_networkMonitor.IsAvailable}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to initialize Network monitor: {ex.Message}");
-            }
-        }
+            UpdateDeviceNames();
+            UpdateAllMetrics();
 
-        private void InitializeUI()
-        {
-            var mainPanel = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                Margin = new Thickness(20),
-                Spacing = 15
-            };
-
-            // Title
-            var titleText = new TextBlock
-            {
-                Text = "System Monitor",
-                FontSize = 24,
-                FontWeight = FontWeight.Bold,
-                Foreground = new SolidColorBrush(Colors.White),
-                Margin = new Thickness(0, 0, 0, 20)
-            };
-            mainPanel.Children.Add(titleText);
-
-            // CPU Section
-            var cpuPanel = CreateSection("CPU");
-            _cpuUsageText = new TextBlock
-            {
-                Text = "Usage: ---%",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            _cpuTempText = new TextBlock
-            {
-                Text = "Temperature: ---°C",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            cpuPanel.Children.Add(_cpuUsageText);
-            cpuPanel.Children.Add(_cpuTempText);
-            mainPanel.Children.Add(cpuPanel);
-
-            // Memory Section
-            var memoryPanel = CreateSection("Memory");
-            _memoryUsageText = new TextBlock
-            {
-                Text = "Usage: --- / --- GB (---%)",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            memoryPanel.Children.Add(_memoryUsageText);
-            mainPanel.Children.Add(memoryPanel);
-
-            // GPU Section
-            var gpuPanel = CreateSection("GPU");
-            _gpuUsageText = new TextBlock
-            {
-                Text = "Usage: ---%",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            _gpuMemoryText = new TextBlock
-            {
-                Text = "Memory: --- / --- GB (---%)",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            _gpuTempText = new TextBlock
-            {
-                Text = "Temperature: ---°C",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            gpuPanel.Children.Add(_gpuUsageText);
-            gpuPanel.Children.Add(_gpuMemoryText);
-            gpuPanel.Children.Add(_gpuTempText);
-            mainPanel.Children.Add(gpuPanel);
-
-            // Disk Section
-            var diskPanel = CreateSection("Disk");
-            _diskText = new TextBlock
-            {
-                Text = "Read: --- MB/s | Write: --- MB/s",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            diskPanel.Children.Add(_diskText);
-            mainPanel.Children.Add(diskPanel);
-
-            // Network Section
-            var networkPanel = CreateSection("Network");
-            _networkText = new TextBlock
-            {
-                Text = "Download: --- Mbps | Upload: --- Mbps",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Colors.LightGray)
-            };
-            networkPanel.Children.Add(_networkText);
-            mainPanel.Children.Add(networkPanel);
-
-            Content = new ScrollViewer
-            {
-                Content = mainPanel,
-                HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
-                VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto
-            };
-        }
-
-        private StackPanel CreateSection(string title)
-        {
-            var panel = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                Spacing = 5
-            };
-
-            var titleBlock = new TextBlock
-            {
-                Text = title,
-                FontSize = 18,
-                FontWeight = FontWeight.Bold,
-                Foreground = new SolidColorBrush(Color.Parse("#00D4FF")),
-                Margin = new Thickness(0, 0, 0, 5)
-            };
-            panel.Children.Add(titleBlock);
-
-            return panel;
-        }
-
-        private void StartMonitoring()
-        {
-            _updateTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(1000)
-            };
-            _updateTimer.Tick += UpdateTimer_Tick;
+            _updateTimer.Tick += (_, _) => UpdateAllMetrics();
             _updateTimer.Start();
         }
 
-        private void UpdateTimer_Tick(object? sender, EventArgs e)
+        #region Window Management
+
+        private void PositionOnTargetMonitor()
         {
-            UpdateCPU();
-            UpdateMemory();
-            UpdateGPU();
-            UpdateDisk();
-            UpdateNetwork();
+            Screen? targetScreen = FindTargetMonitor();
+            if (targetScreen == null)
+                return;
+
+            // Fill the target monitor
+            Position = targetScreen.Bounds.Position;
+            Width = targetScreen.Bounds.Width / targetScreen.Scaling;
+            Height = targetScreen.Bounds.Height / targetScreen.Scaling;
+
+            Debug.WriteLine($"Window positioned on screen at {targetScreen.Bounds}");
+        }
+
+        private Screen? FindTargetMonitor()
+        {
+            // Look for a monitor that matches mini monitor dimensions (wide and short)
+            foreach (Screen screen in Screens.All)
+            {
+                // Check for typical mini monitor aspect ratios (4:1 or wider)
+                double aspectRatio = (double)screen.Bounds.Width / screen.Bounds.Height;
+
+                if (aspectRatio >= 3.5) // Very wide aspect ratio like 1920x480 (4:1)
+                {
+                    Debug.WriteLine($"Found mini monitor: {screen.Bounds.Width}x{screen.Bounds.Height}");
+                    return screen;
+                }
+            }
+
+            // If no mini monitor found, use secondary monitor if available, else the primary
+            return Screens.All.FirstOrDefault(s => !s.IsPrimary) ?? Screens.Primary;
+        }
+
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+
+            // Drag the borderless window, except when clicking a gauge's device menu
+            if (e.Handled || e.Source is GaugeControl { IsSelectable: true, HasMultipleDevices: true })
+                return;
+
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                BeginMoveDrag(e);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key == Key.Escape)
+            {
+                WindowState = WindowState.Minimized;
+                e.Handled = true;
+            }
+        }
+
+        #endregion
+
+        private static float GetAutoScale(float currentValue, float peakValue)
+        {
+            float target = Math.Max(currentValue, peakValue);
+            foreach (float scale in SCALE_OPTIONS)
+                if (target <= scale * 0.95f) return scale;
+            return SCALE_OPTIONS[^1];
+        }
+
+        #region Device Selection
+
+        private void UpdateDeviceNames()
+        {
+            gpuUsageGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
+            gpuVramGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
+            diskGauge.HasMultipleDevices = _diskMonitor.HasMultipleDevices;
+            networkGauge.HasMultipleDevices = _networkMonitor.HasMultipleDevices;
+
+            string gpuShortName = _gpuMonitor.IsAvailable ? _gpuMonitor.GetShortName() : "";
+            gpuUsageGauge.DeviceName = gpuShortName;
+            gpuVramGauge.DeviceName = gpuShortName;
+            diskGauge.DeviceName = _diskMonitor.IsAvailable ? _diskMonitor.CurrentDeviceDisplayName : "";
+            networkGauge.DeviceName = _networkMonitor.IsAvailable ? _networkMonitor.CurrentDeviceDisplayName : "";
+        }
+
+        private void ShowDeviceMenu(GaugeControl gauge, ISelectableMonitor monitor)
+        {
+            var menu = new MenuFlyout();
+            foreach (var device in monitor.AvailableDevices)
+            {
+                var item = new MenuItem
+                {
+                    Header = device.DisplayName,
+                    Icon = device.Id == monitor.SelectedDevice?.Id ? new TextBlock { Text = "✓" } : null
+                };
+                item.Click += (_, _) => SelectDevice(monitor, device.Id);
+                menu.Items.Add(item);
+            }
+            menu.ShowAt(gauge);
+        }
+
+        private void SelectDevice(ISelectableMonitor monitor, string deviceId)
+        {
+            if (!monitor.SelectDevice(deviceId))
+                return;
+
+            if (monitor == _gpuMonitor && _gpuMonitor.IsMemoryAvailable)
+                gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+            else if (monitor == _diskMonitor)
+                _diskPeakMbps = 0;
+            else if (monitor == _networkMonitor)
+                _networkPeakMbps = 0;
+
+            UpdateDeviceNames();
+            UpdateAllMetrics();
+            Debug.WriteLine($"Selected device: {monitor.CurrentDeviceDisplayName}");
+        }
+
+        #endregion
+
+        #region Update Methods
+
+        private void UpdateAllMetrics()
+        {
+            SafeUpdate(UpdateRAM);
+            SafeUpdate(UpdateCPU);
+            SafeUpdate(UpdateGPU);
+            SafeUpdate(UpdateDisk);
+            SafeUpdate(UpdateNetwork);
+            SafeUpdate(UpdateDateTime);
+        }
+
+        private static void SafeUpdate(Action updateAction)
+        {
+            try
+            {
+                updateAction();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Update error in {updateAction.Method.Name}: {ex.Message}");
+            }
+        }
+
+        private void UpdateRAM()
+        {
+            if (_memoryMonitor.IsAvailable)
+            {
+                _memoryMonitor.Update();
+                ramGauge.SetValue(_memoryMonitor.UsagePercent,
+                    $"{_memoryMonitor.UsedMemoryGB:F1}/{_memoryMonitor.TotalMemoryGB:F0}GB");
+            }
+            else
+            {
+                ramGauge.SetValue(0, "N/A");
+            }
         }
 
         private void UpdateCPU()
         {
-            if (_cpuMonitor != null && _cpuMonitor.IsAvailable)
+            if (_cpuMonitor.IsAvailable)
             {
-                try
-                {
-#if WINDOWS
-                    var cpu = _cpuMonitor as CPUMonitor;
-#endif
-                    var linuxCpu = _cpuMonitor as Linux.LinuxCPUMonitor;
-
-#if WINDOWS
-                    if (cpu != null)
-                    {
-                        var usage = cpu.Update();
-                        if (_cpuUsageText != null)
-                            _cpuUsageText.Text = $"Usage: {usage:F1}%";
-
-                        var temp = cpu.UpdateTemperature();
-                        if (_cpuTempText != null && temp > 0)
-                            _cpuTempText.Text = $"Temperature: {temp}°C";
-                    }
-                    else
-#endif
-                    if (linuxCpu != null)
-                    {
-                        var usage = linuxCpu.Update();
-                        if (_cpuUsageText != null)
-                            _cpuUsageText.Text = $"Usage: {usage:F1}%";
-
-                        var temp = linuxCpu.UpdateTemperature();
-                        if (_cpuTempText != null && temp > 0)
-                            _cpuTempText.Text = $"Temperature: {temp}°C";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating CPU: {ex.Message}");
-                }
+                float usage = _cpuMonitor.Update();
+                int temp = _cpuMonitor.UpdateTemperature();
+                if (temp > 0)
+                    cpuGauge.SetValue(usage, $"{Math.Round(usage)}%", $"{temp}°C");
+                else
+                    cpuGauge.SetValue(usage, $"{Math.Round(usage)}%");
             }
-        }
-
-        private void UpdateMemory()
-        {
-            if (_memoryMonitor != null && _memoryMonitor.IsAvailable)
+            else
             {
-                try
-                {
-#if WINDOWS
-                    var mem = _memoryMonitor as SystemMemoryMonitor;
-#endif
-                    var linuxMem = _memoryMonitor as Linux.LinuxMemoryMonitor;
-
-#if WINDOWS
-                    if (mem != null)
-                    {
-                        mem.Update();
-                        if (_memoryUsageText != null)
-                            _memoryUsageText.Text = $"Usage: {mem.UsedMemoryGB:F2} / {mem.TotalMemoryGB:F2} GB ({mem.UsagePercent}%)";
-                    }
-                    else
-#endif
-                    if (linuxMem != null)
-                    {
-                        linuxMem.Update();
-                        if (_memoryUsageText != null)
-                            _memoryUsageText.Text = $"Usage: {linuxMem.UsedMemoryGB:F2} / {linuxMem.TotalMemoryGB:F2} GB ({linuxMem.UsagePercent}%)";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating Memory: {ex.Message}");
-                }
+                cpuGauge.SetValue(0, "N/A");
             }
         }
 
         private void UpdateGPU()
         {
-            if (_gpuMonitor != null && _gpuMonitor.IsAvailable)
-            {
-                try
-                {
-#if WINDOWS
-                    var gpu = _gpuMonitor as GPUMonitor;
-#endif
-                    var linuxGpu = _gpuMonitor as Linux.LinuxGPUMonitor;
+            if (_gpuMonitor.IsAvailable)
+                _gpuMonitor.Update();
 
-#if WINDOWS
-                    if (gpu != null)
-                    {
-                        gpu.Update();
-                        if (_gpuUsageText != null)
-                            _gpuUsageText.Text = $"Usage: {gpu.CurrentUsagePercent:F1}%";
-                        if (_gpuMemoryText != null)
-                            _gpuMemoryText.Text = $"Memory: {gpu.UsedMemoryGB:F2} / {gpu.TotalMemoryGB:F2} GB ({gpu.MemoryUsagePercent}%)";
-                        if (_gpuTempText != null && gpu.CurrentTemperatureCelsius > 0)
-                            _gpuTempText.Text = $"Temperature: {gpu.CurrentTemperatureCelsius}°C";
-                    }
-                    else
-#endif
-                    if (linuxGpu != null)
-                    {
-                        linuxGpu.Update();
-                        if (_gpuUsageText != null)
-                            _gpuUsageText.Text = $"Usage: {linuxGpu.CurrentUsagePercent:F1}%";
-                        if (_gpuMemoryText != null)
-                            _gpuMemoryText.Text = $"Memory: {linuxGpu.UsedMemoryGB:F2} / {linuxGpu.TotalMemoryGB:F2} GB ({linuxGpu.MemoryUsagePercent}%)";
-                        if (_gpuTempText != null && linuxGpu.CurrentTemperatureCelsius > 0)
-                            _gpuTempText.Text = $"Temperature: {linuxGpu.CurrentTemperatureCelsius}°C";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating GPU: {ex.Message}");
-                }
+            if (_gpuMonitor.IsUsageAvailable)
+            {
+                float usage = _gpuMonitor.CurrentUsagePercent;
+                if (_gpuMonitor.IsTemperatureAvailable)
+                    gpuUsageGauge.SetValue(usage, $"{Math.Round(usage)}%", $"{_gpuMonitor.CurrentTemperatureCelsius}°C");
+                else
+                    gpuUsageGauge.SetValue(usage, $"{Math.Round(usage)}%");
+            }
+            else
+            {
+                gpuUsageGauge.SetValue(0, "N/A");
+            }
+
+            if (_gpuMonitor.IsMemoryAvailable)
+            {
+                double usedGB = _gpuMonitor.UsedMemoryGB;
+                double totalGB = _gpuMonitor.TotalMemoryGB;
+                gpuVramGauge.SetValue((float)usedGB, $"{usedGB:F1}/{totalGB:F0}GB");
+            }
+            else
+            {
+                gpuVramGauge.SetValue(0, "N/A");
             }
         }
 
         private void UpdateDisk()
         {
-            if (_diskMonitor != null && _diskMonitor.IsAvailable)
+            if (_diskMonitor.IsAvailable)
             {
-                try
-                {
-#if WINDOWS
-                    var disk = _diskMonitor as DiskMonitor;
-#endif
-                    var linuxDisk = _diskMonitor as Linux.LinuxDiskMonitor;
-
-#if WINDOWS
-                    if (disk != null)
-                    {
-                        disk.Update();
-                        if (_diskText != null)
-                            _diskText.Text = $"Read: {disk.CurrentReadMBps:F2} MB/s | Write: {disk.CurrentWriteMBps:F2} MB/s";
-                    }
-                    else
-#endif
-                    if (linuxDisk != null)
-                    {
-                        linuxDisk.Update();
-                        if (_diskText != null)
-                            _diskText.Text = $"Read: {linuxDisk.CurrentReadMBps:F2} MB/s | Write: {linuxDisk.CurrentWriteMBps:F2} MB/s";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating Disk: {ex.Message}");
-                }
+                _diskMonitor.Update();
+                float totalMbps = (float)_diskMonitor.CurrentTotalMBps;
+                _diskPeakMbps = Math.Max(_diskPeakMbps, totalMbps);
+                diskGauge.MaxValue = GetAutoScale(totalMbps, _diskPeakMbps);
+                diskGauge.SetValue(totalMbps, $"{totalMbps:F0}MB/s");
+            }
+            else
+            {
+                diskGauge.SetValue(0, "N/A");
             }
         }
 
         private void UpdateNetwork()
         {
-            if (_networkMonitor != null && _networkMonitor.IsAvailable)
+            if (_networkMonitor.IsAvailable)
             {
-                try
-                {
-#if WINDOWS
-                    var network = _networkMonitor as NetworkMonitor;
-#endif
-                    var linuxNetwork = _networkMonitor as Linux.LinuxNetworkMonitor;
-
-#if WINDOWS
-                    if (network != null)
-                    {
-                        network.Update();
-                        if (_networkText != null)
-                            _networkText.Text = $"Download: {network.CurrentDownloadMbps:F2} Mbps | Upload: {network.CurrentUploadMbps:F2} Mbps";
-                    }
-                    else
-#endif
-                    if (linuxNetwork != null)
-                    {
-                        linuxNetwork.Update();
-                        if (_networkText != null)
-                            _networkText.Text = $"Download: {linuxNetwork.CurrentDownloadMbps:F2} Mbps | Upload: {linuxNetwork.CurrentUploadMbps:F2} Mbps";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error updating Network: {ex.Message}");
-                }
+                _networkMonitor.Update();
+                float totalMbps = (float)_networkMonitor.CurrentTotalMbps;
+                _networkPeakMbps = Math.Max(_networkPeakMbps, totalMbps);
+                networkGauge.MaxValue = GetAutoScale(totalMbps, _networkPeakMbps);
+                networkGauge.SetValue(totalMbps, $"{totalMbps:F0}Mbps");
+            }
+            else
+            {
+                networkGauge.SetValue(0, "N/A");
             }
         }
 
+        private void UpdateDateTime()
+        {
+            DateTime now = DateTime.Now;
+
+            // 12-hour format without seconds (e.g., "3:45 PM") and month/day (e.g., "January 15")
+            lblTime.Text = now.ToString("h:mm tt");
+            lblDate.Text = now.ToString("MMMM d");
+        }
+
+        #endregion
+
         protected override void OnClosed(EventArgs e)
         {
-            _updateTimer?.Stop();
-            
-            (_cpuMonitor as IDisposable)?.Dispose();
-            (_memoryMonitor as IDisposable)?.Dispose();
-            (_gpuMonitor as IDisposable)?.Dispose();
-            (_diskMonitor as IDisposable)?.Dispose();
-            (_networkMonitor as IDisposable)?.Dispose();
+            _updateTimer.Stop();
+
+            _cpuMonitor?.Dispose();
+            _memoryMonitor?.Dispose();
+            _gpuMonitor?.Dispose();
+            _diskMonitor?.Dispose();
+            _networkMonitor?.Dispose();
 
             base.OnClosed(e);
         }

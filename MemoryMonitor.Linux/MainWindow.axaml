@@ -1,7 +1,45 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Memory_Monitor.Controls"
         x:Class="Memory_Monitor.MainWindow"
-        Title="Memory Monitor - Linux"
-        Width="1920"
-        Height="480">
+        Title="Memory Monitor"
+        Width="1920" Height="480"
+        CanResize="False"
+        SystemDecorations="None"
+        Topmost="True"
+        WindowStartupLocation="Manual"
+        Background="#191C20">
+
+    <Panel>
+        <!-- Six gauges in a row, 95% of the window height (matches the Windows layout) -->
+        <UniformGrid Columns="6" Rows="1" Margin="10,12">
+            <UniformGrid.Styles>
+                <Style Selector="c|GaugeControl">
+                    <Setter Property="Margin" Value="2.5,0" />
+                </Style>
+            </UniformGrid.Styles>
+
+            <c:GaugeControl x:Name="ramGauge" Label="RAM" GaugeColor="#3A96DD" />
+            <c:GaugeControl x:Name="cpuGauge" Label="CPU" GaugeColor="#DC3232" />
+            <c:GaugeControl x:Name="gpuUsageGauge" Label="GPU" GaugeColor="#FF8C00" IsSelectable="True" />
+            <c:GaugeControl x:Name="gpuVramGauge" Label="VRAM" GaugeColor="#A05AF0" MaxValue="24" IsSelectable="True" />
+            <c:GaugeControl x:Name="diskGauge" Label="DISK" GaugeColor="#32C850" IsSelectable="True" />
+            <c:GaugeControl x:Name="networkGauge" Label="NET" GaugeColor="#FFC832" IsSelectable="True" />
+        </UniformGrid>
+
+        <!-- Date (top left) and time (top right) -->
+        <Panel Margin="15" IsHitTestVisible="False">
+            <Panel.Styles>
+                <Style Selector="TextBlock">
+                    <Setter Property="FontFamily" Value="fonts:Inter#Inter" />
+                    <Setter Property="FontSize" Value="29.33" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="VerticalAlignment" Value="Top" />
+                </Style>
+            </Panel.Styles>
+            <TextBlock x:Name="lblDate" HorizontalAlignment="Left" />
+            <TextBlock x:Name="lblTime" HorizontalAlignment="Right" />
+        </Panel>
+    </Panel>
 </Window>

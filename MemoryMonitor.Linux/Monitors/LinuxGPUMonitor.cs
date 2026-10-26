@@ -369,6 +369,30 @@ namespace Memory_Monitor.Linux
             }
         }
 
+        /// <summary>
+        /// Gets a shortened GPU name for display under the gauge (e.g., "NVIDIA GeForce RTX 3060" -> "RTX 3060")
+        /// </summary>
+        public string GetShortName() => GetShortName(GPUName);
+
+        private static string GetShortName(string gpuName)
+        {
+            string[] removeWords = { "NVIDIA", "GeForce", "AMD", "Radeon", "Intel", "Graphics", "(TM)", "™", "®" };
+            string shortened = gpuName;
+
+            foreach (string word in removeWords)
+            {
+                shortened = shortened.Replace(word, "").Trim();
+            }
+
+            while (shortened.Contains("  "))
+                shortened = shortened.Replace("  ", " ");
+
+            if (shortened.Length < 3)
+                return gpuName;
+
+            return shortened;
+        }
+
         public void Dispose()
         {
             if (_detectedGPUs.Any(g => g.Vendor == GPUVendor.NVIDIA))
