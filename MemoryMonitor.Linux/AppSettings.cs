@@ -31,6 +31,11 @@ namespace Memory_Monitor
         public DisplayMode DisplayMode { get; set; } = DisplayMode.CircularGauges;
         public bool TopMost { get; set; } = true;
 
+        // Device IDs chosen from the gauge menus (null = monitor's default device)
+        public string? SelectedGPUDevice { get; set; }
+        public string? SelectedDiskDevice { get; set; }
+        public string? SelectedNetworkDevice { get; set; }
+
         public static AppSettings Load()
         {
             try

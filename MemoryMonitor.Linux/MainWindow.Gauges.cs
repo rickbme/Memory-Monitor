@@ -14,6 +14,8 @@ namespace Memory_Monitor
 
         private void InitializeGauges()
         {
+            LoadDeviceSelections();
+
             gpuVramGauge.MaxValue = _gpuMonitor.IsMemoryAvailable
                 ? (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB)
                 : 24f;
@@ -63,16 +65,51 @@ namespace Memory_Monitor
             if (!monitor.SelectDevice(deviceId))
                 return;
 
-            if (monitor == _gpuMonitor && _gpuMonitor.IsMemoryAvailable)
-                gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+            if (monitor == _gpuMonitor)
+            {
+                if (_gpuMonitor.IsMemoryAvailable)
+                    gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+                _settings.SelectedGPUDevice = deviceId;
+            }
             else if (monitor == _diskMonitor)
+            {
                 _diskPeakMbps = 0;
+                _barDiskPeakMBps = 0;
+                _settings.SelectedDiskDevice = deviceId;
+            }
             else if (monitor == _networkMonitor)
+            {
                 _networkPeakMbps = 0;
+                _barNetworkPeakMBps = 0;
+                _settings.SelectedNetworkDevice = deviceId;
+            }
+            _settings.Save();
 
             UpdateDeviceNames();
             UpdateAllMetrics();
             Debug.WriteLine($"Selected device: {monitor.CurrentDeviceDisplayName}");
+        }
+
+        /// <summary>
+        /// Restores the devices chosen in a previous session. A saved device that no longer exists
+        /// (e.g. an unplugged USB adapter) is ignored and the monitor keeps its default.
+        /// </summary>
+        private void LoadDeviceSelections()
+        {
+            RestoreDeviceSelection(_gpuMonitor, _settings.SelectedGPUDevice);
+            RestoreDeviceSelection(_diskMonitor, _settings.SelectedDiskDevice);
+            RestoreDeviceSelection(_networkMonitor, _settings.SelectedNetworkDevice);
+        }
+
+        private static void RestoreDeviceSelection(ISelectableMonitor monitor, string? deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId))
+                return;
+
+            bool restored = monitor.SelectDevice(deviceId);
+            Debug.WriteLine(restored
+                ? $"Loaded device selection: {deviceId}"
+                : $"Saved device {deviceId} not found, using {monitor.CurrentDeviceDisplayName}");
         }
 
         #endregion
