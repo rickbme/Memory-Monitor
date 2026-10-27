@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Memory Monitor
-Comment=System Hardware Monitor for Linux
-Exec=/usr/local/bin/memory-monitor/Memory Monitor
-Icon=/usr/local/bin/memory-monitor/Resources/mmguage.ico
-Terminal=false
-Type=Application
-Categories=System;Monitor;
-StartupNotify=true

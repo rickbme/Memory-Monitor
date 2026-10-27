@@ -10,6 +10,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Memory_Monitor</RootNamespace>
     <AssemblyName>Memory Monitor</AssemblyName>
+    <Version>2.4.4</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
@@ -40,7 +41,7 @@
 
   <ItemGroup>
     <!-- Copy resources to output for runtime loading -->
-    <Content Include="..\Memory Monitor\Resources\mmguage.ico" Link="Resources\mmguage.ico">
+    <Content Include="Packaging\icons\memory-monitor-256.png" Link="Resources\memory-monitor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Memory Monitor\Resources\dfs_logo_1920.png" Link="Resources\dfs_logo_1920.png">

@@ -42,7 +42,6 @@ files with it, but building the Linux version never touches the Windows project,
 | Touch gestures | Not yet |
 | Welcome dialog on first run | Not yet |
 | Fade animation when switching display modes | Not yet |
-| Installer | No installer yet; build and run from source (see below) |
 
 ---
 
@@ -67,14 +66,57 @@ files with it, but building the Linux version never touches the Windows project,
 Read from the kernel's thermal zones (`x86_pkg_temp`, `coretemp` or `cpu`). This works on Intel CPUs.
 Many AMD CPUs don't expose one of these zones, so the temperature won't show.
 
-### To build
+### To build from source
 - **.NET 8 SDK** - on Ubuntu: `sudo apt install dotnet-sdk-8.0`
 
-No other packages are needed. A published build is self-contained and includes the .NET runtime.
+The release package doesn't need .NET; it includes its own runtime. No other packages are needed.
 
 ---
 
-## Building and Running
+## Installing
+
+1. Download `memory-monitor-<version>-linux-x64.tar.gz` from
+   [Releases](https://github.com/rickbme/Memory-Monitor/releases) (or build it, see below).
+2. Unpack it and run the installer:
+   ```bash
+   tar -xzf memory-monitor-2.4.4-linux-x64.tar.gz
+   cd memory-monitor-2.4.4-linux-x64
+   ./install.sh
+   ```
+3. Start **Memory Monitor** from the app menu, or run `memory-monitor`.
+
+The installer is for your user only and doesn't need sudo. It asks whether to:
+- **start Memory Monitor at login**
+- **add a desktop shortcut**
+- **set up MangoHud** for game FPS (only if you don't already have a MangoHud config)
+
+Use `./install.sh --yes` or `./install.sh --no` to answer all of these at once. Running a newer
+`install.sh` upgrades an existing install; exit Memory Monitor first.
+
+### What gets installed
+
+| Path | What |
+|------|------|
+| `~/.local/share/memory-monitor/` | The app, this README and `uninstall.sh` |
+| `~/.local/bin/memory-monitor` | Launcher command |
+| `~/.local/share/applications/memory-monitor.desktop` | App menu entry |
+| `~/.local/share/icons/hicolor/*/apps/memory-monitor.*` | Icons |
+| `~/.config/autostart/memory-monitor.desktop` | Start at login (optional) |
+| `~/.config/memory-monitor/settings.json` | Your settings (created by the app) |
+| `~/.local/state/memory-monitor/` | Log file and crash dumps (created by the launcher) |
+
+### Uninstalling
+
+```bash
+~/.local/share/memory-monitor/uninstall.sh
+```
+
+It removes everything above and asks before deleting your settings and logs. MangoHud's config and game
+logs are left alone.
+
+---
+
+## Building from Source
 
 ```bash
 git clone https://github.com/rickbme/Memory-Monitor.git
@@ -86,17 +128,15 @@ cd MemoryMonitor.Linux
 dotnet run
 ```
 
-### Self-contained release build
+### Release package
 
 ```bash
-./build-linux.sh
+./package-linux.sh
 ```
 
-The app is written to `bin/Release/net8.0/linux-x64/publish/`. Run it with:
-
-```bash
-"bin/Release/net8.0/linux-x64/publish/Memory Monitor"
-```
+This publishes a self-contained build and creates `bin/dist/memory-monitor-<version>-linux-x64.tar.gz`
+with the app, icons, `install.sh`, `uninstall.sh` and this README. The version comes from `<Version>` in
+`MemoryMonitor.Linux.csproj`.
 
 ### Developing in VS Code
 - Install **C# Dev Kit** for F5 debugging and breakpoints.
@@ -226,11 +266,12 @@ main one. Use **Move to Next Monitor** to move it.
 ## Known Issues
 
 - **Rare crash on startup.** In testing, about 1 in 100 launches crashed within the first few seconds.
-  The cause isn't known yet. Start it again if it happens.
+  The cause isn't known yet. Start it again if it happens. When started from the app menu or
+  `memory-monitor`, a crash dump is saved in `~/.local/state/memory-monitor/crash-dumps/`; please attach
+  it, with `memory-monitor.log` from the same folder, to an [Issue](https://github.com/rickbme/Memory-Monitor/issues).
 - **Tray tooltip.** Avalonia 11's Linux tray code copies the tooltip text into the icon's status, so the
   tooltip has to be the word "Active" for Ubuntu to show the icon. GNOME doesn't display tray tooltips,
   so this isn't visible.
-- **`memory-monitor.desktop` is out of date** and doesn't match the build output yet.
 
 ---
 
@@ -263,9 +304,12 @@ MemoryMonitor.Linux/
 │   ├── LinuxDiskMonitor.cs       # /proc/diskstats
 │   ├── LinuxNetworkMonitor.cs    # /proc/net/dev
 │   └── MangoHudFpsReader.cs      # Game FPS from MangoHud logs
+├── Packaging/
+│   ├── install.sh                # Per-user installer (menu entry, launcher, icons, autostart)
+│   ├── uninstall.sh              # Removes everything install.sh added
+│   └── icons/                    # App icon: memory-monitor.svg and PNGs from 16 to 256px
 ├── Screenshots/
-├── build-linux.sh                # Self-contained release build
-└── memory-monitor.desktop        # Desktop launcher (out of date)
+└── package-linux.sh              # Builds the release tarball
 ```
 
 Shared with the Windows project: `IMonitor.cs`, `ISelectableMonitor.cs`, `DeviceInfo.cs`, `Constants.cs`

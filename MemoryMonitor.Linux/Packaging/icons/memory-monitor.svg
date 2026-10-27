@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Memory Monitor (Linux) app icon: gauge in the app's own style -->
+  <defs>
+    <radialGradient id="face" cx="50%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#3A3E43"/>
+      <stop offset="1" stop-color="#16181C"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C9CED4"/>
+      <stop offset="0.5" stop-color="#6A7076"/>
+      <stop offset="1" stop-color="#B5BAC0"/>
+    </linearGradient>
+    <linearGradient id="needle" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#B02020"/>
+      <stop offset="1" stop-color="#FF6A5A"/>
+    </linearGradient>
+    <radialGradient id="hub" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#8A9096"/>
+      <stop offset="1" stop-color="#2D3136"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="122" fill="#000" opacity="0.25"/>
+  <circle cx="128" cy="128" r="120" fill="url(#rim)"/>
+  <circle cx="128" cy="128" r="111" fill="url(#face)"/>
+    <path d="M 67.19 188.81 A 86 86 0 1 1 188.81 188.81" fill="none" stroke="#2E3135" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 67.19 188.81 A 86 86 0 0 1 72.72 62.12" fill="none" stroke="#32C850" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 70.45 64.09 A 86 86 0 0 1 157.41 47.19" fill="none" stroke="#FFC832" stroke-width="20" stroke-linecap="butt"/>
+  <path d="M 154.58 46.21 A 86 86 0 0 1 197.58 77.45" fill="none" stroke="#DC3232" stroke-width="20" stroke-linecap="round"/>
+  <line x1="81.33" y1="174.67" x2="89.82" y2="166.18" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <line x1="65.23" y1="148.40" x2="70.94" y2="146.54" stroke="#9A9EA3" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="62.81" y1="117.68" x2="74.66" y2="119.55" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <line x1="74.60" y1="89.21" x2="79.46" y2="92.73" stroke="#9A9EA3" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="98.04" y1="69.19" x2="103.48" y2="79.89" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <line x1="128.00" y1="62.00" x2="128.00" y2="68.00" stroke="#9A9EA3" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="157.96" y1="69.19" x2="152.52" y2="79.89" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <line x1="181.40" y1="89.21" x2="176.54" y2="92.73" stroke="#9A9EA3" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="193.19" y1="117.68" x2="181.34" y2="119.55" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <line x1="190.77" y1="148.40" x2="185.06" y2="146.54" stroke="#9A9EA3" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="174.67" y1="174.67" x2="166.18" y2="166.18" stroke="#9A9EA3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 122.71 120.72 L 192.72 80.98 L 133.29 135.28 L 113.44 138.58 Z" fill="url(#needle)"/>
+  <circle cx="128" cy="128" r="15" fill="url(#hub)" stroke="#1A1C20" stroke-width="2"/>
+</svg>

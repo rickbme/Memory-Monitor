@@ -47,6 +47,10 @@ namespace Memory_Monitor
 
             _settings = AppSettings.Load();
 
+            string iconPath = Path.Combine(AppContext.BaseDirectory, "Resources", "memory-monitor.png");
+            if (File.Exists(iconPath))
+                Icon = new WindowIcon(iconPath);
+
             _memoryMonitor = new LinuxMemoryMonitor();
             _cpuMonitor = new LinuxCPUMonitor();
             _gpuMonitor = new LinuxGPUMonitor();

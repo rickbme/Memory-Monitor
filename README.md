@@ -56,9 +56,10 @@ project using the Avalonia UI framework, so it doesn't affect the Windows build 
 
 It has the same circular gauge and bar graph displays, automatic placement on the 1920x480 display, a
 system tray icon, device selection, and game FPS through [MangoHud](https://github.com/flightlessmango/MangoHud)
-in place of HWiNFO/RTSS. Touch gestures and an installer aren't ported yet.
+in place of HWiNFO/RTSS. It installs per user from a release tarball with an install script; touch
+gestures aren't ported yet.
 
-See the [Linux README](MemoryMonitor.Linux/README.md) for requirements, building, and MangoHud setup.
+See the [Linux README](MemoryMonitor.Linux/README.md) for requirements, installing, building, and MangoHud setup.
 
 ---
 
