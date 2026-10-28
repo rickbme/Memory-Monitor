@@ -1,94 +1,105 @@
 # ============================================================================
 # Verify Installer Contents
 # ============================================================================
-# This script verifies that the MSI installer includes all required files
+# Checks a built MSI against the publish folder it was made from:
+#   - the MSI's version matches the published MemoryMonitor.dll
+#   - the MSI contains every published file (plus USER_GUIDE.md)
+#   - key application, runtime and resource files were published
+#
+# Usage:
+#   .\Verify-Installer.ps1 [-Configuration Release|Debug]
+#
+# Exits with code 1 if any check fails.
 # ============================================================================
 
-$msiPath = ".\bin\x64\Release\MemoryMonitorSetup.msi"
+param(
+    [ValidateSet("Release", "Debug")]
+    [string]$Configuration = "Release"
+)
+
+$msiPath = Join-Path $PSScriptRoot "bin\x64\$Configuration\MemoryMonitorSetup.msi"
+$publishPath = Join-Path $PSScriptRoot "..\Memory Monitor\bin\$Configuration\net8.0-windows\win-x64\publish"
+$failures = 0
+
+function Report([bool]$ok, [string]$message) {
+    if ($ok) {
+        Write-Host "  [OK]   $message" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] $message" -ForegroundColor Red
+        $script:failures++
+    }
+}
+
+# Runs a query against the MSI database and returns the first column of each row
+function Get-MsiColumn([string]$path, [string]$sql) {
+    $installer = New-Object -ComObject WindowsInstaller.Installer
+    $database = $installer.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $installer, @($path, [int]0))
+    $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, @($sql))
+    [void]$view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
+    $values = @()
+    while ($record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)) {
+        $values += $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, @([int]1))
+    }
+    [void]$view.GetType().InvokeMember("Close", "InvokeMethod", $null, $view, $null)
+    [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($database)
+    return ,$values
+}
+
+Write-Host ""
+Write-Host "Memory Monitor installer verification ($Configuration)" -ForegroundColor Cyan
+Write-Host ""
 
 if (-not (Test-Path $msiPath)) {
-    Write-Error "MSI not found at: $msiPath"
+    Write-Host "MSI not found: $msiPath" -ForegroundColor Red
+    Write-Host "Build it first with build-installer.bat or Build-Installer.ps1" -ForegroundColor Yellow
+    exit 1
+}
+if (-not (Test-Path $publishPath)) {
+    Write-Host "Publish folder not found: $publishPath" -ForegroundColor Red
     exit 1
 }
 
-$msiFile = Get-Item $msiPath
-Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "  MSI Installer Verification" -ForegroundColor Cyan
-Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "File: $($msiFile.Name)"
-Write-Host "Size: $([math]::Round($msiFile.Length / 1MB, 2)) MB ($($msiFile.Length) bytes)"
-Write-Host "Date: $($msiFile.LastWriteTime)"
+$msi = Get-Item $msiPath
+$publishedFiles = Get-ChildItem -Path $publishPath -Recurse -File
+Write-Host ("MSI:     {0} ({1:N1} MB, built {2})" -f $msi.FullName, ($msi.Length / 1MB), $msi.LastWriteTime)
+Write-Host ("Publish: {0} files, {1:N1} MB" -f $publishedFiles.Count, (($publishedFiles | Measure-Object Length -Sum).Sum / 1MB))
 Write-Host ""
 
-Write-Host "Size Analysis:" -ForegroundColor Cyan
-if ($msiFile.Length -gt 50MB) {
-    Write-Host "  ? Size indicates self-contained .NET 8 runtime IS included" -ForegroundColor Green
-    Write-Host "  ? Expected size for full installer: 50-70 MB" -ForegroundColor Green
-    Write-Host "  ? Users will NOT need to install .NET 8 separately" -ForegroundColor Green
-} elseif ($msiFile.Length -gt 5MB) {
-    Write-Host "  ? Size seems small - may be missing runtime files" -ForegroundColor Yellow
-    Write-Host "  Expected size for full installer: 50-70 MB" -ForegroundColor Yellow
-} else {
-    Write-Host "  ? Size is too small - runtime files missing!" -ForegroundColor Red
-    Write-Host "  Expected size for full installer: 50-70 MB" -ForegroundColor Red
+Write-Host "Installer:" -ForegroundColor Yellow
+$msiVersion = (Get-MsiColumn $msi.FullName "SELECT Value FROM Property WHERE Property='ProductVersion'")[0]
+$appVersion = [System.Reflection.AssemblyName]::GetAssemblyName((Join-Path $publishPath "MemoryMonitor.dll")).Version.ToString()
+Report ($msiVersion -eq $appVersion) "Version $msiVersion matches the published app ($appVersion)"
+
+$msiFileCount = (Get-MsiColumn $msi.FullName "SELECT File FROM File").Count
+$expectedCount = $publishedFiles.Count + 1   # + USER_GUIDE.md
+Report ($msiFileCount -eq $expectedCount) "Contains $msiFileCount files (publish folder + USER_GUIDE.md = $expectedCount)"
+
+Report ($msi.LastWriteTime -ge ($publishedFiles | Measure-Object LastWriteTime -Maximum).Maximum) "MSI is newer than the published files"
+
+Write-Host ""
+Write-Host "Published files:" -ForegroundColor Yellow
+$criticalFiles = [ordered]@{
+    "MemoryMonitor.exe"           = "Main executable"
+    "MemoryMonitor.dll"           = "Application code"
+    "LibreHardwareMonitorLib.dll" = "Hardware monitoring library"
+    "System.Management.dll"       = "WMI access (GPU detection)"
+    "coreclr.dll"                 = ".NET 8 runtime"
+    "hostfxr.dll"                 = ".NET host"
+    "System.Windows.Forms.dll"    = "Windows Forms"
+    "Resources\mmguage.ico"       = "Application icon"
+    "Resources\dfs_logo_1920.png" = "Intro logo"
+    "Resources\dfslogo_round.png" = "Splash logo"
+}
+foreach ($file in $criticalFiles.Keys) {
+    Report (Test-Path (Join-Path $publishPath $file)) "$file - $($criticalFiles[$file])"
 }
 
 Write-Host ""
-Write-Host "Published Files Verification:" -ForegroundColor Cyan
-
-# Check publish directory
-$publishPath = "..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish"
-if (Test-Path $publishPath) {
-    $publishedFiles = Get-ChildItem -Path $publishPath -Recurse -File
-    $totalPublishSize = ($publishedFiles | Measure-Object -Property Length -Sum).Sum
-    
-    Write-Host "  Total files in publish folder: $($publishedFiles.Count)"
-    Write-Host "  Total size of published files: $([math]::Round($totalPublishSize / 1MB, 2)) MB"
-    
-    # Check for critical files
-    Write-Host ""
-    Write-Host "Critical Files Check:" -ForegroundColor Yellow
-    
-    $criticalFiles = @{
-        "Memory Monitor.exe" = "Main executable"
-        "LibreHardwareMonitorLib.dll" = "Hardware monitoring library"
-        "coreclr.dll" = ".NET 8 CoreCLR runtime"
-        "System.Windows.Forms.dll" = "Windows Forms framework"
-        "Resources\mmguage.ico" = "Application icon"
-        "clrjit.dll" = ".NET JIT compiler"
-        "hostfxr.dll" = ".NET host"
-    }
-    
-    foreach ($file in $criticalFiles.Keys) {
-        $fullPath = Join-Path $publishPath $file
-        if (Test-Path $fullPath) {
-            $fileInfo = Get-Item $fullPath
-            $sizeKB = [math]::Round($fileInfo.Length / 1KB, 1)
-            Write-Host "  ? $file ($sizeKB KB) - $($criticalFiles[$file])" -ForegroundColor Green
-        } else {
-            Write-Host "  ? $file - $($criticalFiles[$file]) - NOT FOUND!" -ForegroundColor Red
-        }
-    }
-    
-    # Check for localization folders
-    Write-Host ""
-    Write-Host "Localization Folders:" -ForegroundColor Yellow
-    $locDirs = Get-ChildItem -Path $publishPath -Directory | Where-Object { $_.Name -match '^[a-z]{2}(-[A-Z]{2})?$' }
-    Write-Host "  Found $($locDirs.Count) localization directories: $($locDirs.Name -join ', ')" -ForegroundColor Cyan
+if ($failures -eq 0) {
+    Write-Host "All checks passed." -ForegroundColor Green
+    Write-Host "Final check: install it on a test PC (ideally one without .NET 8) and launch the app." -ForegroundColor White
+    exit 0
 } else {
-    Write-Host "  ? Publish folder not found at: $publishPath" -ForegroundColor Yellow
+    Write-Host "$failures check(s) failed." -ForegroundColor Red
+    exit 1
 }
-
-Write-Host ""
-Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Installation Test:" -ForegroundColor Cyan
-Write-Host "  To verify the installer works correctly:" -ForegroundColor White
-Write-Host "  1. Test on a VM or PC without .NET 8 installed" -ForegroundColor White
-Write-Host "  2. Run: MemoryMonitorSetup.msi" -ForegroundColor White
-Write-Host "  3. Application should install and run without errors" -ForegroundColor White
-Write-Host "  4. No additional runtime downloads should be required" -ForegroundColor White
-Write-Host ""
-Write-Host "Current Status: READY FOR DISTRIBUTION ?" -ForegroundColor Green
-Write-Host ""

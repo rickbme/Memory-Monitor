@@ -3,10 +3,16 @@
     <OutputName>MemoryMonitorSetup</OutputName>
     <OutputType>Package</OutputType>
     <Cultures>en-us</Cultures>
+    <!-- The app is 64-bit (win-x64). Without this the package is x86 and installs to "Program Files (x86)" -->
+    <Platform>x64</Platform>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- ICE61 warns that MajorUpgrade also removes the same version; that is intended (AllowSameVersionUpgrades in Package.wxs) -->
+    <SuppressIces>ICE61</SuppressIces>
     <!-- Disable auto-discovery of .wxs files to prevent double-inclusion -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <!-- PublishDir points to where the application publish will be placed -->
-    <PublishDir>..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish</PublishDir>
+    <PublishDir>..\Memory Monitor\bin\$(Configuration)\net8.0-windows\win-x64\publish</PublishDir>
+    <DefineConstants>$(DefineConstants);PublishDir=$(PublishDir)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <!-- Main package definition -->
@@ -15,10 +21,7 @@
     <Compile Include="PublishedFiles.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="INSTALLER_ISSUES_FIXED.md" />
-    <None Include="INSTALLER_UI_IMPROVEMENTS.md" />
     <None Include="NoLicense.rtf" />
-    <None Include="QUICK_FIX_SUMMARY.md" />
   </ItemGroup>
   <!-- WiX Extensions for UI dialogs and utilities -->
   <ItemGroup>
@@ -29,6 +32,16 @@
   <Target Name="ValidatePublishDirectory" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists('$(PublishDir)')" Text="Publish directory '$(PublishDir)' not found. Please run: dotnet publish '..\Memory Monitor\MemoryMonitor.csproj' -c Release -r win-x64 --self-contained true" />
     <Error Condition="!Exists('PublishedFiles.wxs')" Text="PublishedFiles.wxs not found. Please run: powershell -ExecutionPolicy Bypass -File Regenerate-PublishedFiles.ps1" />
-    <Message Importance="high" Text="Building Memory Monitor Installer v2.4.1.0" />
+    <Error Condition="!Exists('$(PublishDir)\MemoryMonitor.dll')" Text="MemoryMonitor.dll not found in '$(PublishDir)'. The publish output looks incomplete." />
+
+    <!-- Take the installer version from the published app, so it always matches <Version> in MemoryMonitor.csproj -->
+    <GetAssemblyIdentity AssemblyFiles="$(PublishDir)\MemoryMonitor.dll">
+      <Output TaskParameter="Assemblies" ItemName="PublishedAppAssembly" />
+    </GetAssemblyIdentity>
+    <PropertyGroup>
+      <ProductVersion>%(PublishedAppAssembly.Version)</ProductVersion>
+      <DefineConstants>$(DefineConstants);ProductVersion=$(ProductVersion)</DefineConstants>
+    </PropertyGroup>
+    <Message Importance="high" Text="Building Memory Monitor Installer v$(ProductVersion) ($(InstallerPlatform))" />
   </Target>
 </Project>

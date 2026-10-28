@@ -10,10 +10,16 @@ param(
     [string]$OutputFile = "PublishedFiles.wxs"
 )
 
+$ErrorActionPreference = "Stop"
+
+# Relative paths are relative to this script's folder (the installer project), whatever the current directory
+Push-Location $PSScriptRoot
+try {
+
 # Ensure publish directory exists
 if (-not (Test-Path $PublishPath)) {
     Write-Error "Publish directory not found: $PublishPath"
-    Write-Host "Please run: dotnet publish '..\Memory Monitor\Memory Monitor.csproj' -c Release"
+    Write-Host "Please run: dotnet publish '..\Memory Monitor\MemoryMonitor.csproj' -c Release -r win-x64 --self-contained true"
     exit 1
 }
 
@@ -66,20 +72,19 @@ $rootFiles = Get-ChildItem -Path $PublishPath -File | Sort-Object Name
 foreach ($file in $rootFiles) {
     $fileName = $file.Name
     $guid = Get-ConsistentGuid "root\$fileName"
-    
-    $isMainExe = ($fileName -eq "Memory Monitor.exe")
-    
-    $xml += @"
+    $sourceEscaped = [System.Security.SecurityElement]::Escape("$PublishPath\$fileName")
+
+    $xml += "`n" + @"
       <Component Id="Comp_$componentId" Guid="$guid">
-        <File Id="File_$componentId" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\$fileName" />
+        <File Id="File_$componentId"
+              Source="$sourceEscaped" />
       </Component>
 "@
     $componentId++
 }
 
 # Close PublishedFileComponents
-$xml += @"
+$xml += "`n" + @"
     </ComponentGroup>
   </Fragment>
 "@
@@ -96,7 +101,7 @@ foreach ($dir in $directories) {
     $subdirComponentGroups += $safeDirName
     
     # Add directory fragment
-    $xml += @"
+    $xml += "`n" + @"
   <Fragment>
     <DirectoryRef Id="INSTALLFOLDER">
       <Directory Id="Dir_$safeDirName" Name="$dirName" />
@@ -113,55 +118,65 @@ foreach ($dir in $directories) {
         $relativePath = $file.FullName.Substring($dir.FullName.Length + 1)
         $relPath = "$dirName\$relativePath"
         $guid = Get-ConsistentGuid $relPath
-        
-        # Handle subdirectories within the language folders
+
+        # Every file of this group is installed directly into Dir_<dirName>, so a nested folder would be
+        # flattened (and could collide). None exist today; stop rather than build a broken installer.
         if ($relativePath.Contains('\')) {
-            $subDirPath = Split-Path $relativePath -Parent
-            $fileName = Split-Path $relativePath -Leaf
-            $fullRelPath = "$dirName\$relativePath"
-        } else {
-            $fileName = $relativePath
-            $fullRelPath = "$dirName\$fileName"
+            throw "Nested folder found in publish output: '$relPath'. Regenerate-PublishedFiles.ps1 only supports one level of subfolders."
         }
-        
-        $xml += @"
+
+        $sourceEscaped = [System.Security.SecurityElement]::Escape("$PublishPath\$relPath")
+
+        $xml += "`n" + @"
       <Component Id="Comp_$componentId" Guid="$guid">
-        <File Id="File_$componentId" 
-              Source="..\Memory Monitor\bin\Release\net8.0-windows\win-x64\publish\$fullRelPath" />
+        <File Id="File_$componentId"
+              Source="$sourceEscaped" />
       </Component>
 "@
         $componentId++
     }
     
     # Close this ComponentGroup
-    $xml += @"
+    $xml += "`n" + @"
     </ComponentGroup>
   </Fragment>
 "@
 }
 
+# One group referencing every subdirectory group, so Package.wxs only needs a single
+# <ComponentGroupRef Id="PublishedSubdirectoryComponents" /> however the publish folders change
+$xml += "`n" + @"
+  <Fragment>
+    <ComponentGroup Id="PublishedSubdirectoryComponents">
+"@
+foreach ($grp in $subdirComponentGroups) {
+    $xml += "`n" + @"
+      <ComponentGroupRef Id="${grp}Components" />
+"@
+}
+$xml += "`n" + @"
+    </ComponentGroup>
+  </Fragment>
+"@
+
 # Close Wix element
-$xml += @"
+$xml += "`n" + @"
 </Wix>
 "@
 
-# Write to file
+# Write to file with Windows line endings, whatever line endings this script was saved with
+$xml = $xml -replace "`r?`n", "`r`n"
 $xml | Out-File -FilePath $OutputFile -Encoding UTF8
 Write-Host ""
 Write-Host "Generated $OutputFile with $($componentId - 1) components" -ForegroundColor Green
 Write-Host ""
-Write-Host "Directory component groups created:" -ForegroundColor Cyan
+Write-Host "Directory component groups created (all referenced by PublishedSubdirectoryComponents):" -ForegroundColor Cyan
 foreach ($grp in $subdirComponentGroups) {
     Write-Host "  - ${grp}Components" -ForegroundColor Yellow
 }
 Write-Host ""
-Write-Host "Make sure Package.wxs includes these ComponentGroupRef entries in the Feature:" -ForegroundColor Green
-Write-Host "  <Feature Id=`"Main`" Title=`"Memory Monitor`" Level=`"1`">"
-Write-Host "    <ComponentGroupRef Id=`"PublishedFileComponents`" />"
-foreach ($grp in $subdirComponentGroups) {
-    Write-Host "    <ComponentGroupRef Id=`"${grp}Components`" />"
+
 }
-Write-Host "    <ComponentGroupRef Id=`"StartMenuShortcuts`" />"
-Write-Host "    <ComponentGroupRef Id=`"DesktopShortcuts`" />"
-Write-Host "  </Feature>"
-Write-Host ""
+finally {
+    Pop-Location
+}
