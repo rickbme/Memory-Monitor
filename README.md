@@ -32,19 +32,20 @@ System Monitor is a comprehensive real-time monitoring tool for Windows designed
 
 ### Key Features
 
-- **Automatic move to any 1920x480 display!
+- **Automatic Placement** - Moves itself to your 1920x480 (or other very wide) display
 - **Two Display Modes** - Switch between Circular Gauges and Bar Graph views
 - **Smooth Mode Transitions** - Fade animation when switching display modes
 - **Real-Time CPU Monitoring** - Track CPU usage with temperature display
-- **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature
+- **GPU Monitoring** - Native NVIDIA (NVML) and AMD (ADL) support with temperature; other GPUs through Windows' GPU performance counters
 - **System Memory Tracking** - Monitor RAM usage with detailed statistics
-- **GPU VRAM Monitoring** - Video memory usage and total capacity
+- **GPU VRAM Monitoring** - Video memory usage and true total capacity (including cards over 4 GB)
 - **Disk I/O Monitoring** - Read/write throughput with auto-scaling
 - **Network Monitoring** - Upload/download speed with auto-scaling
 - **Temperature Display** - CPU and GPU temperatures shown inside gauges
-- **FPS Monitoring** - Real-time frame rate display with smart game detection
+- **FPS Monitoring** - Real-time game frame rate from HWiNFO/RTSS
 - **Date & Time Display** - Current date and time on mini monitor
 - **Touch Gesture Support** - Full touch input for mini monitors with touchscreen
+- **Remembers Your Choices** - Display mode, FPS mode and selected GPU/disk/network are kept between sessions
 - **Mini Monitor Optimized** - Designed for 1920x480 secondary displays
 
 ---
@@ -86,7 +87,8 @@ Right-click the **system tray icon** → **Display Mode**:
 - **Circular Gauges** - Classic needle gauge display
 - **Bar Graph** - Modern animated bar panels
 
-Smooth fade transition (300ms) provides a polished experience when switching.
+Smooth fade transition (300ms) provides a polished experience when switching. Your choice is remembered
+the next time Memory Monitor starts.
 
 ---
 
@@ -124,7 +126,7 @@ The application displays 6 gauges in a horizontal row, optimized for 1920x480 di
 
 ##  FPS Monitoring
 
-Memory Monitor displays real-time frames per second with intelligent game detection.
+Memory Monitor displays your game's real-time frames per second, read from HWiNFO.
 
 ### FPS Gauge Features
 - **Color-Coded Quality Indicator:**
@@ -136,25 +138,25 @@ Memory Monitor displays real-time frames per second with intelligent game detect
 - **Circular Gauges**: Dedicated FPS gauge between GPU and VRAM
 - **Bar Graph**: FPS shown in GPU panel
 
-### Smart Game Detection
-The FPS display automatically appears when you're gaming and hides when you're not:
-- Detects fullscreen and borderless window games
-- Monitors sustained high GPU usage (>70% for 5+ seconds)
-- Recognizes 60+ popular game processes
-- Combines multiple signals for accurate detection
+### When FPS Appears
+The FPS display appears automatically while a game is reporting a frame rate (through RTSS or a game
+overlay feeding HWiNFO), and hides again when the game closes. It works for fullscreen, borderless and
+windowed games.
 
-### Display Modes
+### FPS Display Options
 Right-click tray icon → **FPS Display** submenu (available in both display modes):
-- **Auto-detect** (default) - Smart detection based on activity
-- **Always Show** - Force FPS display when available
-- **Always Hide** - Never show FPS gauge
+- **Auto-detect** (default) - Show FPS whenever a game reports it
+- **Always Show** - Show FPS whenever HWiNFO has a reading
+- **Always Hide** - Never show FPS
+
+Your choice is remembered when switching display modes and after restarting.
 
 ### Setup Requirements
 1. Download and install [HWiNFO](https://www.hwinfo.com/)
 2. Download and install [RTSS](https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html) (RivaTuner Statistics Server)
 3. Launch HWiNFO → Settings → Enable **"Shared Memory Support"**
 4. Launch your game with RTSS overlay enabled
-5. FPS gauge appears automatically when gaming is detected
+5. The FPS gauge appears automatically while the game is running
 
 > **Note:** FPS monitoring requires HWiNFO with "Shared Memory Support" enabled and RTSS or a game overlay that reports FPS to HWiNFO.
 
@@ -172,7 +174,7 @@ For mini monitors with touchscreen capability, Memory Monitor supports the follo
 - **Tap on GPU/Disk/Network Gauge** - Cycle through available devices
   - Each tap advances to the next device (wraps around)
   - Toast notification shows newly selected device
-  - Mouse clicks still show full popup menu for precise selection
+  - Mouse clicks show the full popup menu instead, for precise selection
 - **Long Press** - Show context menu at touch location
 - **Two-Finger Tap** - Toggle "Always on Top" mode
 
@@ -198,7 +200,7 @@ The application uses multiple methods to obtain CPU temperature:
 
 ### HWiNFO Setup (For CPU Temperature)
 
-If CPU temperature shows 0Â°C or doesn't appear:
+If CPU temperature shows 0°C or doesn't appear:
 
 1. **Download HWiNFO** from [https://www.hwinfo.com/](https://www.hwinfo.com/)
 2. **Install and run HWiNFO** (Sensors-only mode is sufficient)
@@ -217,7 +219,7 @@ If CPU temperature shows 0Â°C or doesn't appear:
 
 ### System Requirements
 - **Operating System**: Windows 10/11 (x64)
-- **.NET Runtime**: .NET 8.0 Desktop Runtime
+- **.NET Runtime**: None needed - the installer includes the .NET 8 runtime
 - **Privileges**: Administrator (for hardware sensor access)
 
 ### GPU Drivers (for GPU monitoring)
@@ -230,71 +232,84 @@ If CPU temperature shows 0Â°C or doesn't appear:
 
 ### Installation
 
-#### Option 1: MSI Installer
-1. Download the latest `MemoryMonitorSetup.msi` from [Releases](https://github.com/rickbme/Memory-Monitor/releases)
-2. Run the installer
-3. Launch "Memory Monitor" from the Start Menu
+1. Download the latest `.msi` installer from [Releases](https://github.com/rickbme/Memory-Monitor/releases)
+2. Run it and approve the administrator prompt
+3. Launch "Memory Monitor" from the Start Menu or the desktop shortcut
 
-#### Option 2: Portable
-1. Download the portable ZIP from [Releases](https://github.com/rickbme/Memory-Monitor/releases)
-2. Extract to desired location
-3. Run `Memory Monitor.exe` as Administrator
+The app installs to `C:\Program Files\Memory Monitor`. Installing a newer version upgrades the existing
+one in place; there's no need to uninstall first. To remove it, use **Settings → Apps** (Add/Remove Programs).
+
+> **Upgrading from 2.4.4 or older?** Earlier installers put the app in `C:\Program Files (x86)`. The 2.4.5
+> installer removes that copy automatically. If an old **Memory Monitor 1.0.0.0** entry is still listed in
+> Add/Remove Programs, uninstall it by hand. It's from an early build that newer installers can't detect.
 
 ### Running the Application
-- Right-click and select **"Run as administrator"**
-- Or the application will prompt for elevation automatically
+The app asks for administrator rights each time it starts (needed to read hardware sensors). Approve the
+prompt and it moves itself to your mini monitor.
 
 ---
 
 ## Building from Source
 
 ### Prerequisites
-- Visual Studio 2022 or later
+- Visual Studio 2022 or later (optional - the `dotnet` CLI is enough)
 - .NET 8.0 SDK
-- WiX Toolset v4 (for installer)
+- [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) source, cloned **next to**
+  this repository (the project references `..\LibreHardwareMonitor\LibreHardwareMonitorLib`)
+- WiX Toolset v5 for the installer - restored automatically from NuGet, nothing to install
 
 ### Build Steps
-```bash
-# Clone the repository
+```powershell
+# Clone both repositories side by side
+git clone https://github.com/LibreHardwareMonitor/LibreHardwareMonitor.git
 git clone https://github.com/rickbme/Memory-Monitor.git
 cd Memory-Monitor
 
-# Restore and build
-dotnet restore
-dotnet build --configuration Release
+# Build
+dotnet build "Memory Monitor\MemoryMonitor.csproj" -c Release
 
-# Run
-cd "Memory Monitor\bin\Release\net8.0-windows\win-x64"
-.\Memory Monitor.exe
+# Run (asks for administrator rights)
+& "Memory Monitor\bin\Release\net8.0-windows\win-x64\MemoryMonitor.exe"
 ```
 
-### Creating Installer
-```bash
-dotnet build MemoryMonitorSetup\MemoryMonitorSetup.wixproj --configuration Release
+### Creating the Installer
+```batch
+MemoryMonitorSetup\build-installer.bat
 ```
+
+This publishes the app, builds `MemoryMonitorSetup\bin\x64\Release\MemoryMonitorSetup.msi`, and
+`MemoryMonitorSetup\Verify-Installer.ps1` checks the result. The version comes from `<Version>` in
+`Memory Monitor\MemoryMonitor.csproj`. See the [installer guide](MemoryMonitorSetup/INSTALLER-README.md)
+for details and the release checklist.
 
 ---
 
 ##  Project Structure
 
 ```
-Memory Monitor/
- Memory Monitor/             # Main application
- CompactGaugeControl.cs      # Circular gauge UI control
- MiniMonitorForm.cs          # Main form (1920x480)
- CPUMonitor.cs               # CPU usage & temp monitoring
- GPUMonitor.cs               # GPU usage, VRAM & temp monitoring
- DiskMonitor.cs              # Disk I/O monitoring
- NetworkMonitor.cs           # Network throughput monitoring
- HardwareMonitorService.cs   # LibreHardwareMonitor wrapper
- HWiNFOReader.cs             # HWiNFO shared memory reader
- NVMLInterop.cs              # NVIDIA NVML interop
- ADLInterop.cs               # AMD ADL interop
- app.manifest                # UAC admin manifest
- MemoryMonitorSetup/         # WiX installer project
- MemoryMonitor.Linux/        # Linux version (Avalonia) - see its README
- README.md
- CHANGELOG.md
+Memory-Monitor/
+├── Memory Monitor/                 # Windows application (WinForms, .NET 8)
+│   ├── Program.cs                  # Startup, display mode switching
+│   ├── MiniMonitorForm*.cs         # Circular gauges display (1920x480)
+│   ├── BarGraphDisplayForm.cs      # Bar graph display
+│   ├── CompactGaugeControl.cs      # Circular gauge UI control
+│   ├── CPUMonitor.cs               # CPU usage & temperature
+│   ├── GPUMonitor.cs               # GPU usage, VRAM & temperature
+│   ├── DxgiAdapters.cs             # Links GPUs to their Windows performance counters
+│   ├── DiskMonitor.cs              # Disk I/O
+│   ├── NetworkMonitor.cs           # Network throughput
+│   ├── HardwareMonitorService.cs   # LibreHardwareMonitor wrapper
+│   ├── HWiNFOReader.cs             # HWiNFO shared memory reader (CPU temp, FPS)
+│   ├── GameActivityDetector.cs     # FPS display mode
+│   ├── TouchGestureHandler.cs      # Touchscreen gestures
+│   ├── NVMLInterop.cs              # NVIDIA NVML interop
+│   ├── ADLInterop.cs               # AMD ADL interop
+│   ├── app.manifest                # UAC admin manifest
+│   └── CHANGELOG.md                # Detailed change history
+├── MemoryMonitorSetup/             # WiX installer - see INSTALLER-README.md
+├── MemoryMonitor.Linux/            # Linux version (Avalonia) - see its README
+├── USER_GUIDE.md                   # End-user guide (installed with the app)
+└── README.md
 ```
 
 ---
@@ -311,9 +326,14 @@ Memory Monitor/
 - **AMD**: Ensure latest Radeon drivers are installed
 - Intel integrated graphics may not support temperature reading
 
+### FPS Not Showing
+1. Make sure HWiNFO is running with **Shared Memory Support** enabled
+2. Make sure RTSS (or another overlay that reports FPS to HWiNFO) is running with the game
+3. Check the tray menu → **FPS Display** isn't set to **Always Hide**
+
 ### Application Won't Start
-1. Ensure .NET 8.0 Runtime is installed
-2. Try running as Administrator
+1. Approve the administrator prompt - the app needs it to read sensors
+2. Reinstall with the latest installer (it includes everything the app needs)
 3. Check Windows Event Viewer for error details
 
 ---
@@ -326,15 +346,31 @@ Memory Monitor/
 
 ### AMD GPUs 
 - Radeon RX series
-- Full utilization and temperature support
+- Full utilization, memory, and temperature support
 
-### Intel GPUs 
-- Limited support via Performance Counters
+### Intel and other GPUs 
+- Utilization and VRAM through Windows' GPU performance counters (the same data as Task Manager)
 - No temperature reading available
 
 ---
 
 ##  Version History
+
+See [CHANGELOG.md](Memory%20Monitor/CHANGELOG.md) for full details.
+
+### v2.4.5 (2026-10)
+- **Fixed**: GPU usage, VRAM and temperatures dropping to 0 after switching display mode
+- **Fixed**: CPU temperature stopping after switching display mode
+- **Fixed**: Selected GPU, disk and network not remembered between sessions
+- **Fixed**: Settings reset to defaults after every upgrade (carried over from 2.4.5 onward)
+- **Fixed**: FPS Display setting resetting to Auto-detect when switching display mode
+- **Fixed**: AMD VRAM usage always showing 0; VRAM total capped at 4 GB on some GPUs
+- **Fixed**: GPU usage on Intel/other GPUs reading the wrong data
+- **Fixed**: Network adapters missed or double-counted (Intel adapters, Hyper-V/WSL virtual adapters)
+- **Fixed**: FPS lost when HWiNFO reorders its sensors (e.g. RTSS restart)
+- **Fixed**: Touch taps on gauges, two-finger tap; swipe arrows and welcome text characters
+- **Installer**: Now a true 64-bit package installing to `C:\Program Files`; same-version reinstalls upgrade cleanly
+- **Linux**: AMD Ryzen CPU temperature, network interface matching, tray check timeout, safer log cleanup
 
 ### v2.4.4 (2025-01)
 - **New**: FPS Display menu now available in Bar Graph mode

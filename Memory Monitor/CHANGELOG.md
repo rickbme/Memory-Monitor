@@ -5,17 +5,78 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.5] - 2026-10
+
+A bug-fix release from a full code review of the Windows and Linux versions, plus an installer overhaul.
+
+### Fixed - Windows
+- **GPU readings dropping to 0 after switching display mode** (NVIDIA and AMD)
+  - The old display form was closed after the new one was created, and its cleanup shut down the shared
+    NVML/ADL libraries the new form was using
+  - `Program.cs` now closes the old form before creating the new one; `NVMLInterop`/`ADLInterop` are
+    reference-counted so a library only shuts down when its last user is done
+- **CPU temperature stopping after switching display mode** - same cause: LibreHardwareMonitor's
+  `Computer.Close()` releases process-wide state (`OpCode`, `Mutexes`) that the new form's instance relied on
+- **Selected GPU, disk and network not restored after a restart** - device IDs included
+  `string.GetHashCode()`, which .NET randomizes per process. IDs now use stable identifiers (PCI device ID,
+  disk instance name, adapter GUID). Selections saved by older versions are reset once
+- **Settings reset to defaults after every upgrade** - .NET stores user settings per app version; settings
+  are now carried over from the previous version on first start (`Settings.Upgrade()`)
+- **FPS Display setting reset to Auto-detect** when switching display mode or restarting - now saved
+  (`FpsDisplayMode` setting) and shown in both forms' menus
+- **AMD VRAM usage always 0** - the performance counter lookup needed data only collected for non-AMD GPUs
+- **VRAM total capped at 4 GB** for GPUs without NVML/ADL (WMI `AdapterRAM` is 32-bit)
+- **GPU usage on Intel/other GPUs** read one random process's 3D engine instead of the whole GPU
+- **Performance-counter VRAM usage** multiplied an already-bytes value by 1024×1024, and matched the wrong adapter
+  - New `DxgiAdapters.cs` links each GPU to its adapter LUID through DXGI; usage is the sum of all 3D
+    engines for that LUID and VRAM comes from `GPU Adapter Memory` for that LUID
+- **Network adapters missed or double-counted** - counter instance names use `[` `]` and `_` in place of
+  `(` `)` `#` `/` `\`; matching now uses the exact normalized name, never binds two adapters to one
+  counter, and also filters Hyper-V/WSL `vEthernet` and other virtual adapters by description
+- **FPS lost when HWiNFO reorders its sensors** (e.g. RTSS restarting) - cached readings are re-validated
+  by `ReadingId` and searched for again if they moved; index bounds are checked
+- **FPS auto-detect false positives** - Memory Monitor's own window and the desktop no longer count as
+  fullscreen games; game names only match exactly or as a prefix (VS Code's `code` matched `cod`)
+- **Touch** - taps on gauges now reach the gesture handler (each gauge is registered for touch); two-finger
+  tap works (`WM_TOUCH` disables `WM_GESTURE`, so it's detected from touch points); a tap no longer also
+  opens the device popup
+- **F11** now updates the "Always on Top" menu check mark
+- **Welcome dialog** now also appears on first run in Bar Graph mode
+- **Lost characters** - swipe toast arrows, welcome dialog bullets and arrows; seven source files converted
+  from Windows-1252 to UTF-8
+
+### Fixed - Linux
+- **CPU temperature on AMD Ryzen** - falls back to hwmon (`k10temp`, `zenpower`, `coretemp`) when there is
+  no CPU thermal zone
+- **Network interface matching** - `eth0` no longer matches `veth0` in `/proc/net/dev`
+- **Tray check** can no longer freeze the window if `gdbus` hangs
+- **MangoHud log cleanup** only deletes files named like MangoHud logs
+
+### Installer
+- **64-bit package** - installs to `C:\Program Files\Memory Monitor` (previously `Program Files (x86)`);
+  upgrading removes the old x86 copy
+- **Same-version reinstalls** replace the installed copy instead of adding a second Add/Remove Programs entry
+- **Version comes from `MemoryMonitor.csproj`** - read from the published app at build time; no more
+  version in `Package.wxs`
+- **`PublishedFiles.wxs`** references all subfolders through one generated group, so new folders need no
+  `Package.wxs` edit
+- **Scripts** - `Build-Installer.ps1` rewritten (it pointed at a non-existent project and dropped all
+  subfolders); `build-installer.bat` is now a wrapper for it; `Verify-Installer.ps1` checks the MSI's
+  version and file count against the publish folder; obsolete `Generate-Components.ps1` and
+  `HarvestFiles.bat` removed
+- **Docs** - installer documentation consolidated into `MemoryMonitorSetup/INSTALLER-README.md`
+
 ## [2.4.4] - 2025-01
 
 ### Added
 - **FPS Display Mode in Bar Graph** - FPS Display menu now available in Bar Graph mode
-  - Right-click tray icon ? FPS Display submenu (Auto-detect, Always Show, Always Hide)
+  - Right-click tray icon → FPS Display submenu (Auto-detect, Always Show, Always Hide)
   - Matches functionality already available in Circular Gauges mode
   - FPS shown in GPU panel when gaming activity is detected
 
 ### Changed
 - **Smooth Display Mode Transition** - Added fade animation when switching between display modes
-  - Fade out (150ms) ? Fade in (150ms) for professional, polished look
+  - Fade out (150ms) → Fade in (150ms) for professional, polished look
   - Total transition time ~300ms - quick but easy on the eyes
   - Uses form Opacity property for smooth animation
 
@@ -58,7 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bar Graph Tray Icon** - Distinct tray icon style for Bar Graph mode
   - `GaugeIconGenerator.CreateBarGraphTrayIcon()` method
   - Shows 4 vertical bars instead of circular arc gauge
-  - Color-coded based on RAM usage (green ? yellow ? red)
+  - Color-coded based on RAM usage (green → yellow → red)
 - **MonitorApplicationContext** - Custom ApplicationContext for display mode switching
   - Manages form lifecycle without exiting application
   - Handles `DisplayModeChanged` events for seamless switching
@@ -114,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `SetDisplayMode()` and `ToggleDisplayMode()` methods
 
 - **Display Mode Menu** - New tray menu option to switch between display modes
-  - Right-click tray icon ? **Display Mode** submenu
+  - Right-click tray icon → **Display Mode** submenu
   - **Circular Gauges** - Classic needle gauge display (default)
   - **Bar Graph** - New animated bar graph display
   - Preference saved and restored between sessions
@@ -339,7 +400,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes
 - Touch cycling is designed for small touch displays where popup menus are difficult to use
 - Mouse users still have access to the full popup menu for quick device selection
-- Each touch tap cycles forward through the device list (All ? Device 1 ? Device 2 ? etc. ? All)
+- Each touch tap cycles forward through the device list (All → Device 1 → Device 2 → etc. → All)
 - Device selection is saved and restored between application sessions
 - The first-run welcome dialog is shown only once by default and can be suppressed
 - New users are encouraged to explore the user guide for detailed information

@@ -63,8 +63,10 @@ files with it, but building the Linux version never touches the Windows project,
 - **Intel graphics** - not supported.
 
 ### For CPU temperature
-Read from the kernel's thermal zones (`x86_pkg_temp`, `coretemp` or `cpu`). This works on Intel CPUs.
-Many AMD CPUs don't expose one of these zones, so the temperature won't show.
+Read from the kernel's thermal zones (`x86_pkg_temp`, `coretemp` or `cpu`), which works on Intel CPUs.
+If there's no such zone, as on most AMD Ryzen CPUs, it's read from the hwmon sensor drivers instead
+(`k10temp`, `zenpower` or `coretemp`), using the Tctl/Tdie or package temperature. These drivers load
+automatically on most distributions.
 
 ### To build from source
 - **.NET 8 SDK** - on Ubuntu: `sudo apt install dotnet-sdk-8.0`
@@ -79,8 +81,8 @@ The release package doesn't need .NET; it includes its own runtime. No other pac
    [Releases](https://github.com/rickbme/Memory-Monitor/releases) (or build it, see below).
 2. Unpack it and run the installer:
    ```bash
-   tar -xzf memory-monitor-2.4.4-linux-x64.tar.gz
-   cd memory-monitor-2.4.4-linux-x64
+   tar -xzf memory-monitor-2.4.5-linux-x64.tar.gz
+   cd memory-monitor-2.4.5-linux-x64
    ./install.sh
    ```
 3. Start **Memory Monitor** from the app menu, or run `memory-monitor`.
@@ -217,7 +219,9 @@ mangohud %command%
   (this was needed for *Rise of the Triad*).
 - **MangoHud works with more than Steam** - any Vulkan or OpenGL program started as `mangohud <program>`.
   Normal desktop apps don't report FPS, on Linux or Windows.
-- **Logs older than 7 days are deleted** from the log folder each time Memory Monitor starts.
+- **MangoHud logs older than 7 days are deleted** from the log folder each time Memory Monitor starts.
+  Only files named like MangoHud logs (`<game>_<date>_<time>.csv` and their `_summary.csv`) are removed;
+  anything else in the folder is left alone.
 
 ---
 
@@ -240,11 +244,16 @@ mangohud %command%
   with a hidden window.
 
 ### No CPU temperature
-Your CPU doesn't expose a supported thermal zone. List them with:
+Neither a CPU thermal zone nor a supported hwmon driver was found. Check what your system exposes:
 
 ```bash
+# Thermal zones (Intel: look for x86_pkg_temp)
 for z in /sys/class/thermal/thermal_zone*; do echo "$(cat $z/type) $(cat $z/temp)"; done
+# hwmon drivers (AMD: look for k10temp or zenpower; Intel: coretemp)
+for h in /sys/class/hwmon/hwmon*; do echo "$(cat $h/name)"; done
 ```
+
+If no `k10temp` shows on an AMD system, load it with `sudo modprobe k10temp`.
 
 ### No GPU readings
 - NVIDIA: run `nvidia-smi`. If it fails, the proprietary driver isn't installed.
@@ -296,7 +305,7 @@ MemoryMonitor.Linux/
 │   ├── PanelDrawing.cs           # Shared drawing for the bar panels
 │   └── GaugeIconGenerator.cs     # Live tray icons
 ├── Monitors/
-│   ├── LinuxCPUMonitor.cs        # /proc/stat and thermal zones
+│   ├── LinuxCPUMonitor.cs        # /proc/stat, thermal zones and hwmon
 │   ├── LinuxMemoryMonitor.cs     # /proc/meminfo
 │   ├── LinuxGPUMonitor.cs        # NVIDIA (NVML) and AMD (sysfs)
 │   ├── LinuxNVMLInterop.cs       # libnvidia-ml.so.1 bindings

@@ -10,7 +10,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Memory_Monitor</RootNamespace>
     <AssemblyName>Memory Monitor</AssemblyName>
-    <Version>2.4.4</Version>
+    <Version>2.4.5</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 

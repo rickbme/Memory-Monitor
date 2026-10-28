@@ -6,11 +6,11 @@ This release adds FPS display options to Bar Graph mode and introduces smooth fa
 
 ---
 
-## ? New Features
+## New Features
 
 ### FPS Display Mode in Bar Graph
 - **New**: FPS Display menu now available in Bar Graph mode
-- **Menu Location**: Right-click tray icon ? **FPS Display** submenu
+- **Menu Location**: Right-click tray icon → **FPS Display** submenu
 - **Options**:
   - **Auto-detect** (default) - Shows FPS only when gaming activity detected
   - **Always Show** - Force FPS display when available
@@ -20,14 +20,14 @@ This release adds FPS display options to Bar Graph mode and introduces smooth fa
 
 ### Smooth Display Mode Transitions
 - **New**: Fade animation when switching between Circular Gauges and Bar Graph
-- **Animation**: Fade out (150ms) ? Fade in (150ms)
+- **Animation**: Fade out (150ms) → Fade in (150ms)
 - **Total Time**: ~300ms for complete transition
 - **Result**: Professional, polished appearance that's easy on the eyes
 - No more jarring instant switches between display modes
 
 ---
 
-## ?? Display Modes
+## Display Modes
 
 Memory Monitor now offers two fully-featured display modes:
 
@@ -44,15 +44,15 @@ Memory Monitor now offers two fully-featured display modes:
 - FPS shown in GPU panel
 
 **Both modes now support:**
-- ? FPS Display settings (Auto-detect, Always Show, Always Hide)
-- ? Move to Next Monitor
-- ? Always on Top toggle
-- ? System tray integration
-- ? Touch gestures (if available)
+- FPS Display settings (Auto-detect, Always Show, Always Hide)
+- Move to Next Monitor
+- Always on Top toggle
+- System tray integration
+- Touch gestures (if available)
 
 ---
 
-## ?? Files Changed
+## Files Changed
 
 | File | Changes |
 |------|---------|
@@ -64,7 +64,7 @@ Memory Monitor now offers two fully-featured display modes:
 
 ---
 
-## ?? Technical Details
+## Technical Details
 
 ### Fade Transition Implementation
 ```csharp
@@ -87,7 +87,7 @@ OPACITY_STEP = 0.1       // Opacity change per tick
 
 ---
 
-## ?? Version Info
+## Version Info
 
 | Component | Version |
 |-----------|---------|
@@ -98,7 +98,7 @@ OPACITY_STEP = 0.1       // Opacity change per tick
 
 ---
 
-## ?? Downloads
+## Downloads
 
 | File | Description |
 |------|-------------|
@@ -107,7 +107,7 @@ OPACITY_STEP = 0.1       // Opacity change per tick
 
 ---
 
-## ?? Upgrade Notes
+## Upgrade Notes
 
 - Seamless upgrade from v2.4.3
 - All settings preserved
