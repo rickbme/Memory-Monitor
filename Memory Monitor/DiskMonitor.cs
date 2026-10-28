@@ -50,7 +50,6 @@ namespace Memory_Monitor
 
                 Debug.WriteLine($"Found {instanceNames.Length} PhysicalDisk instances");
 
-                int diskIndex = 0;
                 foreach (string instanceName in instanceNames)
                 {
                     if (instanceName == "_Total" || string.IsNullOrWhiteSpace(instanceName))
@@ -63,7 +62,9 @@ namespace Memory_Monitor
                         
                         var diskCounter = new DiskCounters
                         {
-                            Id = $"disk_{diskIndex}_{instanceName.GetHashCode():X8}",
+                            // Must be stable across launches so the saved selection can be restored
+                            // (string.GetHashCode is randomized per process in .NET, so it can't be used here)
+                            Id = $"disk_{instanceName}",
                             DiskName = instanceName,
                             DisplayName = displayName,
                             ReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", instanceName),
@@ -75,7 +76,6 @@ namespace Memory_Monitor
 
                         _allDisks.Add(diskCounter);
                         Debug.WriteLine($"Initialized disk monitor for: {instanceName} -> {displayName}");
-                        diskIndex++;
                     }
                     catch (Exception ex)
                     {

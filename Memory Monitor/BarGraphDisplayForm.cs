@@ -84,6 +84,12 @@ namespace Memory_Monitor
             }
 
             Debug.WriteLine("Bar Graph Display started");
+
+            // Show welcome dialog on first run (also when the app starts in bar graph mode)
+            this.BeginInvoke(new Action(() =>
+            {
+                WelcomeDialog.ShowIfFirstRun();
+            }));
         }
 
         #region Intro Logo
@@ -261,6 +267,7 @@ namespace Memory_Monitor
         private void InitializeGameDetection()
         {
             _gameActivityDetector = new GameActivityDetector(updateTimer.Interval);
+            UpdateFpsMenuState(_gameActivityDetector.DisplayMode);
             Debug.WriteLine("Game activity detector initialized for bar graph display");
         }
 
@@ -443,7 +450,7 @@ namespace Memory_Monitor
                 _lastCpuUsage = (int)Math.Round(usage);
                 int temp = _cpuMonitor.UpdateTemperature();
                 
-                string tempText = temp > 0 ? $"TEMP: {temp}°C" : "";
+                string tempText = temp > 0 ? $"TEMP: {temp}Â°C" : "";
                 cpuPanel.SetValue(usage, $"{_lastCpuUsage}%", tempText);
             }
             else
@@ -476,7 +483,7 @@ namespace Memory_Monitor
                 if (_gpuMonitor.IsTemperatureAvailable)
                 {
                     int temp = _gpuMonitor.UpdateTemperature();
-                    tempText = $"TEMP: {temp}°C";
+                    tempText = $"TEMP: {temp}Â°C";
                 }
 
                 gpuPanel.SetValue(usage, $"{_lastGpuUsage}%", tempText, fpsText);
@@ -697,7 +704,11 @@ namespace Memory_Monitor
                 _gameActivityDetector.DisplayMode = mode;
             }
 
-            // Update menu checkmarks
+            UpdateFpsMenuState(mode);
+        }
+
+        private void UpdateFpsMenuState(GameActivityDetector.FpsDisplayMode mode)
+        {
             fpsAutoDetectToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AutoDetect;
             fpsAlwaysShowToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysShow;
             fpsAlwaysHideToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysHide;

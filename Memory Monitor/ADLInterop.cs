@@ -109,6 +109,10 @@ namespace Memory_Monitor
         private static bool _isInitialized = false;
         private static bool _isAvailable = false;
 
+        // Number of successful Initialize calls not yet matched by Shutdown. During a display mode switch the
+        // new form's GPUMonitor initializes before the old one is disposed, so ADL must stay up until both are done.
+        private static int _refCount = 0;
+
         public static bool IsAvailable => _isAvailable;
 
         // Memory allocation callback
@@ -118,18 +122,23 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Initialize ADL library
+        /// Initialize ADL library. Each call that returns true must be matched by a call to Shutdown.
         /// </summary>
         public static bool Initialize()
         {
             if (_isInitialized)
+            {
+                if (_isAvailable)
+                    _refCount++;
                 return _isAvailable;
+            }
 
             try
             {
                 int result = ADL_Main_Control_Create(ADL_Main_Memory_Alloc_Callback, 1);
                 _isAvailable = (result == ADL_OK);
                 _isInitialized = true;
+                _refCount = _isAvailable ? 1 : 0;
 
                 if (_isAvailable)
                 {
@@ -159,12 +168,15 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Shutdown ADL library
+        /// Shutdown ADL library once every successful Initialize call has been matched
         /// </summary>
         public static void Shutdown()
         {
             if (_isInitialized && _isAvailable)
             {
+                if (--_refCount > 0)
+                    return;
+
                 try
                 {
                     ADL_Main_Control_Destroy();

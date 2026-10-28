@@ -55,7 +55,9 @@ namespace Memory_Monitor
                 
                 Debug.WriteLine($"Found {interfaces.Length} network interfaces");
 
-                int adapterIndex = 0;
+                string[] instanceNames = new PerformanceCounterCategory("Network Interface").GetInstanceNames();
+                var usedInstances = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 foreach (NetworkInterface ni in interfaces)
                 {
                     if (ni.OperationalStatus != OperationalStatus.Up)
@@ -70,23 +72,28 @@ namespace Memory_Monitor
                         continue;
                     }
 
+                    // Check the description too: Hyper-V switch adapters are named "vEthernet (...)" but described
+                    // as "Hyper-V Virtual Ethernet Adapter"; counting them as well double-counts the physical traffic
                     string name = ni.Name.ToLower();
-                    if (name.Contains("loopback") || name.Contains("tunnel") || 
-                        name.Contains("virtual") || name.Contains("vmware") ||
-                        name.Contains("virtualbox") || name.Contains("hyper-v"))
+                    string description = ni.Description.ToLower();
+                    string[] virtualMarkers = { "loopback", "tunnel", "virtual", "vmware", "virtualbox", "hyper-v", "vethernet" };
+                    if (virtualMarkers.Any(m => name.Contains(m) || description.Contains(m)))
                     {
                         continue;
                     }
 
                     try
                     {
-                        string instanceName = FindPerformanceCounterInstance(ni);
-                        
+                        string instanceName = FindPerformanceCounterInstance(ni, instanceNames, usedInstances);
+
                         if (!string.IsNullOrEmpty(instanceName))
                         {
+                            usedInstances.Add(instanceName);
                             var adapter = new NetworkAdapterInfo
                             {
-                                Id = $"net_{adapterIndex}_{ni.Id.GetHashCode():X8}",
+                                // ni.Id is the adapter's GUID, stable across launches so the saved selection
+                                // can be restored (string.GetHashCode is randomized per process in .NET)
+                                Id = $"net_{ni.Id}",
                                 Name = ni.Name,
                                 Description = ni.Description,
                                 InstanceName = instanceName,
@@ -101,7 +108,6 @@ namespace Memory_Monitor
 
                             _allAdapters.Add(adapter);
                             Debug.WriteLine($"Initialized network monitor for: {ni.Name} ({type})");
-                            adapterIndex++;
                         }
                     }
                     catch (Exception ex)
@@ -162,7 +168,7 @@ namespace Memory_Monitor
                     Id = adapter.Id,
                     DisplayName = adapter.Name,
                     ShortName = GetShortAdapterName(adapter.Name, typeLabel),
-                    Description = $"{typeLabel} • {adapter.Description}",
+                    Description = $"{typeLabel} â€¢ {adapter.Description}",
                     Type = DeviceType.NetworkAdapter,
                     IsActive = true
                 });
@@ -235,44 +241,37 @@ namespace Memory_Monitor
             return SelectedDevice;
         }
 
-        private string FindPerformanceCounterInstance(NetworkInterface ni)
+        /// <summary>
+        /// Finds the "Network Interface" counter instance for an adapter. Instances are named after the adapter's
+        /// description with characters that are reserved in counter paths replaced, e.g.
+        /// "Intel(R) Ethernet Connection #2" becomes "Intel[R] Ethernet Connection _2". Only exact matches are
+        /// accepted, and an instance already taken by another adapter is skipped, so two adapters can never
+        /// share (and double-count) one counter.
+        /// </summary>
+        private static string FindPerformanceCounterInstance(NetworkInterface ni, string[] instanceNames, HashSet<string> usedInstances)
         {
-            try
+            string[] candidates =
             {
-                PerformanceCounterCategory category = new PerformanceCounterCategory("Network Interface");
-                string[] instanceNames = category.GetInstanceNames();
+                ToCounterInstanceName(ni.Description),
+                ni.Description,
+                ni.Name
+            };
 
-                // Try to match by name
-                string niName = ni.Name;
-                string niDesc = ni.Description;
-
-                // Look for exact match first
-                foreach (string instanceName in instanceNames)
-                {
-                    if (instanceName.Equals(niName, StringComparison.OrdinalIgnoreCase) ||
-                        instanceName.Equals(niDesc, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return instanceName;
-                    }
-                }
-
-                // Try partial match
-                foreach (string instanceName in instanceNames)
-                {
-                    if (instanceName.Contains(niName, StringComparison.OrdinalIgnoreCase) ||
-                        instanceName.Contains(niDesc, StringComparison.OrdinalIgnoreCase) ||
-                        niDesc.Contains(instanceName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return instanceName;
-                    }
-                }
-            }
-            catch (Exception ex)
+            foreach (string candidate in candidates)
             {
-                Debug.WriteLine($"Error finding performance counter instance: {ex.Message}");
+                string? match = instanceNames.FirstOrDefault(i =>
+                    i.Equals(candidate, StringComparison.OrdinalIgnoreCase) && !usedInstances.Contains(i));
+                if (match != null)
+                    return match;
             }
 
+            Debug.WriteLine($"No performance counter instance found for {ni.Name} ({ni.Description})");
             return "";
+        }
+
+        private static string ToCounterInstanceName(string name)
+        {
+            return name.Replace('(', '[').Replace(')', ']').Replace('#', '_').Replace('/', '_').Replace('\\', '_');
         }
 
         /// <summary>

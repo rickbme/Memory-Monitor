@@ -141,7 +141,7 @@ namespace Memory_Monitor
                     if (temp.HasValue)
                     {
                         _useHwinfoFallback = true;
-                        Debug.WriteLine($"HWiNFO fallback enabled: {_hwinfoReader.CpuTempSensorName} = {temp}°C");
+                        Debug.WriteLine($"HWiNFO fallback enabled: {_hwinfoReader.CpuTempSensorName} = {temp}Â°C");
                     }
                     else
                     {
@@ -183,7 +183,7 @@ namespace Memory_Monitor
                         {
                             _motherboardCpuTemp = sensor;
                             _sensorsFound = true;
-                            Debug.WriteLine($"  -> Selected MB CPU temp sensor: {sensor.Name} = {sensor.Value}°C");
+                            Debug.WriteLine($"  -> Selected MB CPU temp sensor: {sensor.Name} = {sensor.Value}Â°C");
                         }
                     }
                 }
@@ -210,7 +210,7 @@ namespace Memory_Monitor
                                 {
                                     _motherboardCpuTemp = sensor;
                                     _sensorsFound = true;
-                                    Debug.WriteLine($"    -> Selected MB SubHW CPU temp: {sensor.Name} = {sensor.Value}°C");
+                                    Debug.WriteLine($"    -> Selected MB SubHW CPU temp: {sensor.Name} = {sensor.Value}Â°C");
                                 }
                             }
                         }
@@ -325,6 +325,9 @@ namespace Memory_Monitor
                     {
                         return temp.Value;
                     }
+
+                    // The sensor may have moved in HWiNFO's list; search again for the next reading
+                    _hwinfoReader.RefreshSensors();
                 }
                 catch (Exception ex)
                 {

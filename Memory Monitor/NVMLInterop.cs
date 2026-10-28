@@ -100,21 +100,30 @@ namespace Memory_Monitor
         private static bool _isInitialized = false;
         private static bool _isAvailable = false;
 
+        // Number of successful Initialize calls not yet matched by Shutdown. During a display mode switch the
+        // new form's GPUMonitor initializes before the old one is disposed, so NVML must stay up until both are done.
+        private static int _refCount = 0;
+
         public static bool IsAvailable => _isAvailable;
 
         /// <summary>
-        /// Initialize NVML library
+        /// Initialize NVML library. Each call that returns true must be matched by a call to Shutdown.
         /// </summary>
         public static bool Initialize()
         {
             if (_isInitialized)
+            {
+                if (_isAvailable)
+                    _refCount++;
                 return _isAvailable;
+            }
 
             try
             {
                 nvmlReturn_t result = nvmlInit();
                 _isAvailable = (result == nvmlReturn_t.NVML_SUCCESS);
                 _isInitialized = true;
+                _refCount = _isAvailable ? 1 : 0;
 
                 if (_isAvailable)
                 {
@@ -144,12 +153,15 @@ namespace Memory_Monitor
         }
 
         /// <summary>
-        /// Shutdown NVML library
+        /// Shutdown NVML library once every successful Initialize call has been matched
         /// </summary>
         public static void Shutdown()
         {
             if (_isInitialized && _isAvailable)
             {
+                if (--_refCount > 0)
+                    return;
+
                 try
                 {
                     nvmlShutdown();

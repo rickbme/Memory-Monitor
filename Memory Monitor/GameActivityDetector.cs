@@ -59,6 +59,13 @@ namespace Memory_Monitor
         private const float KNOWN_GAME_SCORE = 0.5f;
         private const float DETECTION_THRESHOLD = 0.5f;
 
+        // Known game names shorter than this must match the process name exactly; longer ones may also be a
+        // prefix (e.g. "battlefield" matches "battlefield2042"). Plain substring matching gave false positives
+        // such as "cod" matching VS Code's "code" process.
+        private const int MIN_PREFIX_MATCH_LENGTH = 5;
+
+        private static readonly int OwnProcessId = Environment.ProcessId;
+
         // State tracking
         private readonly Queue<float> _gpuUsageHistory = new();
         private readonly int _gpuHistorySize;
@@ -90,12 +97,17 @@ namespace Memory_Monitor
             "assettocorsa", "iracing", "forza"
         };
 
+        /// <summary>
+        /// FPS display mode. Saved in the user settings so it survives display mode switches
+        /// (each display form creates its own detector) and restarts.
+        /// </summary>
         public FpsDisplayMode DisplayMode
         {
             get => _displayMode;
             set
             {
                 _displayMode = value;
+                SaveDisplayMode(value);
                 Debug.WriteLine($"FPS display mode changed to: {value}");
             }
         }
@@ -105,6 +117,34 @@ namespace Memory_Monitor
         public GameActivityDetector(int updateIntervalMs = 1000)
         {
             _gpuHistorySize = (GPU_SUSTAINED_SECONDS * 1000) / updateIntervalMs;
+            _displayMode = LoadDisplayMode();
+        }
+
+        private static FpsDisplayMode LoadDisplayMode()
+        {
+            try
+            {
+                if (Enum.TryParse(Properties.Settings.Default.FpsDisplayMode, out FpsDisplayMode mode))
+                    return mode;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to load FPS display mode: {ex.Message}");
+            }
+            return FpsDisplayMode.AutoDetect;
+        }
+
+        private static void SaveDisplayMode(FpsDisplayMode mode)
+        {
+            try
+            {
+                Properties.Settings.Default.FpsDisplayMode = mode.ToString();
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to save FPS display mode: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -131,7 +171,8 @@ namespace Memory_Monitor
 
         private bool DetectGameActivity(bool hasFpsData, int? fpsValue, float currentGpuUsage)
         {
-            // Signal 1: FPS data is available and valid - strongest signal
+            // Signal 1: FPS data is available and valid - strongest signal, enough on its own
+            // (so windowed games reporting FPS through HWiNFO/RTSS are shown too)
             if (hasFpsData && fpsValue.HasValue && fpsValue.Value > 0)
             {
                 return true;
@@ -162,12 +203,34 @@ namespace Memory_Monitor
             return score >= DETECTION_THRESHOLD;
         }
 
+        /// <summary>
+        /// True if the foreground window belongs to this app or to Explorer. Both cover a whole screen
+        /// borderless (our window fills the mini monitor; the desktop is a fullscreen Explorer window),
+        /// so they would otherwise look like a fullscreen game.
+        /// </summary>
+        private static bool IsOwnOrShellWindow(IntPtr window)
+        {
+            GetWindowThreadProcessId(window, out uint processId);
+            if (processId == 0 || processId == OwnProcessId)
+                return true;
+
+            try
+            {
+                using var process = Process.GetProcessById((int)processId);
+                return process.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
         private bool IsFullscreenAppRunning()
         {
             try
             {
                 IntPtr foregroundWindow = GetForegroundWindow();
-                if (foregroundWindow == IntPtr.Zero)
+                if (foregroundWindow == IntPtr.Zero || IsOwnOrShellWindow(foregroundWindow))
                     return false;
 
                 if (!GetWindowRect(foregroundWindow, out RECT windowRect))
@@ -245,7 +308,7 @@ namespace Memory_Monitor
 
                 foreach (string knownGame in KnownGameProcesses)
                 {
-                    if (processName.Contains(knownGame))
+                    if (knownGame.Length >= MIN_PREFIX_MATCH_LENGTH && processName.StartsWith(knownGame, StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
 

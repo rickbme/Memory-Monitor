@@ -36,15 +36,55 @@ namespace Memory_Monitor
             // AMD specific  
             public int AdlAdapterIndex { get; set; } = -1;
             
-            // Performance counter fallback
-            public PerformanceCounter? UsageCounter { get; set; }
-            public string GpuEngineInstance { get; set; } = "";
-            public bool UsageCounterAvailable { get; set; } = false;
+            // Performance counter fallback: the adapter's LUID ("luid_0x..._0x...") names its counter instances
+            public string AdapterLuid { get; set; } = "";
+            public PerformanceCounter? DedicatedUsageCounter { get; set; }
+        }
+
+        /// <summary>
+        /// Samples the "GPU Engine" counters for all processes at once. Its instances are per process and engine
+        /// ("pid_1234_luid_..._eng_0_engtype_3D"), so a GPU's 3D usage is the sum over every instance with its LUID.
+        /// </summary>
+        private class GpuEngineSampler
+        {
+            private Dictionary<string, CounterSample> _previousSamples = new();
+
+            /// <summary>
+            /// Returns the 3D engine usage (0-100) of the adapter with this LUID since the previous call
+            /// </summary>
+            public float GetUtilization(string luid)
+            {
+                var category = new PerformanceCounterCategory("GPU Engine");
+                InstanceDataCollection instances = category.ReadCategory()["Utilization Percentage"];
+
+                var currentSamples = new Dictionary<string, CounterSample>();
+                float total = 0;
+
+                foreach (InstanceData instance in instances.Values)
+                {
+                    currentSamples[instance.InstanceName] = instance.Sample;
+
+                    if (instance.InstanceName.Contains(luid, StringComparison.OrdinalIgnoreCase) &&
+                        instance.InstanceName.EndsWith("engtype_3D", StringComparison.OrdinalIgnoreCase) &&
+                        _previousSamples.TryGetValue(instance.InstanceName, out CounterSample previous))
+                    {
+                        total += CounterSample.Calculate(previous, instance.Sample);
+                    }
+                }
+
+                _previousSamples = currentSamples;
+                return Math.Clamp(total, 0f, 100f);
+            }
         }
 
         private List<GPUDevice> _detectedGPUs = new List<GPUDevice>();
         private GPUDevice? _selectedGPU = null;
         private List<DeviceInfo> _availableDevices = new List<DeviceInfo>();
+        private readonly GpuEngineSampler _engineSampler = new GpuEngineSampler();
+
+        // Whether this instance holds a reference on the shared NVML/ADL libraries (released in Dispose)
+        private bool _nvmlInitialized = false;
+        private bool _adlInitialized = false;
 
         public string GPUName => _selectedGPU?.Name ?? "Unknown GPU";
         public ulong TotalMemoryBytes => _selectedGPU?.TotalMemoryBytes ?? 0;
@@ -92,6 +132,8 @@ namespace Memory_Monitor
         {
             try
             {
+                var dxgiAdapters = DxgiAdapters.Enumerate();
+
                 using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(
                     "SELECT Name, AdapterRAM, VideoProcessor, PNPDeviceID FROM Win32_VideoController"))
                 {
@@ -132,16 +174,21 @@ namespace Memory_Monitor
 
                         var gpu = new GPUDevice
                         {
-                            Id = $"gpu_{gpuIndex}_{pnpId.GetHashCode():X8}",
+                            // Must be stable across launches so the saved selection can be restored
+                            // (string.GetHashCode is randomized per process in .NET, so it can't be used here)
+                            Id = string.IsNullOrEmpty(pnpId) ? $"gpu_{gpuIndex}" : $"gpu_{pnpId}",
                             Name = name,
                             Vendor = vendor
                         };
 
+                        // AdapterRAM is a 32-bit value (caps at 4 GB); LinkDxgiAdapter replaces it with the real size
                         if (adapterRAM != null && ulong.TryParse(adapterRAM.ToString(), out ulong ram) && ram > 0)
                         {
                             gpu.TotalMemoryBytes = ram;
                             gpu.IsMemoryAvailable = true;
                         }
+
+                        LinkDxgiAdapter(gpu, pnpId, dxgiAdapters);
 
                         _detectedGPUs.Add(gpu);
                         Debug.WriteLine($"  Added GPU #{gpuIndex}: {name} ({vendor})");
@@ -155,6 +202,37 @@ namespace Memory_Monitor
             {
                 Debug.WriteLine($"Failed to detect GPUs: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Links a WMI GPU to its DXGI adapter by PCI vendor/device ID, giving it the adapter LUID used by the
+        /// GPU performance counters and the 64-bit dedicated VRAM size. Linked adapters are removed from the
+        /// list so two identical cards are matched to different adapters (in enumeration order).
+        /// </summary>
+        private static void LinkDxgiAdapter(GPUDevice gpu, string pnpId, List<DxgiAdapters.AdapterInfo> dxgiAdapters)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(pnpId, @"VEN_([0-9A-F]{4})&DEV_([0-9A-F]{4})",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!match.Success)
+                return;
+
+            uint vendorId = Convert.ToUInt32(match.Groups[1].Value, 16);
+            uint deviceId = Convert.ToUInt32(match.Groups[2].Value, 16);
+
+            var adapter = dxgiAdapters.FirstOrDefault(a => a.VendorId == vendorId && a.DeviceId == deviceId);
+            if (adapter == null)
+                return;
+
+            dxgiAdapters.Remove(adapter);
+            gpu.AdapterLuid = adapter.Luid;
+
+            if (adapter.DedicatedVideoMemory > 0)
+            {
+                gpu.TotalMemoryBytes = adapter.DedicatedVideoMemory;
+                gpu.IsMemoryAvailable = true;
+            }
+
+            Debug.WriteLine($"  Linked to DXGI adapter {adapter.Luid}, {adapter.DedicatedVideoMemory / Constants.BYTES_TO_GB} GB VRAM");
         }
 
         /// <summary>
@@ -182,7 +260,8 @@ namespace Memory_Monitor
 
             try
             {
-                if (NVMLInterop.Initialize())
+                _nvmlInitialized = NVMLInterop.Initialize();
+                if (_nvmlInitialized)
                 {
                     uint deviceCount = NVMLInterop.GetDeviceCount();
                     Debug.WriteLine($"NVML found {deviceCount} NVIDIA GPU(s)");
@@ -232,7 +311,8 @@ namespace Memory_Monitor
 
             try
             {
-                if (ADLInterop.Initialize())
+                _adlInitialized = ADLInterop.Initialize();
+                if (_adlInitialized)
                 {
                     var adapters = ADLInterop.GetAdapterInfo();
                     if (adapters != null && adapters.Length > 0)
@@ -275,23 +355,16 @@ namespace Memory_Monitor
 
         private void InitializeUsageCounterForGPU(GPUDevice gpu)
         {
+            // Without the adapter's LUID there's no way to tell which GPU's counters are which
+            if (string.IsNullOrEmpty(gpu.AdapterLuid))
+                return;
+
             try
             {
-                PerformanceCounterCategory category = new PerformanceCounterCategory("GPU Engine");
-                string[] instanceNames = category.GetInstanceNames();
-
-                var engine3DInstances = instanceNames.Where(i => i.Contains("engtype_3D")).ToArray();
-                string selectedInstance = engine3DInstances.FirstOrDefault() ?? instanceNames.FirstOrDefault() ?? "";
-
-                if (!string.IsNullOrEmpty(selectedInstance))
-                {
-                    gpu.GpuEngineInstance = selectedInstance;
-                    gpu.UsageCounter = new PerformanceCounter("GPU Engine", "Utilization Percentage", selectedInstance);
-                    gpu.UsageCounter.NextValue();
-                    gpu.UsageCounterAvailable = true;
-                    gpu.IsUsageAvailable = true;
-                    Debug.WriteLine($"Performance counter initialized for GPU: {gpu.Name}");
-                }
+                // Take a first sample so the next call can compute a rate
+                _engineSampler.GetUtilization(gpu.AdapterLuid);
+                gpu.IsUsageAvailable = true;
+                Debug.WriteLine($"Performance counter usage initialized for GPU: {gpu.Name} ({gpu.AdapterLuid})");
             }
             catch (Exception ex)
             {
@@ -310,7 +383,7 @@ namespace Memory_Monitor
                     Id = gpu.Id,
                     DisplayName = gpu.Name,
                     ShortName = GetShortName(gpu.Name),
-                    Description = $"{gpu.Vendor} • {gpu.TotalMemoryBytes / Constants.BYTES_TO_GB:F0} GB",
+                    Description = $"{gpu.Vendor} â€¢ {gpu.TotalMemoryBytes / Constants.BYTES_TO_GB:F0} GB",
                     Type = DeviceType.GPU,
                     IsActive = gpu.IsUsageAvailable || gpu.IsMemoryAvailable
                 });
@@ -378,9 +451,9 @@ namespace Memory_Monitor
                     }
                 }
 
-                if (_selectedGPU.UsageCounterAvailable && _selectedGPU.UsageCounter != null)
+                if (_selectedGPU.IsUsageAvailable && !string.IsNullOrEmpty(_selectedGPU.AdapterLuid))
                 {
-                    CurrentUsagePercent = _selectedGPU.UsageCounter.NextValue();
+                    CurrentUsagePercent = _engineSampler.GetUtilization(_selectedGPU.AdapterLuid);
                     return CurrentUsagePercent;
                 }
             }
@@ -542,56 +615,35 @@ namespace Memory_Monitor
 
         private ulong GetGPUMemoryUsageFromPerfCounter(GPUDevice gpu)
         {
+            if (string.IsNullOrEmpty(gpu.AdapterLuid))
+                return 0;
+
             try
             {
-                if (!string.IsNullOrEmpty(gpu.GpuEngineInstance))
+                if (gpu.DedicatedUsageCounter == null)
                 {
-                    string adapterId = ExtractAdapterIdFromEngineInstance(gpu.GpuEngineInstance);
+                    // Instance names look like "luid_0x00000000_0x0000D1E3_phys_0"
+                    var memCategory = new PerformanceCounterCategory("GPU Adapter Memory");
+                    string? instance = memCategory.GetInstanceNames()
+                        .FirstOrDefault(i => i.StartsWith(gpu.AdapterLuid, StringComparison.OrdinalIgnoreCase));
+                    if (instance == null)
+                        return 0;
 
-                    if (!string.IsNullOrEmpty(adapterId))
-                    {
-                        PerformanceCounterCategory memCategory = new PerformanceCounterCategory("GPU Adapter Memory");
-                        string[] memInstances = memCategory.GetInstanceNames();
-
-                        var matchingInstance = memInstances.FirstOrDefault(i => i.Contains(adapterId));
-
-                        if (!string.IsNullOrEmpty(matchingInstance))
-                        {
-                            using (PerformanceCounter memCounter = new PerformanceCounter(
-                                "GPU Adapter Memory", "Dedicated Usage", matchingInstance))
-                            {
-                                float usageMB = memCounter.NextValue();
-                                return (ulong)(usageMB * 1024 * 1024);
-                            }
-                        }
-                    }
+                    gpu.DedicatedUsageCounter = new PerformanceCounter("GPU Adapter Memory", "Dedicated Usage", instance);
                 }
+
+                // "Dedicated Usage" is a plain count of bytes
+                return (ulong)Math.Max(0, gpu.DedicatedUsageCounter.RawValue);
             }
             catch (Exception ex)
             {
+                // The instance can vanish (e.g. after a driver reset); look it up again next time
                 Debug.WriteLine($"Error getting GPU memory from perf counter: {ex.Message}");
+                gpu.DedicatedUsageCounter?.Dispose();
+                gpu.DedicatedUsageCounter = null;
             }
 
             return 0;
-        }
-
-        private string ExtractAdapterIdFromEngineInstance(string engineInstance)
-        {
-            try
-            {
-                int luidIndex = engineInstance.IndexOf("luid_");
-                if (luidIndex >= 0)
-                {
-                    int endIndex = engineInstance.IndexOf("_", luidIndex + 5);
-                    if (endIndex > luidIndex)
-                    {
-                        return engineInstance.Substring(luidIndex, endIndex - luidIndex);
-                    }
-                }
-            }
-            catch { }
-
-            return "";
         }
 
         public string GetShortName() => GetShortName(GPUName);
@@ -617,24 +669,23 @@ namespace Memory_Monitor
 
         public void Dispose()
         {
-            // Store references before clearing
-            bool hasNvidia = _detectedGPUs.Any(g => g.Vendor == GPUVendor.NVIDIA && g.UseNativeAPI);
-            bool hasAmd = _detectedGPUs.Any(g => g.Vendor == GPUVendor.AMD && g.UseNativeAPI);
-
             foreach (var gpu in _detectedGPUs)
             {
-                gpu.UsageCounter?.Dispose();
+                gpu.DedicatedUsageCounter?.Dispose();
             }
             _detectedGPUs.Clear();
 
-            // Cleanup native APIs
-            if (hasNvidia)
+            // Release this instance's reference on the native APIs; the library itself only shuts down
+            // once no other GPUMonitor (e.g. the form being switched to) is still using it
+            if (_nvmlInitialized)
             {
                 NVMLInterop.Shutdown();
+                _nvmlInitialized = false;
             }
-            if (hasAmd)
+            if (_adlInitialized)
             {
                 ADLInterop.Shutdown();
+                _adlInitialized = false;
             }
         }
     }

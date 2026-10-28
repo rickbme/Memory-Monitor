@@ -80,13 +80,13 @@ namespace Memory_Monitor
             // Feature items
             string[] features = new[]
             {
-                " Monitor CPU, GPU, RAM, VRAM, Disk, and Network",
-                " View CPU and GPU temperatures in real-time",
-                " Smart FPS display during gaming sessions",
-                " Touch gestures for mini monitor touchscreens",
-                " Date and time display in the corners",
-                " Device selection for multiple GPUs, disks, or networks",
-                " Runs quietly in system tray when minimized"
+                "• Monitor CPU, GPU, RAM, VRAM, Disk, and Network",
+                "• View CPU and GPU temperatures in real-time",
+                "• Smart FPS display during gaming sessions",
+                "• Touch gestures for mini monitor touchscreens",
+                "• Date and time display in the corners",
+                "• Device selection for multiple GPUs, disks, or networks",
+                "• Runs quietly in system tray when minimized"
             };
 
             int yPos = 10;
@@ -177,7 +177,7 @@ namespace Memory_Monitor
                     MessageBox.Show(
                         "USER_GUIDE.md was not found in the installation directory.\n\n" +
                         "You can access the guide from the Start Menu:\n" +
-                        "Start  Memory Monitor  Memory Monitor User Guide",
+                        "Start → Memory Monitor → Memory Monitor User Guide",
                         "User Guide Not Found",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information
@@ -189,7 +189,7 @@ namespace Memory_Monitor
                 MessageBox.Show(
                     $"Failed to open User Guide:\n{ex.Message}\n\n" +
                     "You can access the guide from the Start Menu:\n" +
-                    "Start  Memory Monitor  Memory Monitor User Guide",
+                    "Start → Memory Monitor → Memory Monitor User Guide",
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error

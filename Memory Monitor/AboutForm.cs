@@ -41,7 +41,7 @@ namespace Memory_Monitor
             // Subtitle
             subtitleLabel = new Label()
             {
-                Text = "Electronics • Software • Game Development",
+                Text = "Electronics â€¢ Software â€¢ Game Development",
                 Font = new Font("Segoe UI", 10, FontStyle.Italic),
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,

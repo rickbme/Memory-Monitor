@@ -282,10 +282,27 @@ namespace Memory_Monitor
             }
         }
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetMessageExtraInfo();
+
+        // Windows tags mouse messages it synthesizes from touch or pen input with this signature
+        private const long MI_WP_SIGNATURE = 0xFF515700;
+        private const long SIGNATURE_MASK = 0xFFFFFF00;
+
+        private bool _lastMouseDownFromTouch = false;
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            _lastMouseDownFromTouch = (GetMessageExtraInfo().ToInt64() & SIGNATURE_MASK) == MI_WP_SIGNATURE;
+            base.OnMouseDown(e);
+        }
+
         protected override void OnClick(EventArgs e)
         {
             base.OnClick(e);
-            if (_isSelectable && _hasMultipleDevices && !_isTouchMode)
+
+            // A touch tap is handled by the touch handler (cycles devices); ignore the click Windows synthesizes from it
+            if (_isSelectable && _hasMultipleDevices && !_isTouchMode && !_lastMouseDownFromTouch)
             {
                 // Mouse click - show popup menu
                 OnDeviceSelectionRequested();

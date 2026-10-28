@@ -25,12 +25,37 @@ namespace Memory_Monitor
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            
+
+            UpgradeSettingsFromPreviousVersion();
+
             // Show splash screen with DFS logo
             SplashScreen.ShowSplash();
 
             // Run the application with our custom context that handles display mode switching
             Application.Run(new MonitorApplicationContext());
+        }
+
+        /// <summary>
+        /// User settings are stored in a folder per app version, so a new version starts with defaults.
+        /// On the first run of each version, copy the settings over from the previous version.
+        /// </summary>
+        private static void UpgradeSettingsFromPreviousVersion()
+        {
+            try
+            {
+                var settings = Properties.Settings.Default;
+                if (settings.SettingsUpgradeRequired)
+                {
+                    settings.Upgrade();
+                    settings.SettingsUpgradeRequired = false;
+                    settings.Save();
+                    Debug.WriteLine("User settings upgraded from the previous version");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to upgrade user settings: {ex.Message}");
+            }
         }
     }
 
@@ -96,6 +121,13 @@ namespace Memory_Monitor
                     fadeOutTimer.Stop();
                     fadeOutTimer.Dispose();
 
+                    // Close the old form BEFORE creating the new one. Its monitors release process-wide state
+                    // when disposed (LibreHardwareMonitor's static OpCode/Mutexes, NVML, ADL), which would
+                    // break the new form's monitors if they had already been created.
+                    oldForm.FormClosed -= OnFormClosed;
+                    oldForm.Hide();
+                    oldForm.Close();
+
                     // Create and show the new form
                     Form newForm = CreateFormForMode(e.NewMode);
                     newForm.FormClosed += OnFormClosed;
@@ -104,11 +136,6 @@ namespace Memory_Monitor
                     newForm.Size = targetScreen.Bounds.Size;
                     newForm.TopMost = topMost;
                     newForm.Opacity = 0;
-
-                    // Close old form
-                    oldForm.FormClosed -= OnFormClosed;
-                    oldForm.Hide();
-                    oldForm.Close();
 
                     _currentForm = newForm;
                     newForm.Show();

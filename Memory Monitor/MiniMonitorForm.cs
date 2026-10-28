@@ -158,6 +158,7 @@ namespace Memory_Monitor
         private void InitializeGameDetection()
         {
             _gameActivityDetector = new GameActivityDetector(updateTimer.Interval);
+            UpdateFpsMenuState(_gameActivityDetector.DisplayMode);
             Debug.WriteLine("Game activity detector initialized");
         }
 
@@ -224,7 +225,7 @@ namespace Memory_Monitor
                 case SwipeDirection.Right:
                     // Swipe horizontally to switch monitors
                     MoveToNextMonitor();
-                    string arrow = e.Direction == SwipeDirection.Left ? "?" : "?";
+                    string arrow = e.Direction == SwipeDirection.Left ? "←" : "→";
                     ShowToastNotification($"{arrow} Monitor switched");
                     break;
 
@@ -317,6 +318,7 @@ namespace Memory_Monitor
                 case Keys.F11:
                     // Toggle TopMost
                     this.TopMost = !this.TopMost;
+                    topMostToolStripMenuItem.Checked = this.TopMost;
                     e.Handled = true;
                     break;
             }
@@ -384,10 +386,7 @@ namespace Memory_Monitor
                 _gameActivityDetector.DisplayMode = mode;
             }
 
-            // Update menu checkmarks
-            fpsAutoDetectToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AutoDetect;
-            fpsAlwaysShowToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysShow;
-            fpsAlwaysHideToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysHide;
+            UpdateFpsMenuState(mode);
 
             // Show feedback
             string modeName = mode switch
@@ -398,6 +397,13 @@ namespace Memory_Monitor
                 _ => mode.ToString()
             };
             ShowToastNotification($"FPS Display: {modeName}");
+        }
+
+        private void UpdateFpsMenuState(GameActivityDetector.FpsDisplayMode mode)
+        {
+            fpsAutoDetectToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AutoDetect;
+            fpsAlwaysShowToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysShow;
+            fpsAlwaysHideToolStripMenuItem.Checked = mode == GameActivityDetector.FpsDisplayMode.AlwaysHide;
         }
 
         private void MoveToNextMonitor()

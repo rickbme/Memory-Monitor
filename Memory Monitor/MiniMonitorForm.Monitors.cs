@@ -88,7 +88,7 @@ namespace Memory_Monitor
                     int temp = _cpuMonitor.UpdateTemperature();
                     if (temp > 0)
                     {
-                        cpuGauge.SetValue(usage, $"{_lastCpuUsage}%", $"{temp}°C");
+                        cpuGauge.SetValue(usage, $"{_lastCpuUsage}%", $"{temp}Â°C");
                     }
                     else
                     {
@@ -115,7 +115,7 @@ namespace Memory_Monitor
                     if (_gpuMonitor.IsTemperatureAvailable)
                     {
                         int temp = _gpuMonitor.UpdateTemperature();
-                        gpuUsageGauge.SetValue(usage, $"{_lastGpuUsage}%", $"{temp}°C");
+                        gpuUsageGauge.SetValue(usage, $"{_lastGpuUsage}%", $"{temp}Â°C");
                     }
                     else
                     {

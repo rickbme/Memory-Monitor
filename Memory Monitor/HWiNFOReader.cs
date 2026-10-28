@@ -22,12 +22,18 @@ namespace Memory_Monitor
         // Cached CPU temperature sensor info
         private uint _cpuTempSensorIndex = uint.MaxValue;
         private uint _cpuTempReadingIndex = uint.MaxValue;
+        private uint _cpuTempReadingId;
         private string _cpuTempSensorName = "";
 
         // Cached FPS sensor info
         private uint _fpsSensorIndex = uint.MaxValue;
         private uint _fpsReadingIndex = uint.MaxValue;
+        private uint _fpsReadingId;
         private string _fpsSensorName = "";
+
+        // The cached indexes are positions in HWiNFO's reading list, which HWiNFO rebuilds (and can reorder)
+        // when sensors appear or disappear, e.g. when RTSS restarts. Each read checks the reading at the cached
+        // position still has the same ReadingId and drops the cache if not, so RefreshSensors finds it again.
 
         public bool IsAvailable => _isAvailable;
         public string CpuTempSensorName => _cpuTempSensorName;
@@ -189,7 +195,10 @@ namespace Memory_Monitor
                     try
                     {
                         var reading = Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
-                        
+
+                        if (reading.SensorIndex >= sensors.Length)
+                            continue;
+
                         // Look for temperature readings (CPU)
                         if (reading.ReadingType == READING_TYPE_TEMP)
                         {
@@ -202,12 +211,13 @@ namespace Memory_Monitor
 
                             if (isCpuSensor && isCpuTemp && reading.Value > 0 && reading.Value < 150)
                             {
-                                Debug.WriteLine($"HWiNFO: Found CPU temp - {sensors[reading.SensorIndex].SensorNameOrig} / {reading.LabelOrig} = {reading.Value}°C");
+                                Debug.WriteLine($"HWiNFO: Found CPU temp - {sensors[reading.SensorIndex].SensorNameOrig} / {reading.LabelOrig} = {reading.Value}Â°C");
                                 
                                 if (_cpuTempSensorIndex == uint.MaxValue || label.Contains("package"))
                                 {
                                     _cpuTempSensorIndex = reading.SensorIndex;
                                     _cpuTempReadingIndex = (uint)i;
+                                    _cpuTempReadingId = reading.ReadingId;
                                     _cpuTempSensorName = $"{sensors[reading.SensorIndex].SensorNameOrig} - {reading.LabelOrig}";
                                     
                                     if (label.Contains("package"))
@@ -239,6 +249,7 @@ namespace Memory_Monitor
                             {
                                 _fpsSensorIndex = reading.SensorIndex;
                                 _fpsReadingIndex = (uint)i;
+                                _fpsReadingId = reading.ReadingId;
                                 _fpsSensorName = $"{sensors[reading.SensorIndex].SensorNameOrig} - {reading.LabelOrig}";
                             }
                         }
@@ -285,8 +296,8 @@ namespace Memory_Monitor
             {
                 var header = ReadHeader();
                 
-                // Only refresh FPS if not already found
-                if (_fpsReadingIndex == uint.MaxValue)
+                // Only rescan while a sensor is missing (not found yet, or dropped because HWiNFO reordered its readings)
+                if (_fpsReadingIndex == uint.MaxValue || _cpuTempReadingIndex == uint.MaxValue)
                 {
                     FindSensors(header);
                 }
@@ -307,26 +318,18 @@ namespace Memory_Monitor
 
             try
             {
-                var header = ReadHeader();
-                int readingSize = (int)header.SizeOfReadingElement;
-                long offset = header.OffsetOfReadingSection + (_cpuTempReadingIndex * readingSize);
-
-                byte[] buffer = new byte[readingSize];
-                _accessor.ReadArray(offset, buffer, 0, Math.Min(buffer.Length, Marshal.SizeOf<HWiNFO_READING>()));
-
-                GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                try
+                var reading = ReadReading(_cpuTempReadingIndex);
+                if (reading == null || reading.Value.ReadingId != _cpuTempReadingId || reading.Value.ReadingType != READING_TYPE_TEMP)
                 {
-                    var reading = Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
-                    
-                    if (reading.ReadingType == READING_TYPE_TEMP && reading.Value > 0 && reading.Value < 150)
-                    {
-                        return (int)Math.Round(reading.Value);
-                    }
+                    Debug.WriteLine("HWiNFO: CPU temperature reading moved, will search again");
+                    _cpuTempReadingIndex = uint.MaxValue;
+                    return null;
                 }
-                finally
+
+                double value = reading.Value.Value;
+                if (value > 0 && value < 150)
                 {
-                    handle.Free();
+                    return (int)Math.Round(value);
                 }
             }
             catch (Exception ex)
@@ -347,26 +350,18 @@ namespace Memory_Monitor
 
             try
             {
-                var header = ReadHeader();
-                int readingSize = (int)header.SizeOfReadingElement;
-                long offset = header.OffsetOfReadingSection + (_fpsReadingIndex * readingSize);
-
-                byte[] buffer = new byte[readingSize];
-                _accessor.ReadArray(offset, buffer, 0, Math.Min(buffer.Length, Marshal.SizeOf<HWiNFO_READING>()));
-
-                GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                try
+                var reading = ReadReading(_fpsReadingIndex);
+                if (reading == null || reading.Value.ReadingId != _fpsReadingId)
                 {
-                    var reading = Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
-                    
-                    if (reading.Value >= 0 && reading.Value < 10000)
-                    {
-                        return (int)Math.Round(reading.Value);
-                    }
+                    Debug.WriteLine("HWiNFO: FPS reading moved, will search again");
+                    _fpsReadingIndex = uint.MaxValue;
+                    return null;
                 }
-                finally
+
+                double value = reading.Value.Value;
+                if (value >= 0 && value < 10000)
                 {
-                    handle.Free();
+                    return (int)Math.Round(value);
                 }
             }
             catch (Exception ex)
@@ -375,6 +370,32 @@ namespace Memory_Monitor
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Reads the reading at the given position, or null if HWiNFO now has fewer readings than that
+        /// </summary>
+        private HWiNFO_READING? ReadReading(uint readingIndex)
+        {
+            var header = ReadHeader();
+            if (readingIndex >= header.NumReadingElements)
+                return null;
+
+            int readingSize = (int)header.SizeOfReadingElement;
+            long offset = header.OffsetOfReadingSection + ((long)readingIndex * readingSize);
+
+            byte[] buffer = new byte[readingSize];
+            _accessor!.ReadArray(offset, buffer, 0, Math.Min(buffer.Length, Marshal.SizeOf<HWiNFO_READING>()));
+
+            GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try
+            {
+                return Marshal.PtrToStructure<HWiNFO_READING>(handle.AddrOfPinnedObject());
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         public void Dispose()

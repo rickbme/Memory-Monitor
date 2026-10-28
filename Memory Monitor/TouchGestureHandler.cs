@@ -130,6 +130,17 @@ namespace Memory_Monitor
         private bool _isTouching;
         private int _activeTouchId;
 
+        // Two-finger tap tracking. Registering for WM_TOUCH stops Windows sending WM_GESTURE, so the
+        // GID_TWOFINGERTAP gesture never arrives; a two-finger tap is detected from the raw touch points instead.
+        private readonly HashSet<int> _activeTouchIds = new();
+        private bool _isMultiTouch;
+        private int _maxPrimaryMovement;
+        private const int TWO_FINGER_TAP_MAX_DURATION_MS = 400;
+
+        // The gauges are child windows covering most of the form. WM_TOUCH only goes to the registered window
+        // under the finger, so each child is registered too and forwards its touch messages here.
+        private readonly List<ChildTouchForwarder> _childForwarders = new();
+
         // Long press timer
         private readonly System.Windows.Forms.Timer _longPressTimer;
         private const int LONG_PRESS_DURATION_MS = 600;
@@ -213,6 +224,7 @@ namespace Memory_Monitor
                 if (RegisterTouchWindow(_form.Handle, 0))
                 {
                     _isTouchRegistered = true;
+                    RegisterChildControls(_form);
                     Debug.WriteLine("Touch input registered successfully");
                 }
                 else
@@ -227,6 +239,72 @@ namespace Memory_Monitor
                 // Touch API may not be available on this system
                 Debug.WriteLine($"Touch registration not available: {ex.Message}");
                 _isTouchRegistered = false;
+            }
+        }
+
+        private void RegisterChildControls(Control parent)
+        {
+            foreach (Control child in parent.Controls)
+            {
+                _childForwarders.Add(new ChildTouchForwarder(child, this));
+                RegisterChildControls(child);
+            }
+        }
+
+        /// <summary>
+        /// Registers a child control for touch and passes its WM_TOUCH messages to the handler. Hidden controls
+        /// (e.g. the gauges during the intro logo) have no window yet, so registration waits for HandleCreated.
+        /// </summary>
+        private sealed class ChildTouchForwarder : NativeWindow
+        {
+            private readonly Control _control;
+            private readonly TouchGestureHandler _handler;
+
+            public ChildTouchForwarder(Control control, TouchGestureHandler handler)
+            {
+                _control = control;
+                _handler = handler;
+                _control.HandleCreated += Control_HandleCreated;
+                _control.HandleDestroyed += Control_HandleDestroyed;
+
+                if (_control.IsHandleCreated)
+                    Attach();
+            }
+
+            private void Control_HandleCreated(object? sender, EventArgs e) => Attach();
+
+            private void Control_HandleDestroyed(object? sender, EventArgs e) => ReleaseHandle();
+
+            private void Attach()
+            {
+                if (Handle != IntPtr.Zero)
+                    return;
+
+                if (RegisterTouchWindow(_control.Handle, 0))
+                    AssignHandle(_control.Handle);
+            }
+
+            public void Detach()
+            {
+                _control.HandleCreated -= Control_HandleCreated;
+                _control.HandleDestroyed -= Control_HandleDestroyed;
+
+                if (Handle != IntPtr.Zero)
+                {
+                    UnregisterTouchWindow(Handle);
+                    ReleaseHandle();
+                }
+            }
+
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == WM_TOUCH && _handler.ProcessMessage(ref m))
+                {
+                    m.Result = IntPtr.Zero;
+                    return;
+                }
+
+                base.WndProc(ref m);
             }
         }
 
@@ -336,7 +414,24 @@ namespace Memory_Monitor
 
         private void HandleTouchDown(int touchId, Point location)
         {
+            // No gesture in progress: forget any touch whose "up" was never received (e.g. it left the window)
+            if (!_isTouching)
+                _activeTouchIds.Clear();
+
+            _activeTouchIds.Add(touchId);
+
+            if (_activeTouchIds.Count > 1)
+            {
+                // A second finger: this is a two-finger gesture, not a tap, swipe or long press
+                _isMultiTouch = true;
+                _longPressTimer.Stop();
+                Debug.WriteLine($"Additional touch down at {location}");
+                return;
+            }
+
             _isTouching = true;
+            _isMultiTouch = false;
+            _maxPrimaryMovement = 0;
             _activeTouchId = touchId;
             _touchStartPoint = location;
             _touchStartTime = DateTime.Now;
@@ -355,6 +450,7 @@ namespace Memory_Monitor
             // Cancel long press if moved too far
             int deltaX = Math.Abs(location.X - _touchStartPoint.X);
             int deltaY = Math.Abs(location.Y - _touchStartPoint.Y);
+            _maxPrimaryMovement = Math.Max(_maxPrimaryMovement, Math.Max(deltaX, deltaY));
 
             if (deltaX > TAP_THRESHOLD_PIXELS || deltaY > TAP_THRESHOLD_PIXELS)
             {
@@ -364,6 +460,24 @@ namespace Memory_Monitor
 
         private void HandleTouchUp(int touchId, Point location)
         {
+            _activeTouchIds.Remove(touchId);
+
+            if (_isMultiTouch)
+            {
+                // Wait for every finger to lift, then report a two-finger tap if it was quick and didn't move
+                if (_activeTouchIds.Count == 0 && _isTouching)
+                {
+                    _isTouching = false;
+                    var multiDuration = DateTime.Now - _touchStartTime;
+                    if (multiDuration.TotalMilliseconds < TWO_FINGER_TAP_MAX_DURATION_MS &&
+                        _maxPrimaryMovement < TAP_THRESHOLD_PIXELS)
+                    {
+                        OnTwoFingerTapDetected(_touchStartPoint);
+                    }
+                }
+                return;
+            }
+
             if (!_isTouching || touchId != _activeTouchId)
                 return;
 
@@ -526,6 +640,12 @@ namespace Memory_Monitor
 
             _longPressTimer.Stop();
             _longPressTimer.Dispose();
+
+            foreach (var forwarder in _childForwarders)
+            {
+                forwarder.Detach();
+            }
+            _childForwarders.Clear();
 
             if (_isTouchRegistered)
             {
