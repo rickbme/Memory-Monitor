@@ -121,7 +121,6 @@ logs are left alone.
 ```bash
 git clone https://github.com/rickbme/Memory-Monitor.git
 cd Memory-Monitor
-git checkout linux-port
 cd MemoryMonitor.Linux
 
 # Build and run (like Ctrl+F5 in Visual Studio)
