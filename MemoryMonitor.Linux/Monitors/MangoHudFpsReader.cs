@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Memory_Monitor.Linux
 {
@@ -70,9 +71,13 @@ namespace Memory_Monitor.Linux
             }
         }
 
+        // MangoHud names its logs "<program>_<YYYY-MM-DD>_<HH-MM-SS>.csv" (plus "..._summary.csv")
+        private static readonly Regex MangoHudLogName = new(@"_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(_summary)?\.csv$");
+
         /// <summary>
-        /// Deletes logs (and their summaries) older than maxAge from the log folder. MangoHud writes a new
-        /// file for every game session, so the folder grows by roughly 1 MB per hour of play.
+        /// Deletes MangoHud logs (and their summaries) older than maxAge from the log folder. MangoHud writes a new
+        /// file for every game session, so the folder grows by roughly 1 MB per hour of play. Only files named
+        /// like MangoHud logs are touched, so other CSV files kept in the folder are left alone.
         /// </summary>
         public void DeleteOldLogs(TimeSpan maxAge)
         {
@@ -83,7 +88,7 @@ namespace Memory_Monitor.Linux
 
                 foreach (var file in new DirectoryInfo(LogFolder).EnumerateFiles("*.csv"))
                 {
-                    if (DateTime.UtcNow - file.LastWriteTimeUtc > maxAge)
+                    if (MangoHudLogName.IsMatch(file.Name) && DateTime.UtcNow - file.LastWriteTimeUtc > maxAge)
                     {
                         file.Delete();
                         Debug.WriteLine($"Deleted old MangoHud log: {file.Name}");

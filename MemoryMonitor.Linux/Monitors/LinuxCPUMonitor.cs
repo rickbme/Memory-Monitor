@@ -198,6 +198,57 @@ namespace Memory_Monitor.Linux
                 Debug.WriteLine($"Error reading thermal zone: {ex.Message}");
             }
 
+            // AMD Ryzen CPUs usually have no CPU thermal zone; their sensor is a hwmon device instead
+            return ReadHwmonCpuTemp();
+        }
+
+        // hwmon drivers for CPU temperature: AMD (k10temp, zenpower) and Intel (coretemp)
+        private static readonly string[] CpuHwmonDrivers = { "k10temp", "zenpower", "coretemp" };
+
+        // Preferred sensor labels: AMD control/die temperature, Intel package temperature
+        private static readonly string[] CpuTempLabels = { "Tctl", "Tdie", "Package id 0" };
+
+        /// <summary>
+        /// Reads the CPU temperature from /sys/class/hwmon, preferring the Tctl/Tdie/package sensor
+        /// and falling back to the driver's first sensor (temp1)
+        /// </summary>
+        private static int ReadHwmonCpuTemp()
+        {
+            try
+            {
+                const string hwmonPath = "/sys/class/hwmon";
+                if (!Directory.Exists(hwmonPath))
+                    return 0;
+
+                foreach (var hwmon in Directory.GetDirectories(hwmonPath, "hwmon*"))
+                {
+                    var namePath = Path.Combine(hwmon, "name");
+                    if (!File.Exists(namePath) || !CpuHwmonDrivers.Contains(File.ReadAllText(namePath).Trim()))
+                        continue;
+
+                    string? inputPath = null;
+                    foreach (var labelPath in Directory.GetFiles(hwmon, "temp*_label"))
+                    {
+                        if (CpuTempLabels.Contains(File.ReadAllText(labelPath).Trim()))
+                        {
+                            inputPath = labelPath.Replace("_label", "_input");
+                            break;
+                        }
+                    }
+                    inputPath ??= Path.Combine(hwmon, "temp1_input");
+
+                    if (File.Exists(inputPath) && int.TryParse(File.ReadAllText(inputPath).Trim(), out int tempMilliC))
+                    {
+                        // Temperature is in millidegrees Celsius
+                        return tempMilliC / 1000;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading hwmon CPU temperature: {ex.Message}");
+            }
+
             return 0;
         }
 

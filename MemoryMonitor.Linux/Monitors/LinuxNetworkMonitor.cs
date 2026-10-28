@@ -132,6 +132,15 @@ namespace Memory_Monitor.Linux
             return false;
         }
 
+        /// <summary>
+        /// True if this /proc/net/dev line is the given interface's ("  eth0: 1234 ..."). A plain Contains check
+        /// would also match other interfaces whose name ends the same way, e.g. "veth0:" for "eth0".
+        /// </summary>
+        private static bool IsInterfaceLine(string line, string interfaceName)
+        {
+            return line.TrimStart().StartsWith(interfaceName + ":", StringComparison.Ordinal);
+        }
+
         private bool ReadNetworkStats(NetworkInterface iface)
         {
             try
@@ -139,7 +148,7 @@ namespace Memory_Monitor.Linux
                 var lines = File.ReadAllLines("/proc/net/dev");
                 foreach (var line in lines)
                 {
-                    if (line.Contains(iface.Id + ":"))
+                    if (IsInterfaceLine(line, iface.Id))
                     {
                         var colonIndex = line.IndexOf(':');
                         if (colonIndex > 0)
@@ -186,7 +195,7 @@ namespace Memory_Monitor.Linux
                 var lines = File.ReadAllLines("/proc/net/dev");
                 foreach (var line in lines)
                 {
-                    if (line.Contains(_selectedInterface.Id + ":"))
+                    if (IsInterfaceLine(line, _selectedInterface.Id))
                     {
                         var colonIndex = line.IndexOf(':');
                         if (colonIndex > 0)

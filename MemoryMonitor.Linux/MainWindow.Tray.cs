@@ -151,9 +151,19 @@ namespace Memory_Monitor
                 if (process == null)
                     return false;
 
-                string output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit(2000);
-                return output.Contains($"org.kde.StatusNotifierItem-{Environment.ProcessId}-");
+                // Read both streams asynchronously so the 2 second timeout also covers a gdbus that hangs
+                // (a blocking ReadToEnd would wait for it forever and freeze the UI)
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                _ = process.StandardError.ReadToEndAsync();
+
+                if (!process.WaitForExit(2000))
+                {
+                    Debug.WriteLine("gdbus did not respond, assuming there is no system tray");
+                    process.Kill();
+                    return false;
+                }
+
+                return outputTask.Result.Contains($"org.kde.StatusNotifierItem-{Environment.ProcessId}-");
             }
             catch (Exception ex)
             {
