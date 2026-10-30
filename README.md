@@ -1,14 +1,8 @@
-Initially I put one of these on my christmas list thinking I would use it for an information display.  Little did i know that this was just a display.  Ya I know, dummy lol.  Anyway, I saw that there was a program that would do what
-I wanted called AIDA64.  After looking at it and seeing how involved it was this was not for me.  I just wanted a simple display to show my usage. Plus I didn't want to pay for it :P.  So this was my vacation project!
-Feel free to use and modify it to suite your needs!  I may add some different displays with different looks if I get enough interest.  Let me know! And hope this is useful for you!
-I've tried to bug check it best I could, but if there is one you find, please let me know and i'll try and get it fixed.
+# Memory Monitor
 
-Rick
-DFS
+**A free, simple system monitor for 1920x480 mini displays, for Windows and Linux.**
 
-# System Monitor
-
-**A modern, feature-rich Windows system monitoring application built with .NET 8**
+A lightweight alternative to AIDA64 SensorPanel: plug in one of those 8.8" bar displays, run Memory Monitor, and it moves itself onto the display and shows live CPU, GPU, RAM, VRAM, disk, network and FPS gauges.
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows)
@@ -26,9 +20,21 @@ DFS
 
 ---
 
+## 💬 About This Project
+
+Initially I put one of these on my christmas list thinking I would use it for an information display.  Little did i know that this was just a display.  Ya I know, dummy lol.  Anyway, I saw that there was a program that would do what
+I wanted called AIDA64.  After looking at it and seeing how involved it was this was not for me.  I just wanted a simple display to show my usage. Plus I didn't want to pay for it :P.  So this was my vacation project!
+Feel free to use and modify it to suite your needs!  I may add some different displays with different looks if I get enough interest.  Let me know! And hope this is useful for you!
+I've tried to bug check it best I could, but if there is one you find, please let me know and i'll try and get it fixed.
+
+Rick
+DFS
+
+---
+
 ##  Overview
 
-System Monitor is a comprehensive real-time monitoring tool for Windows designed for **secondary/mini displays (1920x480)**. Built with modern .NET 8 and Windows Forms, it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU. Program will automatically detect a 1920x480 display and move itself over to it. No moving the display each time.
+Memory Monitor is a real-time monitoring tool for Windows and Linux designed for **secondary/mini displays (1920x480)**. Built with .NET 8 (Windows Forms on Windows, Avalonia on Linux), it features beautiful circular gauge visualizations with temperature monitoring for both CPU and GPU. Program will automatically detect a 1920x480 display and move itself over to it. No moving the display each time.
 
 ### Key Features
 
