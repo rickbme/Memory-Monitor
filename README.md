@@ -1,3 +1,5 @@
+https://github.com/user-attachments/assets/66458593-1dbe-415e-8628-f094be02c6f8
+
 # Memory Monitor
 
 **A free, simple system monitor for 1920x480 mini displays, for Windows and Linux.**
