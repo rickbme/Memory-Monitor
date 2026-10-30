@@ -1,10 +1,10 @@
-https://github.com/user-attachments/assets/66458593-1dbe-415e-8628-f094be02c6f8
-
 # Memory Monitor
 
 **A free, simple system monitor for 1920x480 mini displays, for Windows and Linux.**
 
 A lightweight alternative to AIDA64 SensorPanel: plug in one of those 8.8" bar displays, run Memory Monitor, and it moves itself onto the display and shows live CPU, GPU, RAM, VRAM, disk, network and FPS gauges.
+
+https://github.com/user-attachments/assets/66458593-1dbe-415e-8628-f094be02c6f8
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows)
