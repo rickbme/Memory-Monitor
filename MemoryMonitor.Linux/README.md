@@ -14,10 +14,11 @@ files with it, but building the Linux version never touches the Windows project,
 ## 📸 Screenshots
 
 ![Circular gauges on Linux](Screenshots/linux-gauges.png)
-*Circular gauges mode on a 1920x480 mini display (Ubuntu 24.04, RTX 3060)*
+*Circular gauges mode on a 1920x480 mini display with two GPUs (Ubuntu 24.04, two RTX 3060s): each card gets
+its own half-size GPU and VRAM dial, with the game FPS in the middle*
 
 ![Bar graph on Linux](Screenshots/linux-bargraph.png)
-*Bar graph mode*
+*Bar graph mode with two GPUs*
 
 ---
 
@@ -27,11 +28,15 @@ files with it, but building the Linux version never touches the Windows project,
 - **Two display modes** - Circular Gauges and Bar Graph, switchable from the right-click or tray menu
 - **CPU** - usage and temperature
 - **GPU** - usage, temperature and VRAM for NVIDIA and AMD
+- **Two GPUs** - with two or more GPUs, the GPU and VRAM columns show the first two cards stacked
+  (half-size dials, or half-height panels in bar graph mode), with the FPS badge in the middle.
+  Turn it off with **Show Both GPUs** to watch one card at full size
 - **RAM, Disk and Network** - with auto-scaling for disk and network throughput
 - **Game FPS** - from MangoHud, shown only while a game is running
 - **Date and time** on the mini display
 - **System tray icon** - live memory gauge with the same menu as Windows; Escape hides to the tray
-- **Device selection** - click the DISK or NET gauge (or GPU/VRAM with several GPUs) to pick a device
+- **Device selection** - click the DISK or NET gauge (or GPU/VRAM with several GPUs and **Show Both GPUs**
+  off) to pick a device
 - **Remembers your settings** - display mode, always on top, FPS and chosen devices
 - **Splash screen and intro logo** on startup
 
@@ -81,8 +86,8 @@ The release package doesn't need .NET; it includes its own runtime. No other pac
    [Releases](https://github.com/rickbme/Memory-Monitor/releases) (or build it, see below).
 2. Unpack it and run the installer:
    ```bash
-   tar -xzf memory-monitor-2.4.5-linux-x64.tar.gz
-   cd memory-monitor-2.4.5-linux-x64
+   tar -xzf memory-monitor-2.5.0-linux-x64.tar.gz
+   cd memory-monitor-2.5.0-linux-x64
    ./install.sh
    ```
 3. Start **Memory Monitor** from the app menu, or run `memory-monitor`.
@@ -161,6 +166,7 @@ with the app, icons, `install.sh`, `uninstall.sh` and this README. The version c
 | Always on top | Right-click → **Always on Top**, or **F11** |
 | Hide to tray | **Escape** (tray icon → **Show** brings it back) |
 | Turn game FPS on/off | Right-click → **Show Game FPS (MangoHud)** |
+| One or both GPUs | Right-click → **Show Both GPUs** (shown only with two or more GPUs) |
 | Exit | Right-click or tray icon → **Exit** |
 
 ### Settings

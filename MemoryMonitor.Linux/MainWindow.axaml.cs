@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -63,6 +65,7 @@ namespace Memory_Monitor
             Topmost = _settings.TopMost;
 
             InitializeGauges();
+            ApplyGpuLayout();
             ApplyDisplayMode(_settings.DisplayMode);
             ShowIntroLogo();
 
@@ -225,6 +228,61 @@ namespace Memory_Monitor
             MoveToScreen(screens[(currentIndex + 1) % screens.Count]);
         }
 
+        #region Multiple GPUs
+
+        /// <summary>
+        /// True when two GPUs are shown stacked (half-size gauges / half-height panels) instead of one
+        /// </summary>
+        private bool IsDualGpu => _settings.ShowAllGpus && _gpuMonitor.GpuCount >= 2;
+
+        /// <summary>
+        /// Switches the GPU and VRAM columns of both views between one full-size GPU and two stacked GPUs
+        /// </summary>
+        private void ApplyGpuLayout()
+        {
+            bool dual = IsDualGpu;
+
+            // The first gauge/panel fills its column, or takes the top half when a second one is shown below it
+            int rowSpan = dual ? 1 : 2;
+            foreach (Control control in new Control[] { gpuUsageGauge, gpuVramGauge, gpuPanel, vramPanel })
+                Grid.SetRowSpan(control, rowSpan);
+
+            gpuUsageGauge2.IsVisible = dual;
+            gpuVramGauge2.IsVisible = dual;
+            gpuPanel2.IsVisible = dual;
+            vramPanel2.IsVisible = dual;
+
+            gpuUsageGauge.Label = dual ? "GPU 1" : "GPU";
+            gpuVramGauge.Label = dual ? "VRAM 1" : "VRAM";
+            gpuPanel.Title = dual ? "GPU 1 USAGE" : "GPU USAGE";
+            vramPanel.Title = dual ? "VRAM 1 USAGE" : "VRAM USAGE";
+
+            // FPS badge: in the middle of the four stacked dials, or at the bottom between the GPU and VRAM gauges
+            fpsGauge.VerticalAlignment = dual ? VerticalAlignment.Center : VerticalAlignment.Bottom;
+            fpsGauge.Margin = dual ? default : new Thickness(0, 0, 0, 10);
+
+            // Small gap between the stacked bar panels
+            gpuPanel.Margin = vramPanel.Margin = dual ? new Thickness(0, 0, 0, 4) : default;
+            gpuPanel2.Margin = vramPanel2.Margin = dual ? new Thickness(0, 4, 0, 0) : default;
+
+            // With one GPU, the VRAM scale follows the selected card
+            if (!dual && _gpuMonitor.IsMemoryAvailable)
+                gpuVramGauge.MaxValue = (float)Math.Ceiling(_gpuMonitor.TotalMemoryGB);
+
+            UpdateDeviceNames();
+        }
+
+        private void SetShowAllGpus(bool showAllGpus)
+        {
+            _settings.ShowAllGpus = showAllGpus;
+            _settings.Save();
+            ApplyGpuLayout();
+            UpdateTrayMenuState();
+            UpdateAllMetrics();
+        }
+
+        #endregion
+
         private void SetShowFps(bool showFps)
         {
             _settings.ShowFps = showFps;
@@ -281,6 +339,8 @@ namespace Memory_Monitor
             barGraphMenuItem.IsChecked = _settings.DisplayMode == DisplayMode.BarGraph;
             topMostMenuItem.IsChecked = Topmost;
             showFpsMenuItem.IsChecked = _settings.ShowFps;
+            showAllGpusMenuItem.IsVisible = _gpuMonitor.GpuCount >= 2;
+            showAllGpusMenuItem.IsChecked = _settings.ShowAllGpus;
         }
 
         private void CircularGaugesMenuItem_Click(object? sender, RoutedEventArgs e) => SetDisplayMode(DisplayMode.CircularGauges);
@@ -292,6 +352,8 @@ namespace Memory_Monitor
         private void MoveToMonitorMenuItem_Click(object? sender, RoutedEventArgs e) => MoveToNextMonitor();
 
         private void ShowFpsMenuItem_Click(object? sender, RoutedEventArgs e) => SetShowFps(!_settings.ShowFps);
+
+        private void ShowAllGpusMenuItem_Click(object? sender, RoutedEventArgs e) => SetShowAllGpus(!_settings.ShowAllGpus);
 
         private void ExitMenuItem_Click(object? sender, RoutedEventArgs e) => Close();
 

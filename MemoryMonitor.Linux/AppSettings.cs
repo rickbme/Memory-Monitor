@@ -34,6 +34,9 @@ namespace Memory_Monitor
         // Show game FPS from MangoHud's logs when a game is reporting it
         public bool ShowFps { get; set; } = true;
 
+        // With two or more GPUs, show the first two stacked instead of one selected GPU
+        public bool ShowAllGpus { get; set; } = true;
+
         // Device IDs chosen from the gauge menus (null = monitor's default device)
         public string? SelectedGPUDevice { get; set; }
         public string? SelectedDiskDevice { get; set; }

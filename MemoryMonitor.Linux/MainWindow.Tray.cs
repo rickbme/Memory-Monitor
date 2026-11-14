@@ -19,6 +19,7 @@ namespace Memory_Monitor
         private NativeMenuItem? _trayBarGraphItem;
         private NativeMenuItem? _trayTopMostItem;
         private NativeMenuItem? _trayShowFpsItem;
+        private NativeMenuItem? _trayShowAllGpusItem;
 
         private void InitializeTrayIcon()
         {
@@ -50,6 +51,9 @@ namespace Memory_Monitor
             _trayShowFpsItem = new NativeMenuItem("Show Game FPS (MangoHud)") { ToggleType = NativeMenuItemToggleType.CheckBox };
             _trayShowFpsItem.Click += (_, _) => SetShowFps(!_settings.ShowFps);
 
+            _trayShowAllGpusItem = new NativeMenuItem("Show Both GPUs") { ToggleType = NativeMenuItemToggleType.CheckBox };
+            _trayShowAllGpusItem.Click += (_, _) => SetShowAllGpus(!_settings.ShowAllGpus);
+
             _trayCircularGaugesItem = new NativeMenuItem("Circular Gauges") { ToggleType = NativeMenuItemToggleType.Radio };
             _trayCircularGaugesItem.Click += (_, _) => SetDisplayMode(DisplayMode.CircularGauges);
 
@@ -64,17 +68,23 @@ namespace Memory_Monitor
             var exitItem = new NativeMenuItem("Exit");
             exitItem.Click += (_, _) => Close();
 
-            return new NativeMenu
+            var menu = new NativeMenu
             {
                 showItem,
                 new NativeMenuItemSeparator(),
                 moveToMonitorItem,
                 _trayTopMostItem,
                 displayModeItem,
-                _trayShowFpsItem,
-                new NativeMenuItemSeparator(),
-                exitItem
+                _trayShowFpsItem
             };
+
+            // Only offer the GPU option when there is more than one GPU
+            if (_gpuMonitor.GpuCount >= 2)
+                menu.Add(_trayShowAllGpusItem);
+
+            menu.Add(new NativeMenuItemSeparator());
+            menu.Add(exitItem);
+            return menu;
         }
 
         /// <summary>
@@ -88,6 +98,7 @@ namespace Memory_Monitor
             _trayBarGraphItem!.IsChecked = _settings.DisplayMode == DisplayMode.BarGraph;
             _trayTopMostItem!.IsChecked = Topmost;
             _trayShowFpsItem!.IsChecked = _settings.ShowFps;
+            _trayShowAllGpusItem!.IsChecked = _settings.ShowAllGpus;
         }
 
         private void UpdateTrayIcon(int memoryPercentage)

@@ -3,6 +3,22 @@ using System.Diagnostics;
 namespace Memory_Monitor.Linux
 {
     /// <summary>
+    /// One GPU's readings from the latest update
+    /// </summary>
+    public class GpuReading
+    {
+        public string Id { get; init; } = "";
+        public string ShortName { get; init; } = "";
+        public bool IsUsageAvailable { get; init; }
+        public bool IsMemoryAvailable { get; init; }
+        public bool IsTemperatureAvailable { get; init; }
+        public float UsagePercent { get; init; }
+        public int TemperatureCelsius { get; init; }
+        public double UsedMemoryGB { get; init; }
+        public double TotalMemoryGB { get; init; }
+    }
+
+    /// <summary>
     /// Monitors GPU usage and memory on Linux using NVML for NVIDIA and sysfs for AMD
     /// </summary>
     public class LinuxGPUMonitor : ISelectableMonitor, IDisposable
@@ -24,6 +40,11 @@ namespace Memory_Monitor.Linux
             public bool IsMemoryAvailable { get; set; } = false;
             public bool IsUsageAvailable { get; set; } = false;
             public bool IsTemperatureAvailable { get; set; } = false;
+
+            // Latest readings
+            public float UsagePercent { get; set; }
+            public ulong MemoryUsedBytes { get; set; }
+            public int TemperatureCelsius { get; set; }
             
             // NVIDIA specific
             public LinuxNVMLInterop.nvmlDevice_t? NvmlDevice { get; set; } = null;
@@ -61,6 +82,7 @@ namespace Memory_Monitor.Linux
             ? _availableDevices.FirstOrDefault(d => d.Id == _selectedGPU.Id) 
             : null;
         public bool HasMultipleDevices => _detectedGPUs.Count > 1;
+        public int GpuCount => _detectedGPUs.Count;
         public string CurrentDeviceDisplayName => _selectedGPU?.Name ?? "No GPU";
 
         public LinuxGPUMonitor()
@@ -276,24 +298,58 @@ namespace Memory_Monitor.Linux
                 return;
             }
 
+            UpdateDevice(_selectedGPU);
+            CurrentUsagePercent = _selectedGPU.UsagePercent;
+            CurrentMemoryUsedBytes = _selectedGPU.MemoryUsedBytes;
+            CurrentTemperatureCelsius = _selectedGPU.TemperatureCelsius;
+        }
+
+        /// <summary>
+        /// Updates every detected GPU and returns their readings in detection order (NVIDIA cards by
+        /// NVML index, which follows PCI bus order, then AMD cards)
+        /// </summary>
+        public IReadOnlyList<GpuReading> UpdateAll()
+        {
+            var readings = new List<GpuReading>(_detectedGPUs.Count);
+            foreach (var gpu in _detectedGPUs)
+            {
+                UpdateDevice(gpu);
+                readings.Add(new GpuReading
+                {
+                    Id = gpu.Id,
+                    ShortName = GetShortName(gpu.Name),
+                    IsUsageAvailable = gpu.IsUsageAvailable,
+                    IsMemoryAvailable = gpu.IsMemoryAvailable,
+                    IsTemperatureAvailable = gpu.IsTemperatureAvailable,
+                    UsagePercent = gpu.UsagePercent,
+                    TemperatureCelsius = gpu.TemperatureCelsius,
+                    UsedMemoryGB = gpu.MemoryUsedBytes / (double)Constants.BYTES_TO_GB,
+                    TotalMemoryGB = gpu.TotalMemoryBytes / (double)Constants.BYTES_TO_GB
+                });
+            }
+            return readings;
+        }
+
+        private static void UpdateDevice(GPUDevice gpu)
+        {
             try
             {
-                if (_selectedGPU.Vendor == GPUVendor.NVIDIA && _selectedGPU.NvmlDevice.HasValue)
+                if (gpu.Vendor == GPUVendor.NVIDIA && gpu.NvmlDevice.HasValue)
                 {
-                    UpdateNVIDIA(_selectedGPU);
+                    UpdateNVIDIA(gpu);
                 }
-                else if (_selectedGPU.Vendor == GPUVendor.AMD && _selectedGPU.SysfsPath != null)
+                else if (gpu.Vendor == GPUVendor.AMD && gpu.SysfsPath != null)
                 {
-                    UpdateAMD(_selectedGPU);
+                    UpdateAMD(gpu);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error updating GPU stats: {ex.Message}");
+                Debug.WriteLine($"Error updating GPU stats for {gpu.Id}: {ex.Message}");
             }
         }
 
-        private void UpdateNVIDIA(GPUDevice gpu)
+        private static void UpdateNVIDIA(GPUDevice gpu)
         {
             if (!gpu.NvmlDevice.HasValue)
                 return;
@@ -304,25 +360,25 @@ namespace Memory_Monitor.Linux
             var util = LinuxNVMLInterop.GetUtilizationRates(device);
             if (util.HasValue)
             {
-                CurrentUsagePercent = util.Value.gpu;
+                gpu.UsagePercent = util.Value.gpu;
             }
 
             // Get memory
             var mem = LinuxNVMLInterop.GetMemoryInfo(device);
             if (mem.HasValue)
             {
-                CurrentMemoryUsedBytes = mem.Value.used;
+                gpu.MemoryUsedBytes = mem.Value.used;
             }
 
             // Get temperature
             var temp = LinuxNVMLInterop.GetTemperature(device);
             if (temp.HasValue)
             {
-                CurrentTemperatureCelsius = temp.Value;
+                gpu.TemperatureCelsius = temp.Value;
             }
         }
 
-        private void UpdateAMD(GPUDevice gpu)
+        private static void UpdateAMD(GPUDevice gpu)
         {
             if (gpu.SysfsPath == null)
                 return;
@@ -334,7 +390,7 @@ namespace Memory_Monitor.Linux
                 var busyStr = File.ReadAllText(gpuBusyPath).Trim();
                 if (int.TryParse(busyStr, out int busy))
                 {
-                    CurrentUsagePercent = Math.Min(100, Math.Max(0, busy));
+                    gpu.UsagePercent = Math.Min(100, Math.Max(0, busy));
                 }
             }
 
@@ -345,7 +401,7 @@ namespace Memory_Monitor.Linux
                 var vramStr = File.ReadAllText(vramUsedPath).Trim();
                 if (ulong.TryParse(vramStr, out ulong vramUsed))
                 {
-                    CurrentMemoryUsedBytes = vramUsed;
+                    gpu.MemoryUsedBytes = vramUsed;
                 }
             }
 
@@ -362,7 +418,7 @@ namespace Memory_Monitor.Linux
                         var tempStr = File.ReadAllText(temp1Path).Trim();
                         if (int.TryParse(tempStr, out int tempMilliC))
                         {
-                            CurrentTemperatureCelsius = tempMilliC / 1000;
+                            gpu.TemperatureCelsius = tempMilliC / 1000;
                         }
                     }
                 }

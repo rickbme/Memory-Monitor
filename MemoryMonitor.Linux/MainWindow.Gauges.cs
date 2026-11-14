@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Memory_Monitor.Controls;
+using Memory_Monitor.Linux;
 using System.Diagnostics;
 
 namespace Memory_Monitor
@@ -40,14 +41,20 @@ namespace Memory_Monitor
 
         private void UpdateDeviceNames()
         {
-            gpuUsageGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
-            gpuVramGauge.HasMultipleDevices = _gpuMonitor.HasMultipleDevices;
+            // With two GPUs stacked both are already shown, so there is nothing to pick
+            bool gpuMenu = !IsDualGpu && _gpuMonitor.HasMultipleDevices;
+            gpuUsageGauge.HasMultipleDevices = gpuMenu;
+            gpuVramGauge.HasMultipleDevices = gpuMenu;
             diskGauge.HasMultipleDevices = _diskMonitor.HasMultipleDevices;
             networkGauge.HasMultipleDevices = _networkMonitor.HasMultipleDevices;
 
-            string gpuShortName = _gpuMonitor.IsAvailable ? _gpuMonitor.GetShortName() : "";
-            gpuUsageGauge.DeviceName = gpuShortName;
-            gpuVramGauge.DeviceName = gpuShortName;
+            // In two-GPU mode each card's name is set from its own readings (ShowGpuGauges)
+            if (!IsDualGpu)
+            {
+                string gpuShortName = _gpuMonitor.IsAvailable ? _gpuMonitor.GetShortName() : "";
+                gpuUsageGauge.DeviceName = gpuShortName;
+                gpuVramGauge.DeviceName = gpuShortName;
+            }
             diskGauge.DeviceName = _diskMonitor.IsAvailable ? _diskMonitor.CurrentDeviceDisplayName : "";
             networkGauge.DeviceName = _networkMonitor.IsAvailable ? _networkMonitor.CurrentDeviceDisplayName : "";
         }
@@ -169,6 +176,14 @@ namespace Memory_Monitor
 
         private void UpdateGPU()
         {
+            if (IsDualGpu)
+            {
+                var readings = _gpuMonitor.UpdateAll();
+                ShowGpuGauges(gpuUsageGauge, gpuVramGauge, readings[0]);
+                ShowGpuGauges(gpuUsageGauge2, gpuVramGauge2, readings[1]);
+                return;
+            }
+
             if (_gpuMonitor.IsAvailable)
                 _gpuMonitor.Update();
 
@@ -194,6 +209,37 @@ namespace Memory_Monitor
             else
             {
                 gpuVramGauge.SetValue(0, "N/A");
+            }
+        }
+
+        /// <summary>
+        /// Shows one card's load/temperature and VRAM on a pair of stacked gauges
+        /// </summary>
+        private static void ShowGpuGauges(GaugeControl usageGauge, GaugeControl vramGauge, GpuReading gpu)
+        {
+            usageGauge.DeviceName = gpu.ShortName;
+            vramGauge.DeviceName = gpu.ShortName;
+
+            if (gpu.IsUsageAvailable)
+            {
+                if (gpu.IsTemperatureAvailable)
+                    usageGauge.SetValue(gpu.UsagePercent, $"{Math.Round(gpu.UsagePercent)}%", $"{gpu.TemperatureCelsius}°C");
+                else
+                    usageGauge.SetValue(gpu.UsagePercent, $"{Math.Round(gpu.UsagePercent)}%");
+            }
+            else
+            {
+                usageGauge.SetValue(0, "N/A");
+            }
+
+            if (gpu.IsMemoryAvailable)
+            {
+                vramGauge.MaxValue = (float)Math.Ceiling(gpu.TotalMemoryGB);
+                vramGauge.SetValue((float)gpu.UsedMemoryGB, $"{gpu.UsedMemoryGB:F1}/{gpu.TotalMemoryGB:F0}GB");
+            }
+            else
+            {
+                vramGauge.SetValue(0, "N/A");
             }
         }
 

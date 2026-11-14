@@ -1,3 +1,6 @@
+using Memory_Monitor.Controls;
+using Memory_Monitor.Linux;
+
 namespace Memory_Monitor
 {
     /// <summary>
@@ -50,6 +53,14 @@ namespace Memory_Monitor
 
         private void UpdateGPUPanels()
         {
+            if (IsDualGpu)
+            {
+                var readings = _gpuMonitor.UpdateAll();
+                ShowGpuPanels(gpuPanel, vramPanel, readings[0], GetGameFps());
+                ShowGpuPanels(gpuPanel2, vramPanel2, readings[1], null);
+                return;
+            }
+
             if (_gpuMonitor.IsAvailable)
                 _gpuMonitor.Update();
 
@@ -75,6 +86,33 @@ namespace Memory_Monitor
                 float percentage = totalGB > 0 ? (float)(usedGB / totalGB * 100) : 0;
 
                 vramPanel.SetValue(percentage, $"{usedGB:F1} GB", $"TOTAL: {totalGB:F1} GB");
+            }
+            else
+            {
+                vramPanel.SetValue(0, "N/A");
+            }
+        }
+
+        /// <summary>
+        /// Shows one card's load and VRAM on a pair of stacked panels (game FPS goes on the first card's panel)
+        /// </summary>
+        private static void ShowGpuPanels(BarGraphPanelControl gpuPanel, BarGraphPanelControl vramPanel, GpuReading gpu, int? fps)
+        {
+            if (gpu.IsUsageAvailable)
+            {
+                string tempText = gpu.IsTemperatureAvailable ? $"TEMP: {gpu.TemperatureCelsius}°C" : "";
+                string fpsText = fps.HasValue ? $"FPS: {fps.Value}" : "";
+                gpuPanel.SetValue(gpu.UsagePercent, $"{Math.Round(gpu.UsagePercent)}%", tempText, fpsText);
+            }
+            else
+            {
+                gpuPanel.SetValue(0, "N/A");
+            }
+
+            if (gpu.IsMemoryAvailable)
+            {
+                float percentage = gpu.TotalMemoryGB > 0 ? (float)(gpu.UsedMemoryGB / gpu.TotalMemoryGB * 100) : 0;
+                vramPanel.SetValue(percentage, $"{gpu.UsedMemoryGB:F1} GB", $"TOTAL: {gpu.TotalMemoryGB:F1} GB");
             }
             else
             {

@@ -24,6 +24,8 @@
             <MenuItem Header="Move to Next Monitor" Click="MoveToMonitorMenuItem_Click" />
             <MenuItem x:Name="showFpsMenuItem" Header="Show Game FPS (MangoHud)" ToggleType="CheckBox"
                       Click="ShowFpsMenuItem_Click" />
+            <MenuItem x:Name="showAllGpusMenuItem" Header="Show Both GPUs" ToggleType="CheckBox"
+                      Click="ShowAllGpusMenuItem_Click" />
             <Separator />
             <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
         </ContextMenu>
@@ -42,8 +44,15 @@
 
                 <c:GaugeControl x:Name="ramGauge" Label="RAM" GaugeColor="#3A96DD" />
                 <c:GaugeControl x:Name="cpuGauge" Label="CPU" GaugeColor="#DC3232" />
-                <c:GaugeControl x:Name="gpuUsageGauge" Label="GPU" GaugeColor="#FF8C00" IsSelectable="True" />
-                <c:GaugeControl x:Name="gpuVramGauge" Label="VRAM" GaugeColor="#A05AF0" MaxValue="24" IsSelectable="True" />
+                <!-- With two GPUs each of these columns stacks two half-size gauges; with one GPU the first fills the column -->
+                <Grid RowDefinitions="*,*">
+                    <c:GaugeControl x:Name="gpuUsageGauge" Grid.RowSpan="2" Label="GPU" GaugeColor="#FF8C00" IsSelectable="True" />
+                    <c:GaugeControl x:Name="gpuUsageGauge2" Grid.Row="1" Label="GPU 2" GaugeColor="#FF8C00" IsVisible="False" />
+                </Grid>
+                <Grid RowDefinitions="*,*">
+                    <c:GaugeControl x:Name="gpuVramGauge" Grid.RowSpan="2" Label="VRAM" GaugeColor="#A05AF0" MaxValue="24" IsSelectable="True" />
+                    <c:GaugeControl x:Name="gpuVramGauge2" Grid.Row="1" Label="VRAM 2" GaugeColor="#A05AF0" MaxValue="24" IsVisible="False" />
+                </Grid>
                 <c:GaugeControl x:Name="diskGauge" Label="DISK" GaugeColor="#32C850" IsSelectable="True" />
                 <c:GaugeControl x:Name="networkGauge" Label="NET" GaugeColor="#FFC832" IsSelectable="True" />
             </UniformGrid>
@@ -82,8 +91,14 @@
                 </UniformGrid.Styles>
 
                 <c:BarGraphPanelControl x:Name="cpuPanel" Title="CPU USAGE" AccentColor="#00B4FF" />
-                <c:BarGraphPanelControl x:Name="gpuPanel" Title="GPU USAGE" AccentColor="#64C850" />
-                <c:BarGraphPanelControl x:Name="vramPanel" Title="VRAM USAGE" AccentColor="#A05AF0" />
+                <Grid RowDefinitions="*,*">
+                    <c:BarGraphPanelControl x:Name="gpuPanel" Grid.RowSpan="2" Title="GPU USAGE" AccentColor="#64C850" />
+                    <c:BarGraphPanelControl x:Name="gpuPanel2" Grid.Row="1" Title="GPU 2 USAGE" AccentColor="#64C850" IsVisible="False" />
+                </Grid>
+                <Grid RowDefinitions="*,*">
+                    <c:BarGraphPanelControl x:Name="vramPanel" Grid.RowSpan="2" Title="VRAM USAGE" AccentColor="#A05AF0" />
+                    <c:BarGraphPanelControl x:Name="vramPanel2" Grid.Row="1" Title="VRAM 2 USAGE" AccentColor="#A05AF0" IsVisible="False" />
+                </Grid>
                 <c:BarGraphPanelControl x:Name="drivePanel" Title="DRIVE USAGE" AccentColor="#FFA032" />
                 <c:NetworkBarPanelControl x:Name="networkPanel" Title="NETWORK" AccentColor="#00C8DC" />
             </UniformGrid>

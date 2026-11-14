@@ -19,6 +19,8 @@ https://github.com/user-attachments/assets/66458593-1dbe-415e-8628-f094be02c6f8
 *Memory Monitor running on a 1920x480 mini display with real-time CPU, GPU, RAM, VRAM, Disk, and Network monitoring*
 ![Memory Monitor Screenshot](MemMonGraph.png)
 *Graph Display mode*
+![Memory Monitor on Linux with two GPUs](MemoryMonitor.Linux/Screenshots/linux-gauges.png)
+*Linux version on a PC with two GPUs: each card gets its own half-size GPU and VRAM dial, with the game FPS in the middle*
 
 ---
 
@@ -65,7 +67,8 @@ project using the Avalonia UI framework, so it doesn't affect the Windows build 
 
 It has the same circular gauge and bar graph displays, automatic placement on the 1920x480 display, a
 system tray icon, device selection, and game FPS through [MangoHud](https://github.com/flightlessmango/MangoHud)
-in place of HWiNFO/RTSS. It installs per user from a release tarball with an install script; touch
+in place of HWiNFO/RTSS. On PCs with two GPUs it shows both cards stacked in the GPU and VRAM columns
+(coming to Windows in a later release). It installs per user from a release tarball with an install script; touch
 gestures aren't ported yet.
 
 See the [Linux README](MemoryMonitor.Linux/README.md) for requirements, installing, building, and MangoHud setup.
@@ -365,6 +368,13 @@ Memory-Monitor/
 ##  Version History
 
 See [CHANGELOG.md](Memory%20Monitor/CHANGELOG.md) for full details.
+
+### v2.5.0 for Linux (2026-11)
+- **New**: Two-GPU display - with two or more GPUs, the GPU and VRAM columns show the first two cards
+  stacked (half-size dials or half-height bar panels), with the FPS badge in the middle
+- **New**: **Show Both GPUs** option in the right-click and tray menus to switch back to one full-size GPU
+- **Includes**: the Linux fixes from 2.4.5 (AMD Ryzen CPU temperature, network interface matching,
+  tray check timeout, safer log cleanup), which hadn't been released for Linux yet
 
 ### v2.4.5 (2026-10)
 - **Fixed**: GPU usage, VRAM and temperatures dropping to 0 after switching display mode
