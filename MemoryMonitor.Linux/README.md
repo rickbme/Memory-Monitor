@@ -31,7 +31,8 @@ its own half-size GPU and VRAM dial, with the game FPS in the middle*
 - **Two GPUs** - with two or more GPUs, the GPU and VRAM columns show the first two cards stacked
   (half-size dials, or half-height panels in bar graph mode), with the FPS badge in the middle.
   Turn it off with **Show Both GPUs** to watch one card at full size
-- **RAM, Disk and Network** - with auto-scaling for disk and network throughput
+- **RAM, Disk and Network** - with auto-scaling for disk and network throughput, plus the selected
+  disk's temperature (NVMe drives, and SATA drives when the `drivetemp` kernel module is loaded)
 - **Game FPS** - from MangoHud, shown only while a game is running
 - **Date and time** on the mini display
 - **System tray icon** - live memory gauge with the same menu as Windows; Escape hides to the tray
@@ -86,8 +87,8 @@ The release package doesn't need .NET; it includes its own runtime. No other pac
    [Releases](https://github.com/rickbme/Memory-Monitor/releases) (or build it, see below).
 2. Unpack it and run the installer:
    ```bash
-   tar -xzf memory-monitor-2.5.0-linux-x64.tar.gz
-   cd memory-monitor-2.5.0-linux-x64
+   tar -xzf memory-monitor-2.5.1-linux-x64.tar.gz
+   cd memory-monitor-2.5.1-linux-x64
    ./install.sh
    ```
 3. Start **Memory Monitor** from the app menu, or run `memory-monitor`.
@@ -248,6 +249,11 @@ mangohud %command%
   *Ubuntu AppIndicators* extension is enabled in the Extensions app.
 - Escape exits instead of hiding when Memory Monitor can't find its tray icon, so you can't get stuck
   with a hidden window.
+
+### No disk temperature
+NVMe drives report it automatically. For SATA drives, load the kernel module with `sudo modprobe drivetemp`
+(add `drivetemp` to `/etc/modules-load.d/drivetemp.conf` to keep it after a reboot).
+Check with `cat /sys/block/sda/device/hwmon*/temp1_input` (millidegrees C).
 
 ### No CPU temperature
 Neither a CPU thermal zone nor a supported hwmon driver was found. Check what your system exposes:

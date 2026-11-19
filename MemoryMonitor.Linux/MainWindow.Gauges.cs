@@ -263,7 +263,10 @@ namespace Memory_Monitor
                 float totalMbps = (float)_diskMonitor.CurrentTotalMBps;
                 _diskPeakMbps = Math.Max(_diskPeakMbps, totalMbps);
                 diskGauge.MaxValue = GetAutoScale(totalMbps, _diskPeakMbps);
-                diskGauge.SetValue(totalMbps, $"{totalMbps:F0}MB/s");
+                if (_diskMonitor.IsTemperatureAvailable)
+                    diskGauge.SetValue(totalMbps, $"{totalMbps:F0}MB/s", $"{_diskMonitor.CurrentTemperatureCelsius}°C");
+                else
+                    diskGauge.SetValue(totalMbps, $"{totalMbps:F0}MB/s");
             }
             else
             {

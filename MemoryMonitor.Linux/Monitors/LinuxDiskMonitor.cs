@@ -25,6 +25,12 @@ namespace Memory_Monitor.Linux
         public double CurrentWriteMBps { get; private set; }
         public double CurrentTotalMBps => CurrentReadMBps + CurrentWriteMBps;
 
+        /// <summary>
+        /// Temperature of the selected disk in °C, or 0 when the kernel doesn't expose one
+        /// </summary>
+        public int CurrentTemperatureCelsius { get; private set; }
+        public bool IsTemperatureAvailable => CurrentTemperatureCelsius > 0;
+
         // ISelectableMonitor implementation
         public IReadOnlyList<DeviceInfo> AvailableDevices => _availableDevices;
         public DeviceInfo? SelectedDevice => _selectedDisk != null
@@ -162,14 +168,51 @@ namespace Memory_Monitor.Linux
             return false;
         }
 
+        /// <summary>
+        /// Reads the disk temperature from hwmon: NVMe drives expose it under the controller, and SATA
+        /// drives expose it once the kernel's drivetemp module is loaded
+        /// </summary>
+        private int ReadDiskTemperature(DiskDevice disk)
+        {
+            try
+            {
+                string deviceDir = $"/sys/block/{disk.Id}/device";
+                var hwmonDirs = new List<string>();
+                foreach (var parent in new[] { Path.Combine(deviceDir, "hwmon"), deviceDir })
+                {
+                    if (!Directory.Exists(parent)) continue;
+                    hwmonDirs.AddRange(Directory.GetDirectories(parent, "hwmon*"));
+                }
+
+                foreach (var dir in hwmonDirs)
+                {
+                    string tempFile = Path.Combine(dir, "temp1_input");
+                    if (File.Exists(tempFile) &&
+                        int.TryParse(File.ReadAllText(tempFile).Trim(), out int milliC) &&
+                        milliC > 0 && milliC < 150000)
+                    {
+                        return (int)Math.Round(milliC / 1000.0);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading disk temperature: {ex.Message}");
+            }
+            return 0;
+        }
+
         public void Update()
         {
             if (_selectedDisk == null)
             {
                 CurrentReadMBps = 0;
                 CurrentWriteMBps = 0;
+                CurrentTemperatureCelsius = 0;
                 return;
             }
+
+            CurrentTemperatureCelsius = ReadDiskTemperature(_selectedDisk);
 
             try
             {

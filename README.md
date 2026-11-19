@@ -369,6 +369,10 @@ Memory-Monitor/
 
 See [CHANGELOG.md](Memory%20Monitor/CHANGELOG.md) for full details.
 
+### v2.5.1 for Linux (2026-11)
+- **New**: The selected disk's temperature is shown on the Disk gauge and bar panel, like the GPU
+  (NVMe drives, and SATA drives with the `drivetemp` kernel module loaded)
+
 ### v2.5.0 for Linux (2026-11)
 - **New**: Two-GPU display - with two or more GPUs, the GPU and VRAM columns show the first two cards
   stacked (half-size dials or half-height bar panels), with the FPS badge in the middle

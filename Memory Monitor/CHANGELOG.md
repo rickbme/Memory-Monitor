@@ -5,6 +5,12 @@ All notable changes to the Memory Monitor project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1-linux] - 2026-11
+
+### Added - Linux
+- **Disk temperature** - the selected disk's temperature is shown on the Disk gauge and bar panel, like the
+  GPU. Read from hwmon: NVMe drives automatically, SATA drives when the `drivetemp` kernel module is loaded
+
 ## [2.4.5] - 2026-10
 
 A bug-fix release from a full code review of the Windows and Linux versions, plus an installer overhaul.

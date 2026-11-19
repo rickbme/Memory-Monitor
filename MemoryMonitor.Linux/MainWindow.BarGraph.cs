@@ -132,7 +132,10 @@ namespace Memory_Monitor
                 float estimatedMax = GetAutoScale(totalMBps, _barDiskPeakMBps);
                 float percentage = estimatedMax > 0 ? (totalMBps / estimatedMax) * 100 : 0;
 
-                drivePanel.SetValue(percentage, $"{(int)Math.Round(percentage)}%", GetRootCapacityText());
+                string capacityText = GetRootCapacityText();
+                if (_diskMonitor.IsTemperatureAvailable)
+                    capacityText = $"TEMP: {_diskMonitor.CurrentTemperatureCelsius}°C  " + capacityText;
+                drivePanel.SetValue(percentage, $"{(int)Math.Round(percentage)}%", capacityText.Trim());
             }
             else
             {
